@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_2" data-name="图层 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 258 221">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #ed1c24;
+      }
+    </style>
+  </defs>
+  <g id="_图层_1-2" data-name="图层 1">
+    <rect class="cls-1" x="71.5" y="127" width="20" height="75"/>
+    <rect class="cls-1" x="71.5" y="110" width="160" height="20"/>
+    <rect class="cls-1" x="212.5" y="110" width="20" height="99"/>
+    <rect class="cls-1" x="45" y="201" width="213" height="20"/>
+    <rect class="cls-1" y=".5" width="20" height="33"/>
+    <rect class="cls-1" y="45" width="20" height="33"/>
+    <rect y="91" width="20" height="130"/>
+    <rect x="71.5" width="160" height="20"/>
+    <rect x="71.5" y="70" width="160" height="20"/>
+    <rect x="71.5" y="34" width="160" height="20"/>
+    <rect x="71.5" y="17" width="20" height="56.49"/>
+    <rect x="212.5" width="20" height="90"/>
+  </g>
+</svg>

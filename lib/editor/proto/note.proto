@@ -1,0 +1,35 @@
+syntax = "proto3";
+option java_package = "cn.wennote.note";
+message NoteElement{
+  repeated NoteElement children = 1;
+  string type = 2;
+  bool newline = 3;
+  int32 level = 4;
+  int32 indent = 5;
+  string url = 6;
+  string alignment = 7;
+  string text = 8;
+  int32 color = 9;
+  int32 background = 10;
+  bool bold = 11;
+  bool italic = 12;
+  double fontSize = 13;
+  bool checked = 14;
+  string itemType = 15;
+  bool underline = 16;
+  bool lineThrough = 17;
+  string code = 18;
+  string language = 19;
+  string id = 20;
+  string file = 21;
+  int32 width = 22;
+  int32 height = 23;
+  map<int32, string> alignments = 24;
+  message Row{
+    repeated NoteElement items = 1;
+  }
+  repeated Row rows = 26;
+}
+message NoteDom{
+  repeated NoteElement elements = 1;
+}

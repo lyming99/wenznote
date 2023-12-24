@@ -1,0 +1,335 @@
+在第一章节中，主要介绍以下内容：
+
+什么是自定义运行时映像和JIMAGE格式
+如何使用jlink工具创建自定义的运行时映像
+如何指定命令名称来运行存储在自定义映像中的应用程序
+如何使用jlink工具插件
+一. 什么是自定义运行时映像？
+在JDK 9之前，Java运行时映像可用作巨大整体的单体（artifact），从而增加了下载时间，启动时间和内存占用。单体JRE使得不可能在具有小内存的设备上使用Java。 如果将Java应用程序部署到云端，则需要支付使用的内存; 最常见的是，单体JRE使用的内存比所要求的内存还要多，因此为云服务支付更多的内存。 在Java 8中引入的Compact配置文件，以减少JRE大小，从而减少运行时内存占用 —— 通过允许将JRE的一个子集打包在称为Compact配置文件的自定义运行时映像中。
+
+Java 9采用了整体的方法来打包运行时映像。 所有平台代码都已经模块化了。 你的应用程序代码也打包模块化了。 在Java 9中，可以创建一个自定义运行时，它将包含应用程序模块和应用程序所使用的平台模块。 还可以在运行时映像中打包本地命令。 创建运行时映像的另一个好处是，你只需将一个包——运行时映像——发送给你的应用程序用户，而不需要下载并安装单独的JRE软件包来运行应用程序。
+
+运行时映像以特定格式存储，称为JIMAGE，该格式针对空间和速度进行了优化。 仅在运行时支持JIMAGE格式。 它是用于在JDK中存储和索引模块，类和资源的容器格式。 从JIMAGE文件搜索和加载类比从JAR和JMOD文件快很多。 JIMAGE格式是JDK内部的，开发人员很少需要直接与JIMAGE文件进行交互。
+
+预计JIMAGE格式将随着时间的推移而不断发展，因此其内部部件不会面向开发人员。 JDK 9附带了一个名为jimage的工具，可用于浏览JIMAGE文件。
+
+Tips
+可以使用jlink工具来创建一个运行时映像，它使用一种名为JIMAGE的新文件来存储模块。 JDK 9附带jimage工具，可以浏览JIMAGE文件的内容。
+
+如果你的代码期望将运行时映像存储在名为rt.jar文件的文件中，请谨慎。 JDK运行库存储在JDK 9之前的rt.jar文件中，但在JDK 9中不再是这样。当将应用程序迁移到JDK 9时，可能会破坏你的代码。
+
+二. 创建自定义运行时映像
+可以使用jlink工具创建特定于平台的运行时映像。 运行时映像将包含指定的应用程序模块和只需的平台模块，从而减少运行时映像的大小。 这对于在具有少量内存的嵌入式设备上运行的应用程序非常有用。 JDK 9附带了jlink工具。 它位于JDK_HOME\bin目录中。 运行jlink工具的一般语法如下：
+
+jlink <options> --module-path <modulepath> --add-modules <mods> --output <path>
+在这里，<options>包括jlink的零个或多个选项，如下面表格所示，<modulepath>是平台和应用程序模块所在的模块路径以添加到映像中。 模块可以是模块化的JAR，展开目录和JMOD文件。 <mods>是要添加到映像的模块的列表，这可能会导致添加其他模块，因为其他模块的传递依赖关系。 <path>是生成的运行时映像被存储的输出目录。
+
+选项	描述
+--add-modules <mod>,<mod>...	指定要解析的根模块列表。 所有已解析的模块将被添加到运行时映像中。
+--bind-services	在链接过程中执行完整的服务绑定。 如果添加的模块包含uses语句，jlink将扫描模块路径上的所有JMOD文件，包括在uses语句中指定的服务运行时映像中的所有服务提供者的模块。
+-c, --compress <0 OR 1 OR 2>[:filter=<pattern-list>]	指定输映像中所有资源的压缩级别。 0表示常量字符串共享，1表示ZIP，2表示两者。 可以指定可选的<pattern-list>过滤列出要包括的文件的模式。
+--disable-plugin <plugin-name>	禁用指定的插件。
+--endian <little OR big>	指定生成的运行时映像的字节指令。 默认值是本地平台的字节指令。
+-h,--help	打印使用说明和jlink工具的所有选项列表。
+--ignore-signing-information	当签名的模块化JAR链接在映像中时，抑制致命错误。 与签名的模块化JAR的相关的签名文件不会复制到运行时映像。
+--launcher <command>=<module>	指定模块的启动器命令。 <command>是要生成以启动应用程序的命令的名称，例如runmyapp。 该工具将创建一个脚本或批处理文件，<command>以运行<module>中的主类。
+--launcher <command>=<module>/<main-class>	指定模块和主类的启动器命令。 <command>是要生成以启动应用程序的命令的名称，例如runmyapp。 该工具将创建一个脚本/批处理文件，<command>以运行<module>中的<main-class>。
+--limit-modules <mod>,<mod>	将可观察模块限制在命名模块的传递性关闭主模块（如果指定）以及使用--add-modules选项指定的任何其他模块中。
+--list-plugins	列出可用的插件。
+-p, --module-path <modulepath>	指定找到将平台和应用程序模块添加到运行时映像的模块路径。
+--no-header-files	排除本地代码的include头文件。
+--no-man-pages	排除手册主页。
+--output <path>	指定要复制运行时映像的目录。
+--save-opts <filename>	将jlink选项保存在指定的文件中。
+-G, --strip-debug	从输出映像中查找调试信息。
+--suggest-providers [<service-name>,...]	如果没有指定服务名称，它会建议将为添加的模块链接的所有服务的提供程序的名称。如果指定一个或多个服务名称，它会建议指定服务名称的提供者。 在创建映像之前，可以使用此选项，以了解在使用--bind-services选项时将包括哪些服务。
+-v, --verbose	打印详细输出。
+--version	打印jlink工具的版本。
+@<filename>	从指定的文件读取选项。
+让我们创建一个运行时映像，其中包含素数检查应用程序和所需平台模块的四个模块，其中仅包含java.base模块。 请注意，以下命令仅包含素数检查程序应用程序中的三个模块。 第四个将被添加，因为这三个依赖于第四个模块。 命令后面的文本详细解释了这一点。
+
+C:\Java9Revealed>jlink --module-path jmods;C:\java9\jmods
+  --add-modules com.jdojo.prime.client,com.jdojo.prime.generic,com.jdojo.prime.faster
+  --launcher runprimechecker=com.jdojo.prime.client
+  --output primechecker
+在解释此命令的所有选项之前，让我们验证运行时映像是否已成功创建。 该命令应该将运行时映像复制到C:\ Java9Revealed\primechecker文件夹。 运行以下命令以验证运行时映像包含五个模块：
+
+C:\Java9Revealed>primechecker\bin\java --list-modules
+输出结果为：
+
+com.jdojo.prime@1.0
+com.jdojo.prime.client@1.0
+com.jdojo.prime.faster@1.0
+com.jdojo.prime.generic@1.0
+java.base@9-ea
+如果你获得的输出类似于此处所示，运行时映像已正确创建。 在输出中的@符号之后显示的模块版本号可能与你的有所不同。
+
+--module-path选项指定两个目录，jmods和C:\ java9\jmods。 在C:\ Java9Revealed\jmods目录中保存了素数检查程序的四个JMOD文件。 模块路径中的第一个元素允许jlink工具查找所有应用程序模块。 将JDK 9安装在C:\java9目录下，所以模块路径中的第二个元素让工具找到平台模块。 如果没有指定第二部分，则会出现错误：
+
+Module java.base not found.
+--add-modules选项指定素数检查程序应用程序的三个模块。 可能会想知道为什么我们没有使用此选项指定第四个模块com.jdojo.prime。 此列表包含根模块，而不仅仅包含在运行时映像中的模块。 jlink工具将解决所有这些根模块的依赖关系，并将所有已解析的依赖模块包含在运行时映像中。 这三个模块取决于com.jdojo.prime模块，它将通过将其定位在模块路径中来解析，因此将被包含在运行时映像中。 该映像还将包含java.base模块，因为所有应用程序模块都隐含依赖于它。
+
+--output选项指定运行时映像将被复制的目录。 该命令将运行时映像复制到C:\Java9Revealed\primechecker目录。 输出目录包含以下子目录和名为release的文件：
+
+bin
+conf
+include
+legal
+lib
+bin目录包含可执行文件。 在Windows上，它还包含动态链接的本地类库（.dll文件）。
+conf目录包含可编辑的配置文件，如.properties和.policy文件。
+include目录包含C / C ++头文件。
+legal目录包含法律声明。
+lib目录包含添加到运行时映像的模块，以及其他文件。 在Mac，Linux和Solaris上，它还将包含系统的动态链接本地类库。
+
+使用--launcher选项与jlink命令。 指定了命令名称runprimechecker，模块名称为com.jdojo.prime.client。--launcher选项使jlink在bin目录中的Windows上创建一个平台特定的可执行文件，例如runprimechecker.bat文件。 可以使用此可执行文件来运行你的应用程序。 文件内容只是在这个模块中运行主类的包装器。 可以使用此文件来运行应用程序：
+
+C:\Java9Revealed> primechecker\bin\runprimechecker
+输出结果为：
+
+Using jdojo.faster.primechecker:
+3 is a prime.
+4 is not a prime.
+121 is not a prime.
+977 is a prime.
+Using jdojo.faster.primechecker:
+3 is a prime.
+4 is not a prime.
+121 is not a prime.
+977 is a prime.
+A PrimeChecker service provider with the name 'jdojo.probable.primechecker' was not found.
+还可以使用java命令来启动应用程序，使用jlink工具已经将文件复制到bin目录下：
+
+C:\Java9Revealed>primechecker\bin\java --module com.jdojo.prime.client
+此命令的输出将与上一个命令的输出相同。 请注意，不必指定模块路径。 链接器jlink工具在创建运行时映像时处理模块路径。 当运行生成的运行时映像的java命令时，它会知道在哪里找到模块。 还要注意，不必为命令指定主类名称。 刚才指定了模块名称。 已经设置了com.jdojo.prime.client模块的main-class属性。 当运行模块而不指定主类时，该模块的module-info.class文件中设置的main-class属性将用作主类。
+
+三. 绑定服务
+在上一节中，为素数服务客户端应用程序创建了运行时映像。 必须使用要包含在映像中的--add-modules选项指定所有服务提供者模块的名称。 在本节中，将展示如何在使用jlink工具使用--bind-services选项创建运行时映像时自动绑定服务。 这一次，需要将模块（即com.jdojo.prime模块）添加到模块图中，并且jlink工具将负责其余部分。 com.jdojo.prime.client模块读取com.jdojo.prime模块，因此将前者添加到模块图中也将解决后者。 以下命令打印运行时映像的建议服务提供程序列表。
+
+C:\Java9Revealed>jlink --module-path jmods;C:\java9\jmods
+--add-modules com.jdojo.prime.client
+--suggest-providers
+以下是部分输出内容：
+
+module com.jdojo.prime located (file:///C:/Java9Revealed/jmods/com.jdojo.prime.jmod)
+    uses com.jdojo.prime.PrimeChecker
+module com.jdojo.prime.client located (file:///C:/Java9Revealed/jmods/com.jdojo.prime.client.jmod)
+module java.base located (file:///C:/java9/jmods/java.base.jmod)
+    uses java.lang.System$LoggerFinder
+    uses java.net.ContentHandlerFactory
+...
+Suggested providers:
+  module com.jdojo.prime.faster provides com.jdojo.prime.PrimeChecker, used by com.jdojo.prime
+  module com.jdojo.prime.generic provides com.jdojo.prime.PrimeChecker, used by com.jdojo.prime
+  module com.jdojo.prime.probable provides com.jdojo.prime.PrimeChecker, used by com.jdojo.prime
+  module java.desktop provides java.net.ContentHandlerFactory, used by java.base
+ ...
+该命令仅将com.jdojo.prime.client模块指定给--add-modules选项。 com.jdojo.prime和java.base模块被解析，因为com.jdojo.prime.client模块读取它们。 扫描所有已解析的模块的uses语句，随后扫描模块路径中的所有模块，以使用在uses语句中指定的服务的服务提供者。 所有找到的服务提供者都被打印出来。
+
+Tips
+可以为--suggest-providers选项指定参数。 如果没有参数使用它，请确保在命令结束时指定它。 否则，--suggest-providers选项之后的选项将被解释为其参数，将收到错误。
+
+以下命令将com.jdojo.prime.PrimeChecker指定为--suggest-providers选项的服务名称，以打印为此服务找到的所有服务提供者：
+
+C:\Java9Revealed>jlink --module-path jmods;C:\java9\jmods
+--add-modules com.jdojo.prime.client
+--suggest-providers com.jdojo.prime.PrimeChecker
+输出结果：
+
+Suggested providers:
+  module com.jdojo.prime.faster provides com.jdojo.prime.PrimeChecker, used by com.jdojo.prime
+  module com.jdojo.prime.generic provides com.jdojo.prime.PrimeChecker, used by com.jdojo.prime
+  module com.jdojo.prime.probable provides com.jdojo.prime.PrimeChecker, used by com.jdojo.prime
+使用与前述相同的逻辑，找到所有三个服务提供者。 让我们创建一个包含所有三个服务提供者的新的运行时映像。 以下命令执行该操作：
+
+C:\Java9Revealed>jlink --module-path jmods;C:\java9\jmods
+--add-modules com.jdojo.prime.client
+--launcher runprimechecker=com.jdojo.prime.client
+--bind-services
+--output primecheckerservice
+将此命令与上一节中使用的命令进行比较。 这次，只使用--add-modules选项指定了一个模块。 也就是说，不必指定服务提供者模块的名称。 使用了--bind-services选项，因此添加的模块中的所有服务提供者引用都将自动添加到运行时映像。 指定了一个名为primecheckerservice的新输出目录。 以下命令运行新创建的运行时映像：
+
+C:\Java9Revealed>primecheckerservice\bin\runprimechecker
+以下是输出结果：
+
+Using jdojo.generic.primechecker:
+3 is a prime.
+4 is not a prime.
+121 is not a prime.
+977 is a prime.
+Using jdojo.faster.primechecker:
+3 is a prime.
+4 is not a prime.
+121 is not a prime.
+977 is a prime.
+Using jdojo.probable.primechecker:
+3 is a prime.
+4 is not a prime.
+121 is not a prime.
+977 is a prime.
+输出证明，模块路径中的所有三个素数检查服务提供者都自动添加到运行时映像中。
+
+四. 使用jlink工具插件
+jlink工具使用插件架构来创建运行时映像。 它将所有类，本地类库和配置文件收集到一组资源中。 它构建了一个转换器管道，它们是指定为命令行选项的插件。 资源进入管道。 管道中的每个转换器对资源进行某种变换，并将变换的资源输送到下一个转换器。 最后，jlink将转换的资源提供给映像构建器。
+
+JDK 9为jlink工具附带了几个插件。 这些插件定义了命令行选项。 要使用插件，需要使用命令行选项。 可以使用--list-plugins选项运行jlink工具，使用其描述和命令行选项打印所有可用插件的列表：
+
+C:\Java9Revealed>jlink --list-plugins
+以下是输出结果：
+
+List of available plugins:
+Plugin Name: class-for-name
+Option: --class-for-name
+Description: Class optimization: convert Class.forName calls to constant loads.
+Plugin Name: compress
+Option: --compress=<0|1|2>[:filter=<pattern-list>]
+Description: Compress all resources in the output image.
+Level 0: constant string sharing
+Level 1: ZIP
+Level 2: both.
+An optional <pattern-list> filter can be specified to list the pattern of
+files to be included.
+Plugin Name: dedup-legal-notices
+Option: --dedup-legal-notices=[error-if-not-same-content]
+Description: De-duplicate all legal notices.  If error-if-not-same-content is
+specified then it will be an error if two files of the same filename
+are different.
+Plugin Name: exclude-files
+Option: --exclude-files=<pattern-list> of files to exclude
+Description: Specify files to exclude. e.g.: **.java,glob:/java.base/native/client/**
+Plugin Name: exclude-jmod-section
+Option: --exclude-jmod-section=<section-name>
+where <section-name> is "man" or "headers".
+Description: Specify a JMOD section to exclude
+Plugin Name: exclude-resources
+Option: --exclude-resources=<pattern-list> resources to exclude
+Description: Specify resources to exclude. e.g.: **.jcov,glob:**/META-INF/**
+Plugin Name: generate-jli-classes
+Option: --generate-jli-classes=@filename
+Description: Takes a file hinting to jlink what java.lang.invoke classes to pre-generate. If
+this flag is not specified a default set of classes will be generated.
+Plugin Name: include-locales
+Option: --include-locales=<langtag>[,<langtag>]*
+Description: BCP 47 language tags separated by a comma, allowing locale matching
+defined in RFC 4647. e.g.: en,ja,*-IN
+Plugin Name: order-resources
+Option: --order-resources=<pattern-list> of paths in priority order.  If a @file
+is specified, then each line should be an exact match for the path to be ordered
+Description: Order resources. e.g.: **/module-info.class,@classlist,/java.base/java/lang/**
+Plugin Name: release-info
+Option: --release-info=<file>|add:<key1>=<value1>:<key2>=<value2>:...|del:<key list>
+Description: <file> option is to load release properties from the supplied file.
+add: is to add properties to the release file.
+Any number of <key>=<value> pairs can be passed.
+del: is to delete the list of keys in release file.
+Plugin Name: strip-debug
+Option: --strip-debug
+Description: Strip debug information from the output image
+Plugin Name: strip-native-commands
+Option: --strip-native-commands
+Description: Exclude native commands (such as java/java.exe) from the image
+Plugin Name: system-modules
+Option: --system-modules
+Description: Fast loading of module descriptors (always enabled)
+Plugin Name: vm
+Option: --vm=<client|server|minimal|all>
+Description: Select the HotSpot VM in the output image.  Default is all
+For options requiring a <pattern-list>, the value will be a comma separated
+list of elements each using one the following forms:
+  <glob-pattern>
+  glob:<glob-pattern>
+  regex:<regex-pattern>
+  @<filename> where filename is the name of a file containing patterns to be
+              used, one pattern per line
+以下命令使用compress和strip-debug插件。 压缩插件将压缩映像，这将得到较小的映像。 这里使用压缩级别2来进行最大压缩。 strip-debug插件从Java代码中删除调试信息，从而进一步减小映像的大小。 在运行此命令之前，请确保删除先前创建的primechecker目录。
+
+C:\Java9Revealed>jlink --module-path jmods;C:\java9\jmods
+  --compress 2
+  --strip-debug
+  --add-modules com.jdojo.prime.client,com.jdojo.prime.generic,com.jdojo.prime.faster
+  --launcher runprimechecker=com.jdojo.prime.client
+  --output primechecker
+Tips
+目前插件API是完全实验性的，并且未定义插件的执行顺序。 在早期的实现中，jlink工具还支持定制插件，后来被删除。
+
+五. jimage 工具
+Java运行时在JIMAGE文件中运送模块运行时映像。 该文件名为modules，它位于JAVA_HOME\lib中，其中JAVA_HOME可以是JDK_HOME或JRE_HOME。 jimage工具用于浏览JIMAGE文件的内容。 它可以：
+
+从JIMAGE文件中提取条目
+打印存储在JIMAGE中的内容的摘要
+打印其名称，大小，偏移量等条目列表。
+验证类文件
+jimage工具存储在JDK_HOME\bin目录中。 命令的一般格式如下：
+
+jimage <subcommand> <options> <jimage-file-list>
+这里，<subcommand>是下面第一个表格列出的子命令之一。 <options>是第二个表格列出的一个或多个选项；<jimage-file-list>是一个空格分隔的JIMAGE文件列表。
+
+子命令	描述
+extract	从指定的JIMAGE文件中将所有条目解压缩到当前目录。 使用--dir选项为提取的条目指定另一个目录。
+info	打印包含在指定JIMAGE文件头部的详细信息。
+list	在指定的JIMAGE文件中打印所有模块及其条目的列表。 使用--verbose选项包括条目的详细信息，例如其大小，偏移量以及条目是否被压缩。
+verify	在指定的JIMAGE文件中打印验证不是类的.class条目列表。
+选项	描述
+-dir <dir-name>	指定提取子命令的目标目录，其中将提取JIMAGE文件中的条目。
+-h, --help	打印jimage工具的使用信息。
+--include <pattern-list>	指定过滤条目的模式列表。 模式列表的值是以逗号分隔的元素列表，每个元素使用以下形式之一： <glob-pattern>， glob:<glob-pattern>， regex:<regex-pattern>。
+--full-version	打印jimage工具的完整版本信息。
+--verbose	当与列表子命令一起使用时，打印详细信息，如大小，偏移量和压缩级别。
+--version	打印jimage工具的版本信息。
+举几个使用jimage命令的例子。 示例使用保存在C:\java9\lib\modules上的JDK 9运行时映像。 当运行这些示例时，将需要将其替换为你的映像位置。 还可以使用这些示例中由jlink工具创建的任何自定义运行时映像。
+
+以下命令从运行时映像中提取所有条目，并将其复制到extracted_jdk目录。 该命令需要几秒钟才能完成。
+
+C:\Java9Revealed>jimage extract --dir extracted_jdk C:\java9\lib\modules
+以下命令将以.png扩展名的所有图像条目从JDK运行时映像提取到extracted_images目录中：
+
+C:\Java9Revealed>jimage extract --include regex:.+\.png --dir extracted_images C:\java9\lib\modules
+以下命令列出运行时映像中的所有条目。 显示部分输出：
+
+C:\Java9Revealed>jimage list C:\java9\lib\modules
+以下是部分输出内容：
+
+jimage: C:\java9\lib\modules
+Module: java.activation
+    META-INF/mailcap.default
+    META-INF/mimetypes.default
+...
+Module: java.annotations.common
+    javax/annotation/Generated.class
+...
+以下命令列出运行时映像中的所有条目以及条目的详细信息。 请注意使用--verbose选项。
+
+C:\Java9Revealed>jimage list --verbose C:\java9\lib\modules
+以下是部分输出：
+
+jimage: C:\java9\lib\modules
+Module: java.activation
+Offset     Size   Compressed Entry
+34214466    292            0 META-INF/mailcap.default
+34214758    562            0 META-INF/mimetypes.default
+...
+Module: java.annotations.common
+Offset     Size   Compressed Entry
+34296622    678            0 javax/annotation/Generated.class
+...
+以下命令打印无效的类文件列表。 你可能会想知道你如何使类文件无效。 通常，你不会有一个无效的类文件 —— 但黑客会！ 但是，要运行此示例，需要一个无效的类文件。 可以使用一个简单的想法 —— 拿一个有效的类文件，在文本编辑器中打开它，并部分和随机地删除其内容，使其成为无效的类文件。 将编译的类文件的内容复制到Main2.class文件中，并删除了其中的一些内容，使其成为无效的类。 将Main2.class文件添加到与Main.class相同目录中的com.jdojo.prime.client模块中。 使用上一个命令为此示例的素数检查应用程序重新创建了运行时映像。 如果使用JDK附带的Java运行时映像，则不会看到任何输出，因为JDK运行时映像中的所有类文件都有效。
+
+C:\Java9Revealed>jimage verify primechecker\lib\modules
+会得到以下错误信息：
+
+jimage: primechecker\lib\modules
+Error(s) in Class: /com.jdojo.prime.client/com/jdojo/prime/client/Main2.class
+六. 总结
+在JDK 9中，运行时映像以特定格式保存，称为JIMAGE，该格式针对空间和速度进行了优化。 仅在运行时支持JIMAGE格式。 它是用于在JDK中存储和索引模块，类和资源的容器格式。 从JIMAGE文件搜索和加载类比从JAR和JMOD文件快很多。 JIMAGE格式是JDK内部的，开发人员很少需要直接与JIMAGE文件进行交互。
+
+它附带了一个名为jlink的工具，可为应用程序创建一个JIMAGE格式的运行时映像，该应用程序将包含应用程序模块和应用程序所使用的那些平台模块。 jlink工具可以从存储在模块JAR，展开的目录和JMOD文件中的模块创建运行时映像。 JDK 9附带了一个名为jimage的工具，可用于浏览JIMAGE文件的内容。
+
+标签: Java, Java 9
+好文要顶 关注我 收藏该文
+林本托
+粉丝 - 374 关注 - 9
++加关注
+20
+« 上一篇： Java 9 揭秘（6. 封装模块）
+» 下一篇： 好书分享 ——《深度工作》
+posted @ 2017-07-03 13:51  林本托  阅读(5782)  评论(1)  编辑  收藏  举报
