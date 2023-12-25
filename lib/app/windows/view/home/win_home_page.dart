@@ -367,12 +367,7 @@ class WinHomePage extends GetView<WinHomeController> {
                     color: Colors.grey.shade100,
                   )),
                 ),
-                child: GetBuilder(
-                  init: WinTodayController(ServiceManager.of(context)),
-                  builder: (c) {
-                    return WinTodayPage();
-                  },
-                )),
+                child: WinTodayPage()),
             if (controller.isDropOver.value)
               Container(
                 width: double.infinity,
@@ -395,12 +390,7 @@ class WinHomePage extends GetView<WinHomeController> {
             color: Colors.grey.shade100,
           )),
         ),
-        child: GetBuilder(
-          init: WinDocPageController(),
-          builder: (c) {
-            return WinDocPage();
-          },
-        ));
+        child: WinDocPage());
   }
 
   Widget buildCardPage(BuildContext context) {
@@ -413,12 +403,7 @@ class WinHomePage extends GetView<WinHomeController> {
             color: Colors.grey.shade100,
           )),
         ),
-        child: GetBuilder(
-          init: WinCardSetController(),
-          builder: (c) {
-            return WinCardSetPage();
-          },
-        ));
+        child: WinCardSetPage());
   }
 
   Widget buildEditPane(BuildContext context) {

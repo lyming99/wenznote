@@ -11,10 +11,13 @@ import 'package:note/service/card/card_study_service.dart';
 import 'package:note/service/doc/doc_service.dart';
 import 'package:note/service/file/wen_file_service.dart';
 import 'package:note/service/isar/isar_service.dart';
+import 'package:note/service/sync/sync_service.dart';
 import 'package:note/service/user/user_service.dart';
 import 'package:note/widgets/root_widget.dart';
 
-class ServiceManager with ChangeNotifier{
+import 'config/config_manager.dart';
+
+class ServiceManager with ChangeNotifier {
   static ServiceManager of(BuildContext context) {
     var state = context.findAncestorStateOfType<ServiceManagerWidgetState>();
     return state!.serviceManager;
@@ -32,8 +35,11 @@ class ServiceManager with ChangeNotifier{
   late WinDocListService docListService;
   late SettingsManager settingsManager;
   late DocumentManager documentManager;
+  late ConfigManager configManager;
+  late SyncService syncService;
   bool isStart = false;
   int time = DateTime.now().millisecondsSinceEpoch;
+  late BuildContext context;
 
   void onInitState(BuildContext context) {
     isarService = IsarService(this);
@@ -48,6 +54,8 @@ class ServiceManager with ChangeNotifier{
     docListService = WinDocListService(this);
     settingsManager = SettingsManager(this);
     documentManager = DocumentManager(this);
+    configManager = ConfigManager(this);
+    syncService = SyncService(this);
     startService();
   }
 
@@ -63,10 +71,11 @@ class ServiceManager with ChangeNotifier{
     notifyListeners();
   }
 
-  Future<void> restartService()async{
-    await stopService();
-    await startService();
+  Future<void> restartService() async {
+    await isarService.close();
+    isStart = false;
     Get.offAllNamed("/");
-    Get.toNamed("/");
+    notifyListeners();
+    startService();
   }
 }

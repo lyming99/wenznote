@@ -11,6 +11,7 @@ import 'package:note/commons/service/file_manager.dart';
 import 'package:note/config/app_constants.dart';
 import 'package:note/model/client/client_vo.dart';
 import 'package:note/model/user/user_vo.dart';
+import 'package:note/service/config/config_manager.dart';
 import 'package:note/service/isar/isar_service.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:oktoast/oktoast.dart';
@@ -60,22 +61,16 @@ class UserService with ChangeNotifier {
     var data = result.data;
     if (data["msg"] == AppConstants.success) {
       //登录成功，data就是token信息
-      var client = await createClient(email, data['data']);
-      if (client == null) {
-        return false;
-      }
-      this.client = client;
       token = data["data"];
       await fetchUserInfo();
       await startUserService();
-      serviceManager.restartService();
       return true;
     }
     return false;
   }
 
-  Future<ClientVO?> createClient(String username, String token) async {
-    var client = await readClientInfo(username);
+  Future<ClientVO?> createClient(String uid, String token) async {
+    var client = await readClientInfo(uid);
     if (client != null) {
       return client;
     }
@@ -92,7 +87,8 @@ class UserService with ChangeNotifier {
     var data = result.data;
     if (data["msg"] == AppConstants.success) {
       var client = ClientVO.fromMap(data["data"]);
-      saveClientInfo(username, client);
+      saveClientInfo(uid, client);
+      return client;
     }
     return null;
   }
@@ -113,19 +109,19 @@ class UserService with ChangeNotifier {
     var data = result.data;
     if (data["msg"] == AppConstants.success) {
       currentUser = UserVO.fromMap(data["data"]);
+      client = await createClient("${currentUser?.id}", data['data']);
       await saveUserInfo();
       notifyListeners();
     }
   }
 
-  Future<ClientVO?> readClientInfo(String? username) async {
-    if (username == null || username.isEmpty) {
+  Future<ClientVO?> readClientInfo(String? uid) async {
+    if (uid == null || uid.isEmpty) {
       return null;
     }
-    var pre = await SharedPreferences.getInstance();
-
-    var info = pre.getString(username);
-    if (info != null && info.isNotEmpty) {
+    var info =
+        await serviceManager.configManager.readConfig("client.$uid", "");
+    if (info.isNotEmpty) {
       var client = ClientVO.fromMap(jsonDecode(info));
       if (client.id == null) {
         return null;
@@ -135,30 +131,29 @@ class UserService with ChangeNotifier {
     return null;
   }
 
-  Future<void> saveClientInfo(String username, ClientVO client) async {
-    var pre = await SharedPreferences.getInstance();
-    pre.setString(username, jsonEncode(client.toMap()));
+  Future<void> saveClientInfo(String uid, ClientVO client) async {
+    await serviceManager.configManager
+        .saveConfig("client.$uid", jsonEncode(client.toMap()));
   }
 
   Future<void> readUserInfo() async {
-    var pre = await SharedPreferences.getInstance();
-    token = pre.getString("token");
-    var info = pre.getString("currentUser");
-    if (info != null && info.isNotEmpty) {
+    token = await serviceManager.configManager.readConfig("token", "");
+    var info = await serviceManager.configManager.readConfig("currentUser", "");
+    if (info.isNotEmpty) {
       currentUser = UserVO.fromMap(jsonDecode(info));
     }
-    client = await readClientInfo(currentUser?.email);
+    client = await readClientInfo("${currentUser?.id}");
     notifyListeners();
   }
 
   Future<void> saveUserInfo() async {
-    var pre = await SharedPreferences.getInstance();
-    pre.setString("token", token ?? "");
+    serviceManager.configManager.saveConfig("token", token ?? "");
     var user = currentUser;
     if (user == null) {
-      pre.setString("currentUser", "");
+      serviceManager.configManager.saveConfig("currentUser", "");
     } else {
-      pre.setString("currentUser", jsonEncode(user.toMap()));
+      serviceManager.configManager
+          .saveConfig("currentUser", jsonEncode(user.toMap()));
     }
   }
 

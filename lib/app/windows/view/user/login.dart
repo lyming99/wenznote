@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
+import 'package:get/get.dart';
 import 'package:note/app/windows/controller/user/login.dart';
 import 'package:note/app/windows/controller/user/sign.dart';
 import 'package:note/app/windows/theme/colors.dart';
 import 'package:note/app/windows/view/user/sign.dart';
 import 'package:note/commons/mvc/view.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
+import 'package:note/service/service_manager.dart';
 import 'package:oktoast/oktoast.dart';
 
 class WinLoginDialog extends MvcView<WinLoginController> {
@@ -98,7 +100,7 @@ class WinLoginDialog extends MvcView<WinLoginController> {
             ));
     if (result == true) {
       showToast("登录成功！");
-      Navigator.of(context).pop();
+      ServiceManager.of(context).restartService();
     }else{
       showToast("登录失败！");
     }

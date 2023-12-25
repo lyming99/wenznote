@@ -1,6 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:get/get.dart';
+import 'package:note/app/windows/controller/card/win_card_set_controller.dart';
+import 'package:note/app/windows/controller/doc_list/win_doc_page_controller.dart';
 import 'package:note/app/windows/controller/home/win_home_controller.dart';
+import 'package:note/app/windows/controller/today/win_today_controller.dart';
 import 'package:note/app/windows/settings/settings_controller.dart';
 import 'package:note/app/windows/view/home/win_home_page.dart';
 import 'package:note/app/windows/view/import/import_controller.dart';
@@ -21,6 +24,9 @@ class WindowsAppRoutes {
         return Builder(
           builder: (context) {
             Get.put(WinHomeController(ServiceManager.of(context)));
+            Get.put(WinTodayController(ServiceManager.of(context)));
+            Get.put(WinDocPageController());
+            Get.put(WinCardSetController());
             return const WinHomePage();
           },
         );

@@ -4,16 +4,13 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:get/get.dart';
-import 'package:note/commons/service/file_manager.dart';
 import 'package:note/commons/util/string.dart';
 import 'package:note/commons/util/wdoc/wdoc.dart';
 import 'package:note/editor/block/element/element.dart';
 import 'package:note/editor/block/image/image_element.dart';
 import 'package:note/editor/crdt/doc_utils.dart';
 import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/file/wen_file_service.dart';
 import 'package:note/service/service_manager.dart';
-import 'package:note/service/user/user_service.dart';
 
 class WinExportSingleMarkdownFileController extends GetxController {
   DocPO doc;
