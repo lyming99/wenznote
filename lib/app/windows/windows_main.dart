@@ -5,9 +5,7 @@ import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 import 'package:get/get.dart';
 import 'package:note/app/windows/routes.dart';
 import 'package:note/commons/widget/ignore_parent_pointer.dart';
-import 'package:note/commons/widget/theme_listner.dart';
 import 'package:note/config/theme_settings.dart';
-import 'package:note/service/service_manager.dart';
 import 'package:note/widgets/root_widget.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:window_manager/window_manager.dart';
@@ -78,18 +76,16 @@ Future<void> windowsMain(
             initialRoute: test ? "/test" : "/",
             getPages: WindowsAppRoutes.routes,
             builder: (context, child) {
-              return ServiceManagerWidget(
-                builder: (context) {
-                  return fluent.FluentTheme(
-                    data: fluent.FluentThemeData(
-                      fontFamily: "MiSans",
-                      brightness: brightness,
-                      acrylicBackgroundColor: Colors.grey.withAlpha(10),
-                    ),
-                    child: Container(child: child ?? Container()),
-                  );
-                }
-              );
+              return ServiceManagerWidget(builder: (context) {
+                return fluent.FluentTheme(
+                  data: fluent.FluentThemeData(
+                    fontFamily: "MiSans",
+                    brightness: brightness,
+                    acrylicBackgroundColor: Colors.grey.withAlpha(10),
+                  ),
+                  child: Container(child: child ?? Container()),
+                );
+              });
             },
           ),
         ),

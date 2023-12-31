@@ -44,7 +44,7 @@ class WenFileService {
     }
     var noteFile = File(await getNoteFilePath(docId));
     if (noteFile.existsSync()) {
-      var result = await CryptService.decode(await noteFile.readAsBytes());
+      var result = await serviceManager.cryptService.decode(await noteFile.readAsBytes());
       _fileCache[docId] = result;
       return result;
     }
@@ -56,7 +56,7 @@ class WenFileService {
       return;
     }
     var noteFile = File(await getNoteFilePath(docId));
-    await noteFile.writeAsBytes(await CryptService.encode(data));
+    await noteFile.writeAsBytes(await serviceManager.cryptService.encode(data));
     _fileCache[docId] = data;
   }
 

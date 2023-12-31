@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:note/commons/service/settings_manager.dart';
 import 'package:note/service/service_manager.dart';
 
 var _defaultColorMap = <String, Map<String, Color>>{

@@ -346,7 +346,8 @@ class WinTodayPage extends GetView<WinTodayController> {
     );
   }
 
-  Widget buildNoteTitleInfo(BuildContext context, WinTodaySearchResultVO searchItem) {
+  Widget buildNoteTitleInfo(
+      BuildContext context, WinTodaySearchResultVO searchItem) {
     return Container(
       margin: EdgeInsets.only(
         left: 5,

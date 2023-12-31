@@ -35,7 +35,6 @@ class DocPO {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': this.id,
       'uid': this.uid,
       'uuid': this.uuid,
       'did': this.did,
@@ -52,7 +51,6 @@ class DocPO {
 
   factory DocPO.fromMap(Map<String, dynamic> map) {
     return DocPO(
-      id: map['id'] as int? ?? Isar.autoIncrement,
       uid: map['uid'] as String?,
       uuid: map['uuid'] as String?,
       did: map['did'] as String?,

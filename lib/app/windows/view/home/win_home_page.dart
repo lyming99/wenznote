@@ -3,10 +3,7 @@ import 'dart:math';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/card/win_card_set_controller.dart';
-import 'package:note/app/windows/controller/doc_list/win_doc_page_controller.dart';
 import 'package:note/app/windows/controller/home/win_home_controller.dart';
-import 'package:note/app/windows/controller/today/win_today_controller.dart';
 import 'package:note/app/windows/controller/user/info.dart';
 import 'package:note/app/windows/controller/user/login.dart';
 import 'package:note/app/windows/theme/colors.dart';
@@ -22,7 +19,6 @@ import 'package:note/editor/theme/theme.dart';
 import 'package:note/editor/widget/drop_menu.dart';
 import 'package:note/editor/widget/toggle_item.dart';
 import 'package:note/editor/widget/window_button.dart';
-import 'package:note/service/service_manager.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -92,8 +88,8 @@ class WinHomePage extends GetView<WinHomeController> {
       padding: const EdgeInsets.only(top: 30),
       width: 60,
       color: isWin11()
-          ? systemColor(context,"winNavColor").withOpacity(0.6)
-          : systemColor(context,"winNavColor"),
+          ? systemColor(context, "winNavColor").withOpacity(0.6)
+          : systemColor(context, "winNavColor"),
       child: Column(
         children: [
           buildAccountLogo(context),

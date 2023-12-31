@@ -10,7 +10,6 @@ import 'package:window_manager/window_manager.dart';
 
 import 'settings_controller.dart';
 
-
 class WinSettingsWidget extends GetView<WinSettingsController> {
   const WinSettingsWidget({
     Key? key,
@@ -35,8 +34,8 @@ class WinSettingsWidget extends GetView<WinSettingsController> {
       decoration: BoxDecoration(
           border: Border(
               bottom: BorderSide(
-            color: EditTheme.of(context).lineColor,
-          ))),
+        color: EditTheme.of(context).lineColor,
+      ))),
       child: Stack(
         children: [
           DragToMoveArea(

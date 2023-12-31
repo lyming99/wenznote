@@ -159,6 +159,7 @@ class WinCardSetDetailPageController extends GetxController {
       createTime: DateTime.now().millisecondsSinceEpoch,
       updateTime: DateTime.now().millisecondsSinceEpoch,
     );
+    cardService.createCard(card);
     openCard(card, true);
   }
 

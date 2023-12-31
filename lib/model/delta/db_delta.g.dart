@@ -115,15 +115,16 @@ DbDelta _dbDeltaDeserialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  final object = DbDelta();
-  object.clientId = reader.readLongOrNull(offsets[0]);
-  object.content = reader.readStringOrNull(offsets[1]);
-  object.dataId = reader.readStringOrNull(offsets[2]);
-  object.dataType = reader.readStringOrNull(offsets[3]);
-  object.deleted = reader.readBoolOrNull(offsets[4]);
-  object.hasUpload = reader.readBoolOrNull(offsets[5]);
-  object.id = id;
-  object.updateTime = reader.readLongOrNull(offsets[6]);
+  final object = DbDelta(
+    clientId: reader.readLongOrNull(offsets[0]),
+    content: reader.readStringOrNull(offsets[1]),
+    dataId: reader.readStringOrNull(offsets[2]),
+    dataType: reader.readStringOrNull(offsets[3]),
+    deleted: reader.readBoolOrNull(offsets[4]),
+    hasUpload: reader.readBoolOrNull(offsets[5]),
+    id: id,
+    updateTime: reader.readLongOrNull(offsets[6]),
+  );
   return object;
 }
 

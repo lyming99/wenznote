@@ -7,7 +7,6 @@ import 'package:note/app/windows/widgets/win_edit_tab.dart';
 import 'package:note/editor/crdt/YsEditController.dart';
 import 'package:note/editor/widget/toggle_item.dart';
 import 'package:note/model/card/po/card_po.dart';
-import 'package:note/service/card/card_service.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
 import 'package:window_manager/window_manager.dart';
@@ -144,6 +143,7 @@ class WinCardEditTab with WinEditTabMixin {
       createTime: DateTime.now().millisecondsSinceEpoch,
       updateTime: DateTime.now().millisecondsSinceEpoch,
     );
+    serviceManager.cardService.createCard(card);
     openCard(card, true);
   }
 

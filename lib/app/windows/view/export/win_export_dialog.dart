@@ -29,7 +29,7 @@ class WinExportSingleMarkdownFileDialog
                   placeholder: "/output/output.md",
                   controller: controller.pathController,
                   suffix: ToggleItem(
-                    onTap: (ctx){
+                    onTap: (ctx) {
                       controller.selectFile(context);
                     },
                     itemBuilder: (BuildContext context, bool checked,

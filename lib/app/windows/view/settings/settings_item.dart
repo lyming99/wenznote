@@ -1,8 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:get/get.dart';
-import 'package:note/commons/service/settings_manager.dart';
 import 'package:note/service/service_manager.dart';
+
 import 'settings_controller.dart';
+
 abstract class WinSettingsItem {
   String title;
   List<String> searchKeys;

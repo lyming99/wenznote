@@ -9,7 +9,6 @@ import 'package:note/app/windows/model/doc_list/win_doc_list_item_vo.dart';
 import 'package:note/app/windows/model/today/search_result_vo.dart';
 import 'package:note/app/windows/service/doc_list/win_doc_list_service.dart';
 import 'package:note/app/windows/service/today/win_today_service.dart';
-import 'package:note/commons/service/copy_service.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';
 import 'package:note/model/task/task.dart';
@@ -49,12 +48,14 @@ class WinDocListController extends GetxController {
     winTodayService = serviceManager.todayService;
     docListService = serviceManager.docListService;
     fetchData();
-    subscription =
-        docListService.documentIsar.docDirPOs.watchLazy().listen((event) {
+    subscription = serviceManager.docService.documentIsar.docDirPOs
+        .watchLazy()
+        .listen((event) {
       queryDocList();
     });
-    subscription =
-        docListService.documentIsar.docPOs.watchLazy().listen((event) {
+    subscription = serviceManager.docService.documentIsar.docPOs
+        .watchLazy()
+        .listen((event) {
       queryDocList();
     });
     searchListener =

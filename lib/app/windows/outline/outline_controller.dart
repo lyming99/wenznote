@@ -6,7 +6,6 @@ import 'package:note/editor/block/block_manager.dart';
 import 'package:note/editor/block/text/text.dart';
 import 'package:note/editor/edit_controller.dart';
 
-
 class OutlineController with ChangeNotifier {
   late TreeController<TextBlock> treeController;
   EditController? editController;
@@ -18,7 +17,6 @@ class OutlineController with ChangeNotifier {
       rootNode: TreeNode(id: "root"),
     );
   }
-
 
   void updateTree(BuildContext context, EditController? editController) {
     this.editController = editController;

@@ -7,7 +7,6 @@ import 'package:note/app/windows/model/doc_list/win_doc_list_item_vo.dart';
 import 'package:note/app/windows/model/today/search_result_vo.dart';
 import 'package:note/app/windows/view/card/win_create_card_dialog.dart';
 import 'package:note/app/windows/view/doc_list/win_select_doc_dir_dialog.dart';
-import 'package:note/app/windows/view/export/win_export_dialog.dart';
 import 'package:note/editor/theme/theme.dart';
 import 'package:note/editor/widget/drop_menu.dart';
 import 'package:note/editor/widget/toggle_item.dart';

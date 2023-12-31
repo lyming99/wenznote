@@ -6,11 +6,13 @@ import 'package:note/app/windows/model/doc_list/win_doc_list_item_vo.dart';
 import 'package:note/app/windows/service/doc_list/win_doc_list_service.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';
+import 'package:note/service/doc/doc_service.dart';
 import 'package:note/service/service_manager.dart';
 
 class WinSelectDocDirListController extends GetxController {
   bool Function(List<DocDirPO> dir)? dirFilter;
   late WinDocListService docListService;
+  late DocService docService;
 
   String? docDirUuid;
   var pathList = RxList<DocDirPO>();
@@ -28,13 +30,13 @@ class WinSelectDocDirListController extends GetxController {
   void onInit() {
     super.onInit();
     docListService = ServiceManager.of(Get.context!).docListService;
+    docService = ServiceManager.of(Get.context!).docService;
     fetchData();
     subscription =
-        docListService.documentIsar.docDirPOs.watchLazy().listen((event) {
+        docService.documentIsar.docDirPOs.watchLazy().listen((event) {
       queryDirList();
     });
-    subscription =
-        docListService.documentIsar.docPOs.watchLazy().listen((event) {
+    subscription = docService.documentIsar.docPOs.watchLazy().listen((event) {
       queryDirList();
     });
   }

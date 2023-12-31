@@ -1,3 +1,4 @@
+import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:get/get.dart';
@@ -6,7 +7,6 @@ import 'package:note/app/windows/controller/user/sign.dart';
 import 'package:note/app/windows/theme/colors.dart';
 import 'package:note/app/windows/view/user/login.dart';
 import 'package:note/commons/mvc/view.dart';
-import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:oktoast/oktoast.dart';
 
 class WinSignDialog extends MvcView<WinSignController> {
@@ -34,7 +34,7 @@ class WinSignDialog extends MvcView<WinSignController> {
               padding: EdgeInsets.only(left: 8),
               child: Icon(
                 Icons.email_outlined,
-                color: systemColor(context,"hintColor"),
+                color: systemColor(context, "hintColor"),
               ),
             ),
           ),
@@ -51,7 +51,7 @@ class WinSignDialog extends MvcView<WinSignController> {
                     padding: EdgeInsets.only(left: 8),
                     child: Icon(
                       Icons.sms_sharp,
-                      color: systemColor(context,"hintColor"),
+                      color: systemColor(context, "hintColor"),
                     ),
                   ),
                 ),
@@ -83,7 +83,7 @@ class WinSignDialog extends MvcView<WinSignController> {
               padding: EdgeInsets.only(left: 8),
               child: Icon(
                 Icons.key,
-                color: systemColor(context,"hintColor"),
+                color: systemColor(context, "hintColor"),
               ),
             ),
           ),
@@ -97,7 +97,7 @@ class WinSignDialog extends MvcView<WinSignController> {
               padding: EdgeInsets.only(left: 8),
               child: Icon(
                 Icons.key,
-                color: systemColor(context,"hintColor"),
+                color: systemColor(context, "hintColor"),
               ),
             ),
           ),

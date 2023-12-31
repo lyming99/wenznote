@@ -26,6 +26,11 @@ class CardStudyService with IsarServiceMixin {
   }
 
   Future<void> saveStudyConfig(CardStudyConfigPO config) async {
+    var oldItem = await documentIsar.cardStudyConfigPOs.get(config.id);
+    await upsertDbDelta(
+        dataId: config.uuid!,
+        dataType: "cardSetConfig",
+        properties: diffMap(oldItem?.toMap() ?? {}, config.toMap()));
     await documentIsar.writeTxn(() async {
       documentIsar.cardStudyConfigPOs.put(config);
     });
@@ -111,6 +116,10 @@ class CardStudyService with IsarServiceMixin {
   }
 
   Future<void> createStudyRecord(CardStudyRecordPO record) async {
+    await upsertDbDelta(
+        dataId: record.uuid!,
+        dataType: "cardStudy",
+        properties: record.toMap());
     await documentIsar.writeTxn(() async {
       await documentIsar.cardStudyRecordPOs.put(record);
     });

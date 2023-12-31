@@ -8,7 +8,6 @@ import 'package:note/editor/widget/toggle_item.dart';
 import 'package:note/editor/widget/window_button.dart';
 import 'package:window_manager/window_manager.dart';
 
-
 class SettingsWidget extends GetView<SettingsController> {
   const SettingsWidget({
     Key? key,

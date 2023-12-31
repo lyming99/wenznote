@@ -37,7 +37,7 @@ class _CardEditorState extends State<CardEditor>
   Future<Doc> jsonToDoc(String? json) async {
     Doc doc = Doc();
     var blocks = doc.getArray("blocks");
-    if (json == null||json.isEmpty) {
+    if (json == null || json.isEmpty) {
       return doc;
     }
     var jsonArray = jsonDecode(json);

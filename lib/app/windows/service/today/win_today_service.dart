@@ -1,16 +1,11 @@
 import 'package:flutter_crdt/flutter_crdt.dart';
-import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:note/app/windows/model/today/search_result_vo.dart';
 import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/crdt/YsBlock.dart';
 import 'package:note/editor/crdt/doc_utils.dart';
 import 'package:note/model/note/enum/note_order_type.dart';
 import 'package:note/model/note/enum/note_type.dart';
 import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/doc/doc_service.dart';
-import 'package:note/service/file/wen_file_service.dart';
-import 'package:note/service/isar/isar_service.dart';
 import 'package:note/service/isar/isar_service_mixin.dart';
 import 'package:note/service/service_manager.dart';
 

@@ -23,7 +23,7 @@ class SettingsManager with IsarServiceMixin implements ValueListenable {
         documentIsar.settingsPOs.filter().keyEqualTo(key).findFirstSync();
     config ??= SettingsPO(key: key, value: value);
     config.value = value;
-    documentIsar.writeTxnSync(() => documentIsar.settingsPOs.putSync(config!));
+    documentIsar.writeTxn(() => documentIsar.settingsPOs.put(config!));
   }
 
   void setThemeMode(ThemeMode mode) {

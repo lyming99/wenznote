@@ -1,21 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
-import 'package:flutter_crdt/utils/doc.dart';
 import 'package:get/get.dart';
-import 'package:note/commons/service/file_manager.dart';
 import 'package:note/config/app_constants.dart';
 import 'package:note/model/client/client_vo.dart';
+import 'package:note/model/client/server_vo.dart';
 import 'package:note/model/user/user_vo.dart';
-import 'package:note/service/config/config_manager.dart';
-import 'package:note/service/isar/isar_service.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:oktoast/oktoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 /// 登录
 /// 登出
@@ -28,6 +22,7 @@ class UserService with ChangeNotifier {
   UserVO? currentUser;
   String? token;
   ClientVO? client;
+  ServerVO? noteServer;
 
   UserService(this.serviceManager);
 
@@ -44,6 +39,8 @@ class UserService with ChangeNotifier {
   }
 
   int? get uid => currentUser?.id;
+
+  int get clientId => client?.id ?? 0;
 
   Future<bool> login({
     required String email,
@@ -109,18 +106,34 @@ class UserService with ChangeNotifier {
     var data = result.data;
     if (data["msg"] == AppConstants.success) {
       currentUser = UserVO.fromMap(data["data"]);
-      client = await createClient("${currentUser?.id}", data['data']);
+      client = await createClient("${currentUser?.id}", token ?? "");
+      noteServer = await queryNoteServer();
       await saveUserInfo();
       notifyListeners();
     }
+  }
+
+  Future<ServerVO?> queryNoteServer() async {
+    var result = await Dio().post(
+      "${AppConstants.apiUrl}/server/queryNoteServer",
+      options: Options(
+        headers: {
+          "token": token,
+        },
+      ),
+    );
+    var data = result.data;
+    if (data['msg'] == AppConstants.success) {
+      return ServerVO.fromMap(data['data']);
+    }
+    return null;
   }
 
   Future<ClientVO?> readClientInfo(String? uid) async {
     if (uid == null || uid.isEmpty) {
       return null;
     }
-    var info =
-        await serviceManager.configManager.readConfig("client.$uid", "");
+    var info = await serviceManager.configManager.readConfig("client.$uid", "");
     if (info.isNotEmpty) {
       var client = ClientVO.fromMap(jsonDecode(info));
       if (client.id == null) {
@@ -143,6 +156,7 @@ class UserService with ChangeNotifier {
       currentUser = UserVO.fromMap(jsonDecode(info));
     }
     client = await readClientInfo("${currentUser?.id}");
+    noteServer = await queryNoteServer();
     notifyListeners();
   }
 

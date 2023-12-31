@@ -7,6 +7,7 @@ import 'package:note/model/card/po/card_study_config_po.dart';
 import 'package:note/model/card/po/card_study_queue_po.dart';
 import 'package:note/model/card/po/card_study_record_po.dart';
 import 'package:note/model/card/po/card_study_score_po.dart';
+import 'package:note/model/delta/db_delta.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';
 import 'package:note/model/settings/settings_po.dart';
@@ -43,6 +44,7 @@ class IsarService {
           CardStudyScorePOSchema,
           CardStudyConfigPOSchema,
           SettingsPOSchema,
+          DbDeltaSchema,
         ],
         directory: databases.path,
         name: "documents",

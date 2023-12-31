@@ -6,7 +6,6 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:get/get.dart';
-import 'package:note/commons/service/file_manager.dart';
 import 'package:note/commons/util/platform_util.dart';
 import 'package:note/commons/util/string.dart';
 import 'package:note/commons/util/wdoc/wdoc.dart';
@@ -16,10 +15,7 @@ import 'package:note/editor/block/image/image_element.dart';
 import 'package:note/editor/crdt/doc_utils.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/doc/doc_service.dart';
-import 'package:note/service/file/wen_file_service.dart';
 import 'package:note/service/service_manager.dart';
-import 'package:note/service/user/user_service.dart';
 import 'package:oktoast/oktoast.dart';
 
 /// 导出笔记

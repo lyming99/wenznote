@@ -13,8 +13,6 @@ import 'package:note/commons/util/markdown/markdown.dart';
 import 'package:note/editor/crdt/doc_utils.dart';
 import 'package:note/model/note/enum/note_type.dart';
 import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/doc/doc_service.dart';
-import 'package:note/service/file/wen_file_service.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:note/service/user/user_service.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
@@ -37,7 +35,6 @@ class WinHomeController extends GetxController {
   var isDropOver = false.obs;
 
   bool get isLogin => userService.hasLogin;
-
 
   WinHomeController(this.serviceManager);
 

@@ -1,67 +1,29 @@
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
-import 'package:isar/isar.dart';
 import 'package:note/app/windows/controller/home/win_home_controller.dart';
 import 'package:note/app/windows/model/doc_list/win_doc_list_item_vo.dart';
 import 'package:note/editor/crdt/YsText.dart';
-import 'package:note/model/note/enum/note_type.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/isar/isar_service_mixin.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
 
-class WinDocListService with IsarServiceMixin {
+class WinDocListService {
   @override
   ServiceManager serviceManager;
 
   WinDocListService(this.serviceManager);
 
   Future<List<dynamic>> queryDirAndDocList(String? uuid) async {
-    var result = [];
-    var dirList = await documentIsar.docDirPOs
-        .filter()
-        .pidEqualTo(uuid)
-        .sortByCreateTime()
-        .findAll();
-    result.addAll(dirList);
-    var docList = await documentIsar.docPOs
-        .filter()
-        .pidEqualTo(uuid)
-        .and()
-        .typeEqualTo(NoteType.doc.name)
-        .sortByCreateTime()
-        .findAll();
-    result.addAll(docList);
-    return result;
+    return serviceManager.docService.queryDirAndDocList(uuid);
   }
 
   Future<List<dynamic>> queryDirList(String? uuid) async {
-    return await documentIsar.docDirPOs
-        .filter()
-        .pidEqualTo(uuid)
-        .sortByCreateTime()
-        .findAll();
+    return serviceManager.docService.queryDirList(uuid);
   }
 
   Future<List<DocDirPO>> queryPath(String? uuid) async {
-    var result = [DocDirPO(name: "我的笔记")];
-    if (uuid == null) {
-      return result;
-    }
-    var current =
-        await documentIsar.docDirPOs.filter().uuidEqualTo(uuid).findFirst();
-    while (current != null) {
-      result.insert(1, current);
-      if (current.pid == null) {
-        break;
-      }
-      current = await documentIsar.docDirPOs
-          .filter()
-          .uuidEqualTo(current.pid)
-          .findFirst();
-    }
-    return result;
+    return serviceManager.docService.queryPath(uuid);
   }
 
   Future<DocDirPO> createDirectory(String? pid, String text) async {
@@ -72,9 +34,7 @@ class WinDocListService with IsarServiceMixin {
       updateTime: DateTime.now().millisecondsSinceEpoch,
       name: text,
     );
-    await documentIsar.writeTxn(() async {
-      await documentIsar.docDirPOs.put(item);
-    });
+    await serviceManager.docService.createDocDir(item);
     return item;
   }
 
@@ -96,18 +56,12 @@ class WinDocListService with IsarServiceMixin {
 
   Future<void> deleteDoc(WinDocListItemVO docItem) async {
     Get.find<WinHomeController>().closeDoc(docItem.doc!);
-    var isar = documentIsar.docPOs.isar;
-    await isar.writeTxn(() async {
-      await isar.docPOs.filter().uuidEqualTo(docItem.uuid).deleteFirst();
-    });
+    await serviceManager.docService.deleteDoc(docItem.doc!);
     await serviceManager.wenFileService.deleteDoc(docItem.uuid!);
   }
 
   Future<void> deleteFolder(WinDocListItemVO docItem) async {
-    var isar = documentIsar.docDirPOs.isar;
-    await isar.writeTxn(() async {
-      await isar.docDirPOs.filter().uuidEqualTo(docItem.uuid).deleteFirst();
-    });
+    await serviceManager.docService.deleteDir(docItem.uuid);
   }
 
   Future<void> updateName(WinDocListItemVO docItem, String name) async {

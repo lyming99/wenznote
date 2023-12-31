@@ -1,13 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:future_progress_dialog/future_progress_dialog.dart';
-import 'package:note/app/windows/controller/user/info.dart';
-import 'package:note/app/windows/controller/user/login.dart';
-import 'package:note/app/windows/theme/colors.dart';
-import 'package:note/commons/mvc/view.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
+import 'package:flutter/material.dart';
+import 'package:note/app/windows/controller/user/info.dart';
+import 'package:note/commons/mvc/view.dart';
 import 'package:note/editor/widget/drop_menu.dart';
-import 'package:oktoast/oktoast.dart';
-import 'package:path/path.dart';
 
 class WinUserInfoDialog extends MvcView<WinUserInfoController> {
   const WinUserInfoDialog({

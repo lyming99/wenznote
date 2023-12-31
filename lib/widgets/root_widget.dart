@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:note/service/service_manager.dart';
-
 class ServiceManagerWidget extends StatefulWidget {
   final WidgetBuilder builder;
 

@@ -6,12 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:note/editor/theme/theme.dart';
 import 'package:note/editor/widget/window_button.dart';
-import 'package:super_clipboard/super_clipboard.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'import_controller.dart';
-
 
 class ImportWidget extends GetView<ImportController> {
   const ImportWidget({super.key});

@@ -15,16 +15,19 @@ class WinCardSetTab with ChangeNotifier, WinEditTabMixin {
 
   @override
   Widget buildWidget(BuildContext context) {
-    controller??=WinCardSetDetailPageController(cardSet: cardSet);
+    controller ??= WinCardSetDetailPageController(cardSet: cardSet);
     return createLocalGetBuilder(
         controller: controller!,
         builder: (context) {
-          return WinCardSetDetailPage(controller: controller!,);
+          return WinCardSetDetailPage(
+            controller: controller!,
+          );
         });
   }
 
   @override
   String get tabId => "cardSet-${cardSet.cardSet.uuid}";
+
   @override
   void onOpenPage() {
     super.onOpenPage();

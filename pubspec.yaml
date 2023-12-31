@@ -89,7 +89,7 @@ dependencies:
   flutter_html: ^2.2.1
   flutter_math_fork: ^0.5.0
   flutter_crdt:
-    path: /Users/liyuanming/Documents/GitHub/flutter_crdt
+    path: d:/project/flutter_crdt
 
   oktoast: ^3.3.1
   flutter_breadcrumb: ^1.0.1
@@ -99,6 +99,10 @@ dependencies:
   easy_image_viewer: ^1.2.1
   photo_view: ^0.14.0
   shared_preferences: ^2.2.1
+  json_diff: ^0.2.1
+  encrypt: ^5.0.3
+  web_socket_channel: ^2.4.0
+  fixnum: ^1.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

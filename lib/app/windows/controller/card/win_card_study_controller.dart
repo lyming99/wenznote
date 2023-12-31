@@ -15,6 +15,7 @@ import 'package:note/model/card/po/card_study_record_po.dart';
 import 'package:note/service/card/card_service.dart';
 import 'package:note/service/card/card_study_service.dart';
 import 'package:note/service/service_manager.dart';
+import 'package:uuid/uuid.dart';
 
 class WinCardStudyController extends WinEditTabController {
   late CardStudyService studyService;
@@ -181,6 +182,7 @@ class WinCardStudyController extends WinEditTabController {
         schedulingInfo?.card.due.millisecondsSinceEpoch ?? 0);
     var endTime = DateTime.now().millisecondsSinceEpoch;
     var record = CardStudyRecordPO(
+        uuid: const Uuid().v1(),
         cardSetId: cardSet.uuid,
         cardId: card.uuid,
         startTime: startTime,

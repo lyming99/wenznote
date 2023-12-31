@@ -7,7 +7,6 @@ import 'package:note/editor/theme/theme.dart';
 
 import 'outline_controller.dart';
 
-
 class OutlineTree extends StatefulWidget {
   double iconSize;
   double indentWidth;

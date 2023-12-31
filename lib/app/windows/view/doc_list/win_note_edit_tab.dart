@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
+import 'package:note/app/windows/controller/home/win_home_controller.dart';
 import 'package:note/app/windows/outline/outline_controller.dart';
 import 'package:note/app/windows/outline/outline_tree.dart';
-import 'package:note/app/windows/controller/home/win_home_controller.dart';
 import 'package:note/app/windows/theme/colors.dart';
 import 'package:note/app/windows/view/card/win_create_card_dialog.dart';
 import 'package:note/app/windows/view/doc_list/win_select_doc_dir_dialog.dart';
 import 'package:note/app/windows/widgets/win_edit_tab.dart';
-import 'package:note/commons/service/copy_service.dart';
 import 'package:note/commons/widget/split_pane.dart';
 import 'package:note/editor/crdt/YsEditController.dart';
 import 'package:note/editor/crdt/YsTree.dart';
@@ -22,11 +21,8 @@ import 'package:note/model/note/enum/note_order_type.dart';
 import 'package:note/model/note/enum/note_type.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/doc/doc_service.dart';
-import 'package:note/service/file/wen_file_service.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:note/service/task/task.dart';
-import 'package:note/service/user/user_service.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -128,7 +124,8 @@ class WinNoteEditTabController extends WinEditTabController
           });
     }
     doc.updateTime = DateTime.now().millisecondsSinceEpoch;
-    await serviceManager.docService.updateDoc(doc);
+    // 更新时间不必马上同步
+    await serviceManager.docService.updateDoc(doc, uploadNow: false);
     onUpdate?.call();
   }
 
@@ -270,7 +267,8 @@ class WinNoteEditTab extends WinEditTab<WinNoteEditTabController>
                           decoration: BoxDecoration(
                               border: Border(
                                   right: BorderSide(
-                                      color: systemColor(context,"borderColor")))),
+                                      color: systemColor(
+                                          context, "borderColor")))),
                           child: editWidget,
                         ),
                         two: OutlineTree(
@@ -299,7 +297,7 @@ class WinNoteEditTab extends WinEditTab<WinNoteEditTabController>
                           child: Text(
                             "字数统计: ${controller.editController.textLength}",
                             style: TextStyle(
-                              color: systemColor(context,"textLengthColor"),
+                              color: systemColor(context, "textLengthColor"),
                               fontSize: 10,
                             ),
                           ),
@@ -367,8 +365,8 @@ class WinNoteEditTab extends WinEditTab<WinNoteEditTabController>
                   Icons.list_alt_outlined,
                   size: 22,
                   color: hover
-                      ? systemColor(context,"textColor").withOpacity(0.8)
-                      : systemColor(context,"textColor").withOpacity(0.4),
+                      ? systemColor(context, "textColor").withOpacity(0.8)
+                      : systemColor(context, "textColor").withOpacity(0.4),
                 ),
               );
             },

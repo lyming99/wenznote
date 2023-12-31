@@ -97,7 +97,7 @@ class _WindowsHelpTabState extends State<WindowsHelpTab> {
     var serviceManager = ServiceManager.of(context);
     String docMarkdown =
         await rootBundle.loadString("assets/doc/help_windows.md");
-    var elements = await parseMarkdown(serviceManager.fileManager,docMarkdown);
+    var elements = await parseMarkdown(serviceManager.fileManager, docMarkdown);
     editController = EditController(
       fileManager: serviceManager.fileManager,
       copyService: serviceManager.copyService,
