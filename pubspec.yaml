@@ -89,7 +89,7 @@ dependencies:
   flutter_html: ^2.2.1
   flutter_math_fork: ^0.5.0
   flutter_crdt:
-    path: d:/project/flutter_crdt
+    git: https://gitee.com/gdccj/flutter_crdt.git
 
   oktoast: ^3.3.1
   flutter_breadcrumb: ^1.0.1
