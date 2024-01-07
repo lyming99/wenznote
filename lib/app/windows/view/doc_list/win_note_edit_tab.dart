@@ -78,7 +78,7 @@ class WinNoteEditTabController extends WinEditTabController
   }
 
   Future<void> readDoc() async {
-    var doc = await serviceManager.wenFileService.readDoc(this.doc.uuid);
+    var doc = await serviceManager.editService.readDoc(this.doc.uuid);
     if (doc != null) {
       var context = Get.context!;
       editController.context = context;
@@ -89,8 +89,14 @@ class WinNoteEditTabController extends WinEditTabController
       );
       tree!.init();
       doc.on("update", (args) async {
-        await serviceManager.wenFileService.writeDoc(this.doc.uuid, doc);
         onContentChanged();
+        var data = args[0];
+        if (serviceManager.editService
+            .isInUpdateCache(this.doc.uuid ?? "", data)) {
+          return;
+        }
+        await serviceManager.editService.writeDoc(this.doc.uuid, doc);
+        serviceManager.p2pService.sendDocEditMessage(this.doc.uuid ?? "", data);
       });
       editController.waitLayout(() {
         editController.requestFocus();
@@ -123,9 +129,6 @@ class WinNoteEditTabController extends WinEditTabController
             }
           });
     }
-    doc.updateTime = DateTime.now().millisecondsSinceEpoch;
-    // 更新时间不必马上同步
-    await serviceManager.docService.updateDoc(doc, uploadNow: false);
     onUpdate?.call();
   }
 
@@ -158,7 +161,7 @@ class WinNoteEditTabController extends WinEditTabController
   void deleteNote(BuildContext ctx) async {
     Get.find<WinHomeController>().closeDoc(doc);
     await serviceManager.docService.deleteDoc(doc);
-    await serviceManager.wenFileService.deleteDoc(doc.uuid!);
+    await serviceManager.editService.deleteDocFile(doc.uuid!);
   }
 
   Future<void> moveToDocDir(DocDirPO dir) async {
@@ -192,7 +195,7 @@ class WinNoteEditTabController extends WinEditTabController
         return title;
       }
     }
-    return "${getTypeTitle()} ${getTimeString(NoteOrderProperty.updateTime)}";
+    return "${getTypeTitle()} ${getTimeString(OrderProperty.updateTime)}";
   }
 
   String getTypeTitle() {
@@ -208,9 +211,9 @@ class WinNoteEditTabController extends WinEditTabController
     }
   }
 
-  String getTimeString(NoteOrderProperty value) {
+  String getTimeString(OrderProperty value) {
     DateTime dateTime;
-    if (value == NoteOrderProperty.createTime) {
+    if (value == OrderProperty.createTime) {
       var time = doc.createTime ?? 0;
       dateTime = DateTime.fromMillisecondsSinceEpoch(time);
     } else {

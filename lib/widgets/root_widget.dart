@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:note/service/service_manager.dart';
+
 class ServiceManagerWidget extends StatefulWidget {
   final WidgetBuilder builder;
 
@@ -11,6 +12,10 @@ class ServiceManagerWidget extends StatefulWidget {
 
 class ServiceManagerWidgetState extends State<ServiceManagerWidget> {
   ServiceManager serviceManager = ServiceManager();
+
+  static ServiceManagerWidgetState of(BuildContext context) {
+    return context.findAncestorStateOfType<ServiceManagerWidgetState>()!;
+  }
 
   @override
   void initState() {
@@ -38,5 +43,9 @@ class ServiceManagerWidgetState extends State<ServiceManagerWidget> {
     return Builder(builder: (context) {
       return widget.builder.call(context);
     });
+  }
+
+  void changeUser(String userId) {
+    print('on user changed:$userId');
   }
 }

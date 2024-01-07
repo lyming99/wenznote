@@ -8,7 +8,7 @@ import 'package:note/service/user/user_service.dart';
 import 'package:rich_clipboard/rich_clipboard.dart';
 import 'package:uuid/uuid.dart';
 
-import 'file_manager.dart';
+import '../../service/file/file_manager.dart';
 
 class CopyService {
   ServiceManager serviceManager;

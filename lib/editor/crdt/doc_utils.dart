@@ -77,8 +77,9 @@ WenElement? createWenElementFromYMap(YMap map) {
   return null;
 }
 
-Future<Doc> jsonToYDoc(String? json) async {
+Future<Doc> jsonToYDoc(int clientId,String? json) async {
   Doc doc = Doc();
+  doc.clientID=clientId;
   var blocks = doc.getArray("blocks");
   if (json == null || json.isEmpty) {
     return doc;

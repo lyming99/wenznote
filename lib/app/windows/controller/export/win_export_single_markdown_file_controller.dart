@@ -63,7 +63,7 @@ class WinExportSingleMarkdownFileController extends GetxController {
     if (!textPath.endsWith(".md")) {
       return;
     }
-    var docContent = await serviceManager.wenFileService.readDoc(doc.uuid);
+    var docContent = await serviceManager.editService.readDoc(doc.uuid);
     if (docContent == null) {
       return;
     }
@@ -81,6 +81,9 @@ class WinExportSingleMarkdownFileController extends GetxController {
         var name = getAssetsFilePath(assetsFile.id);
         var imageFile =
             await serviceManager.fileManager.getImageFile(assetsFile.id);
+        if (imageFile == null) {
+          continue;
+        }
         if (!File(imageFile).existsSync()) {
           continue;
         }

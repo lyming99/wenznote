@@ -6,8 +6,6 @@ import 'package:note/commons/util/string.dart';
 import 'package:note/commons/util/wdoc/wdoc.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/doc/doc_service.dart';
-import 'package:note/service/file/wen_file_service.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
 
@@ -40,13 +38,13 @@ class DocumentManager {
           infoPo.uuid = const Uuid().v1();
         }
         await serviceManager.docService.createDoc(infoPo);
-        await serviceManager.wenFileService.saveDocStringFile(infoPo.uuid, docInfo.content);
+        await serviceManager.editService.saveDocStringFile(infoPo.uuid, docInfo.content);
       } else {
         //保留新的 oldTime<=newTime
         if (compareDocTime(oldItem, infoPo) <= 0) {
           await serviceManager.docService.deleteDocReally(infoPo.uuid!);
           await serviceManager.docService.createDoc(infoPo);
-          await serviceManager.wenFileService.saveDocStringFile(infoPo.uuid, docInfo.content);
+          await serviceManager.editService.saveDocStringFile(infoPo.uuid, docInfo.content);
         }
       }
     }
@@ -89,7 +87,7 @@ class DocumentManager {
       createTime: DateTime.now().millisecondsSinceEpoch,
     );
     await serviceManager.docService.createDoc(doc);
-    await serviceManager.wenFileService.saveDocStringFile(uuid, jsonEncode(elements));
+    await serviceManager.editService.saveDocStringFile(uuid, jsonEncode(elements));
   }
 
   Future<DocDirPO?> createDocPath(String path) async {

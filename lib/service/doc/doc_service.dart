@@ -1,13 +1,13 @@
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:isar/isar.dart';
 import 'package:note/model/note/enum/note_type.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';
 import 'package:note/service/isar/isar_service_mixin.dart';
 import 'package:note/service/service_manager.dart';
-import 'package:note/service/sync/p2p_packet.pb.dart';
 import 'package:uuid/uuid.dart';
 
-class DocService with IsarServiceMixin {
+class DocService with IsarServiceMixin, ChangeNotifier {
   @override
   ServiceManager serviceManager;
 
@@ -58,7 +58,7 @@ class DocService with IsarServiceMixin {
     await documentIsar.writeTxn(() async {
       await documentIsar.docPOs.filter().uuidEqualTo(uuid).deleteFirst();
     });
-    serviceManager.wenFileService.deleteDoc(uuid);
+    serviceManager.editService.deleteDocFile(uuid);
   }
 
   Future<List<DocDirPO>> queryDocDirList(String? uuid) async {
@@ -71,6 +71,10 @@ class DocService with IsarServiceMixin {
 
   Future<List<DocPO>> queryAllDocList() async {
     return documentIsar.docPOs.filter().typeEqualTo("doc").findAll();
+  }
+
+  Future<List<DocPO>> queryDocAndNoteList() async {
+    return documentIsar.docPOs.where().findAll();
   }
 
   Future<void> createDocDir(DocDirPO docDir) async {
@@ -109,7 +113,7 @@ class DocService with IsarServiceMixin {
     });
   }
 
-  Future<List>  queryDirAndDocList(String? uuid) async{
+  Future<List> queryDirAndDocList(String? uuid) async {
     var result = [];
     var dirList = await documentIsar.docDirPOs
         .filter()
@@ -142,7 +146,7 @@ class DocService with IsarServiceMixin {
       return result;
     }
     var current =
-    await documentIsar.docDirPOs.filter().uuidEqualTo(uuid).findFirst();
+        await documentIsar.docDirPOs.filter().uuidEqualTo(uuid).findFirst();
     while (current != null) {
       result.insert(1, current);
       if (current.pid == null) {
@@ -155,5 +159,4 @@ class DocService with IsarServiceMixin {
     }
     return result;
   }
-
 }

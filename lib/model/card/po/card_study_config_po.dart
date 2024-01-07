@@ -107,12 +107,25 @@ class CardStudyConfigPO {
     );
   }
 }
+enum StudyMode {
+  mixin,
+  study,
+  review;
+
+  static StudyMode forName(String? name) {
+    if (name == "mixin") {
+      return StudyMode.mixin;
+    }
+    if (name == "study") {
+      return StudyMode.study;
+    }
+    return StudyMode.review;
+  }
+}
 enum StudyOrderType{
   createTime,random
 }
-enum StudyQueueMode{
-  mixin,study,review
-}
+
 
 enum ShowMode{
   show1,show2,show3,showAll

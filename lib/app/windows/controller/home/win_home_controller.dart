@@ -8,7 +8,7 @@ import 'package:note/app/windows/view/settings/settings_controller.dart';
 import 'package:note/app/windows/view/settings/settings_widget.dart';
 import 'package:note/app/windows/view/tabs/help_tab.dart';
 import 'package:note/app/windows/widgets/win_edit_tab.dart';
-import 'package:note/commons/service/file_manager.dart';
+import 'package:note/service/file/file_manager.dart';
 import 'package:note/commons/util/markdown/markdown.dart';
 import 'package:note/editor/crdt/doc_utils.dart';
 import 'package:note/model/note/enum/note_type.dart';
@@ -185,7 +185,7 @@ class WinHomeController extends GetxController {
       type: NoteType.note.name,
     );
     var yDoc = await elementsToYDoc(elements);
-    await serviceManager.wenFileService.writeDoc(doc.uuid, yDoc);
+    await serviceManager.editService.writeDoc(doc.uuid, yDoc);
     await serviceManager.docService.createDoc(doc);
     openDoc(doc);
   }

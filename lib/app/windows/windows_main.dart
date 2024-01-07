@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 import 'package:note/app/windows/routes.dart';
 import 'package:note/commons/widget/ignore_parent_pointer.dart';
 import 'package:note/config/theme_settings.dart';
@@ -53,6 +54,7 @@ Future<void> windowsMain(
       );
     }
   }
+
   runApp(ValueListenableBuilder<dynamic>(
     valueListenable: ThemeSettings.instance,
     builder: (context, config, widget) {

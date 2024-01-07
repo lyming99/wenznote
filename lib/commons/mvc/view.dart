@@ -51,6 +51,7 @@ class _MvcViewState extends State<MvcView> {
   @override
   void didUpdateWidget(covariant MvcView<MvcController> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    widget.controller.onDidUpdateWidget(context, oldWidget.controller);
   }
 
   @override

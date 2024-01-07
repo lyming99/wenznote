@@ -12,7 +12,7 @@ import 'package:note/app/windows/service/today/win_today_service.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';
 import 'package:note/model/task/task.dart';
-import 'package:note/service/file/wen_file_service.dart';
+import 'package:note/service/edit/doc_edit_service.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:oktoast/oktoast.dart';
 
@@ -30,7 +30,7 @@ class WinDocListController extends GetxController {
 
   late WinTodayService winTodayService;
 
-  late WenFileService wenFileService;
+  late DocEditService docEditService;
 
   WinDocListController({
     this.docDirUuid,
@@ -44,7 +44,7 @@ class WinDocListController extends GetxController {
   void onInit() {
     super.onInit();
     serviceManager = ServiceManager.of(Get.context!);
-    wenFileService = serviceManager.wenFileService;
+    docEditService = serviceManager.editService;
     winTodayService = serviceManager.todayService;
     docListService = serviceManager.docListService;
     fetchData();
@@ -162,7 +162,7 @@ class WinDocListController extends GetxController {
 
   Future<void> updateDocItemName(
       BuildContext context, WinDocListItemVO docItem, String text) async {
-    await docListService.updateName(docItem, text);
+    await docListService.updateName(docItem.doc??docItem.dir, text);
     if (!docItem.isFolder) {
       WinHomeController home = Get.find();
       var tab = home.getDocTab(docItem.uuid);
@@ -189,7 +189,7 @@ class WinDocListController extends GetxController {
   }
 
   void moveToDir(DocDirPO dir, List<WinDocListItemVO> list) {
-    docListService.moveToDir(dir, list);
+    docListService.moveToDir(dir, list.map((e) => e.doc??e.dir).toList());
   }
 
   void searchDoc(String text) async {
@@ -226,7 +226,7 @@ class WinDocListController extends GetxController {
   Future<void> deleteNote(WinTodaySearchResultVO searchItem) async {
     Get.find<WinHomeController>().closeDoc(searchItem.doc);
     await winTodayService.deleteNote(searchItem.doc);
-    await wenFileService.deleteDoc(searchItem.doc.uuid!);
+    await docEditService.deleteDocFile(searchItem.doc.uuid!);
   }
 
   Future<void> moveToDocDir(

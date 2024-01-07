@@ -3,8 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:note/service/user/user_service.dart';
-import '../../../commons/service/file_manager.dart';
+
 import '../../edit_controller.dart';
 import '../block.dart';
 import '../element/element.dart';
@@ -28,7 +27,8 @@ class VideoBlock extends WenBlock {
   }
 
   void readImageId() async {
-    element.file = await editController.fileManager.getImageFile(element.id);
+    element.file =
+        (await editController.fileManager.getImageFile(element.id)) ?? "";
     relayoutFlag = true;
     editController.updateWidgetState();
   }

@@ -135,9 +135,9 @@ class WinTodaySearchResultVO with ChangeNotifier {
   }
 
   String getTimeString(
-      [NoteOrderProperty? value = NoteOrderProperty.updateTime]) {
+      [OrderProperty? value = OrderProperty.updateTime]) {
     DateTime dateTime;
-    if (value == NoteOrderProperty.createTime) {
+    if (value == OrderProperty.createTime) {
       var time = doc.createTime ?? 0;
       dateTime = DateTime.fromMillisecondsSinceEpoch(time);
     } else {
@@ -171,6 +171,6 @@ class WinTodaySearchResultVO with ChangeNotifier {
         return title;
       }
     }
-    return "${getTypeTitle()} ${getTimeString(NoteOrderProperty.updateTime)}";
+    return "${getTypeTitle()} ${getTimeString(OrderProperty.updateTime)}";
   }
 }

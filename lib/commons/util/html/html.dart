@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/src/css_parser.dart';
 import 'package:note/commons/service/copy_service.dart';
-import 'package:note/commons/service/file_manager.dart';
 import 'package:note/commons/util/image.dart';
 import 'package:note/editor/block/block.dart';
 import 'package:note/editor/block/code/code.dart';
@@ -18,7 +17,6 @@ import 'package:note/editor/block/text/title.dart';
 import 'package:note/editor/block/video/video_element.dart';
 import 'package:note/editor/edit_controller.dart';
 import 'package:note/service/service_manager.dart';
-import 'package:note/service/user/user_service.dart';
 
 Future<List<WenBlock>> parseHtmlBlock(EditController editController,
     CopyService copyService, BuildContext context, String html) async {
@@ -214,7 +212,7 @@ Future<void> _parseHtmlToBlockElement(
     var src = element.attributes["src"];
     var imageFile =
         await ServiceManager.of(context).fileManager.getImageFile(id);
-    if (File(imageFile).existsSync()) {
+    if (imageFile != null && File(imageFile).existsSync()) {
       var size = readImageFileSize(imageFile);
       result.add(WenImageElement(
         id: id,
@@ -225,18 +223,21 @@ Future<void> _parseHtmlToBlockElement(
       return;
     }
     if (src != null) {
-      var id =
+      var fileItem =
           await ServiceManager.of(context).fileManager.downloadImageFile(src);
-      if (id != null) {
-        var imageFile =
-            await ServiceManager.of(context).fileManager.getImageFile(id);
-        var size = readImageFileSize(imageFile);
-        result.add(WenImageElement(
-          id: id,
-          file: imageFile,
-          width: size.width,
-          height: size.height,
-        ));
+      if (fileItem != null) {
+        var imageFile = await ServiceManager.of(context)
+            .fileManager
+            .getImageFile(fileItem.uuid);
+        if (imageFile != null) {
+          var size = readImageFileSize(imageFile);
+          result.add(WenImageElement(
+            id: fileItem.uuid!,
+            file: imageFile,
+            width: size.width,
+            height: size.height,
+          ));
+        }
       }
     }
   } else if (element is VideoContentElement) {

@@ -95,17 +95,17 @@ class WinCardStudyController extends WinEditTabController {
     if (config != null) {
       cardStudyConfig.value = config;
     }
-    var mode = config?.studyQueueMode ?? StudyQueueMode.mixin.name;
+    var mode = config?.studyQueueMode ?? StudyMode.mixin.name;
     var cardIds = <String>[];
-    if (mode == StudyQueueMode.mixin.name ||
-        mode == StudyQueueMode.study.name) {
+    if (mode == StudyMode.mixin.name ||
+        mode == StudyMode.study.name) {
       var studyQueue = await studyService.queryNeedStudyQueue(cardSet.uuid);
       if (studyQueue.isNotEmpty) {
         cardIds.add(studyQueue.first);
       }
     }
-    if (mode == StudyQueueMode.mixin.name ||
-        mode == StudyQueueMode.review.name) {
+    if (mode == StudyMode.mixin.name ||
+        mode == StudyMode.review.name) {
       var reviewQueue = await studyService.queryReviewQueue(cardSet.uuid);
       if (reviewQueue.isNotEmpty) {
         cardIds.add(reviewQueue.first);

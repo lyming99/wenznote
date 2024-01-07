@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
+// 从上一个界面返回
 class DidPopNextListener extends StatefulWidget {
   final VoidCallback? onPopNext;
   final Widget child;
@@ -33,6 +33,7 @@ class _DidPopNextListenerState extends State<DidPopNextListener>
     super.dispose();
     RouterListener.routeObserver.unsubscribe(this);
   }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();

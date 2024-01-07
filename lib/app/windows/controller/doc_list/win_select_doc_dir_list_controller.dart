@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:note/app/windows/model/doc_list/win_doc_list_item_vo.dart';
 import 'package:note/app/windows/service/doc_list/win_doc_list_service.dart';
+import 'package:note/commons/mvc/controller.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';
 import 'package:note/service/doc/doc_service.dart';
 import 'package:note/service/service_manager.dart';
 
-class WinSelectDocDirListController extends GetxController {
+class WinSelectDocDirListController extends MvcController {
   bool Function(List<DocDirPO> dir)? dirFilter;
   late WinDocListService docListService;
   late DocService docService;
@@ -27,10 +28,10 @@ class WinSelectDocDirListController extends GetxController {
   });
 
   @override
-  void onInit() {
-    super.onInit();
-    docListService = ServiceManager.of(Get.context!).docListService;
-    docService = ServiceManager.of(Get.context!).docService;
+  void onInitState(BuildContext context) {
+    super.onInitState(context);
+    docListService = ServiceManager.of(context).docListService;
+    docService = ServiceManager.of(context).docService;
     fetchData();
     subscription =
         docService.documentIsar.docDirPOs.watchLazy().listen((event) {
@@ -88,8 +89,8 @@ class WinSelectDocDirListController extends GetxController {
   }
 
   @override
-  void onClose() {
-    super.onClose();
+  void onDispose() {
+    super.onDispose();
     subscription?.cancel();
   }
 }

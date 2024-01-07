@@ -521,9 +521,11 @@ packages:
   flutter_crdt:
     dependency: "direct main"
     description:
-      path: "d:/project/flutter_crdt"
-      relative: false
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: b55bc5d503460a758dad03e50180bb5b55d9bd59
+      url: "https://gitee.com/gdccj/flutter_crdt.git"
+    source: git
     version: "1.0.0+1"
   flutter_displaymode:
     dependency: "direct main"
@@ -582,7 +584,7 @@ packages:
     source: hosted
     version: "2.0.1"
   flutter_localizations:
-    dependency: transitive
+    dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"
@@ -676,6 +678,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.1"
+  go_router:
+    dependency: "direct main"
+    description:
+      name: go_router
+      sha256: "3b40e751eaaa855179b416974d59d29669e750d2e50fcdb2b37f1cb0ca8c803a"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "13.0.1"
   graphs:
     dependency: transitive
     description:

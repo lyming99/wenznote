@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:note/app/windows/controller/home/win_home_controller.dart';
 import 'package:note/app/windows/model/today/search_result_vo.dart';
 import 'package:note/app/windows/view/doc_list/win_note_edit_tab.dart';
-import 'package:note/editor/crdt/YsText.dart';
 import 'package:note/model/note/enum/note_order_type.dart';
 import 'package:note/model/note/enum/note_type.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
@@ -23,7 +22,7 @@ class WinTodayController extends GetxController {
   Rx<String> searchContent = Rx("");
   RxList<NoteType> noteType =
       RxList([NoteType.note, NoteType.doc, NoteType.dayNote]);
-  Rx<NoteOrderProperty> orderProperty = Rx(NoteOrderProperty.updateTime);
+  Rx<OrderProperty> orderProperty = Rx(OrderProperty.updateTime);
   Rx<OrderType> orderType = Rx(OrderType.desc);
   TextEditingController searchController = TextEditingController();
   TabController? tabBarController;
@@ -46,12 +45,18 @@ class WinTodayController extends GetxController {
     orderType.listen((p0) {
       startSearchTask();
     });
+    serviceManager.docService.addListener(onDocListUpdate);
+  }
+  @override
+  void onClose() {
+    super.onClose();
+    serviceManager.docService.removeListener(onDocListUpdate);
   }
 
   int sortDoc(DocPO a, DocPO b) {
     var aValue = 0;
     var bValue = 0;
-    if (orderProperty.value == NoteOrderProperty.createTime) {
+    if (orderProperty.value == OrderProperty.createTime) {
       aValue = a.createTime ?? 0;
       bValue = b.createTime ?? 0;
     } else {
@@ -100,15 +105,16 @@ class WinTodayController extends GetxController {
 
   Future<void> createNote() async {
     var doc = DocPO(
-      uuid: Uuid().v1(),
+      uuid: const Uuid().v1(),
       type: NoteType.note.name,
       createTime: DateTime.now().millisecondsSinceEpoch,
       updateTime: DateTime.now().millisecondsSinceEpoch,
     );
     await serviceManager.todayService.createDoc(doc);
-    var docContent = Doc();
-    docContent.getArray("blocks").insert(0, [createEmptyTextYMap()]);
-    await serviceManager.wenFileService.writeDoc(doc.uuid, docContent);
+    var docContent = serviceManager.editService.createDoc();
+    serviceManager.p2pService
+        .sendDocEditMessage(doc.uuid!, encodeStateAsUpdateV2(docContent, null));
+    await serviceManager.editService.writeDoc(doc.uuid, docContent);
     Get.find<WinHomeController>().openDoc(doc);
     startSearchTask();
   }
@@ -130,7 +136,7 @@ class WinTodayController extends GetxController {
   Future<void> deleteNote(WinTodaySearchResultVO searchItem) async {
     Get.find<WinHomeController>().closeDoc(searchItem.doc);
     await serviceManager.todayService.deleteNote(searchItem.doc);
-    await serviceManager.wenFileService.deleteDoc(searchItem.doc.uuid!);
+    await serviceManager.editService.deleteDocFile(searchItem.doc.uuid!);
     startSearchTask();
   }
 
@@ -146,6 +152,10 @@ class WinTodayController extends GetxController {
     doc.pid = dir.uuid;
     doc.updateTime = DateTime.now().millisecondsSinceEpoch;
     await serviceManager.todayService.updateDoc(doc);
+    startSearchTask();
+  }
+
+  void onDocListUpdate() {
     startSearchTask();
   }
 }

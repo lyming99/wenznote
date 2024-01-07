@@ -50,43 +50,43 @@ class WinDocListService {
     await serviceManager.docService.createDoc(item);
     var docContent = Doc();
     docContent.getArray("blocks").insert(0, [createEmptyTextYMap()]);
-    await serviceManager.wenFileService.writeDoc(item.uuid, docContent);
+    await serviceManager.editService.writeDoc(item.uuid, docContent);
     return item;
   }
 
   Future<void> deleteDoc(WinDocListItemVO docItem) async {
     Get.find<WinHomeController>().closeDoc(docItem.doc!);
     await serviceManager.docService.deleteDoc(docItem.doc!);
-    await serviceManager.wenFileService.deleteDoc(docItem.uuid!);
+    await serviceManager.editService.deleteDocFile(docItem.uuid!);
   }
 
   Future<void> deleteFolder(WinDocListItemVO docItem) async {
     await serviceManager.docService.deleteDir(docItem.uuid);
   }
 
-  Future<void> updateName(WinDocListItemVO docItem, String name) async {
-    if (docItem.isFolder) {
-      var dir = docItem.dir!;
+  Future<void> updateName(Object? docItem, String name) async {
+    if (docItem is DocDirPO) {
+      var dir = docItem;
       dir.updateTime = DateTime.now().millisecondsSinceEpoch;
       dir.name = name;
       await serviceManager.docService.updateDocDir(dir);
-    } else {
-      var doc = docItem.doc!;
+    } else if (docItem is DocPO) {
+      var doc = docItem;
       doc.updateTime = DateTime.now().millisecondsSinceEpoch;
       doc.name = name;
       await serviceManager.docService.updateDoc(doc);
     }
   }
 
-  Future<void> moveToDir(DocDirPO toDir, List<WinDocListItemVO> list) async {
+  Future<void> moveToDir(DocDirPO toDir, List list) async {
     for (var value in list) {
-      if (value.isFolder) {
-        var item = value.dir!;
+      if (value is DocDirPO) {
+        var item = value;
         item.pid = toDir.uuid;
         item.updateTime = DateTime.now().millisecondsSinceEpoch;
         await serviceManager.docService.updateDocDir(item);
-      } else {
-        var doc = value.doc!;
+      } else if(value is DocPO){
+        var doc = value;
         doc.pid = toDir.uuid;
         doc.updateTime = DateTime.now().millisecondsSinceEpoch;
         await serviceManager.docService.updateDoc(doc);

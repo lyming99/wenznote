@@ -18,7 +18,7 @@ class WinTodayService with IsarServiceMixin {
   /// 查询文档列表
   Future<List<DocPO>> queryDocList(
     List<NoteType> types, [
-    NoteOrderProperty orderProperty = NoteOrderProperty.updateTime,
+    OrderProperty orderProperty = OrderProperty.updateTime,
   ]) async {
     if (types.isEmpty) {
       var result = (await documentIsar.docPOs.where().findAll());
@@ -38,7 +38,7 @@ class WinTodayService with IsarServiceMixin {
       DocPO doc, String searchContent,
       [int searchCount = 1]) async {
     List<WinTodaySearchResultVO> result = [];
-    var docContent = await serviceManager.wenFileService.readDoc(doc.uuid);
+    var docContent = await serviceManager.editService.readDoc(doc.uuid);
     if (docContent == null) {
       return result;
     }
@@ -88,10 +88,7 @@ class WinTodayService with IsarServiceMixin {
   }
 
   Future<void> deleteNote(DocPO doc) async {
-    var isar = documentIsar;
-    await isar.writeTxn(() async {
-      await isar.docPOs.delete(doc.id);
-    });
+    await serviceManager.docService.deleteDoc(doc);
   }
 
   Future<void> updateDoc(DocPO doc) async {

@@ -76,7 +76,7 @@ class WinCardSetConfigTabController extends WinEditTabController {
   }
 
   String get studyQueueMode =>
-      cardSetConfig.value.studyQueueMode ?? StudyQueueMode.mixin.name;
+      cardSetConfig.value.studyQueueMode ?? StudyMode.mixin.name;
 
   set studyQueueMode(mode) {
     cardSetConfig.update((val) {
@@ -123,7 +123,7 @@ class WinCardSetConfigTabController extends WinEditTabController {
   }
 
   List<String> get studyQueueModes =>
-      StudyQueueMode.values.map((e) => e.name).toList();
+      StudyMode.values.map((e) => e.name).toList();
 
   String getStudyQueueModeName(String studyQueueMode) {
     switch (studyQueueMode) {

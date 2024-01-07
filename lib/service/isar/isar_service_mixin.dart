@@ -29,7 +29,7 @@ mixin IsarServiceMixin {
     required Map<String, dynamic> properties,
     bool uploadNow = true,
   }) async {
-    await serviceManager.syncService.putDbDelta(
+    await serviceManager.recordSyncService.putDbDelta(
       dataId: dataId,
       dataType: dataType,
       properties: properties,
@@ -42,7 +42,7 @@ mixin IsarServiceMixin {
     required List<Map<String, dynamic>> objList,
     bool uploadNow = true,
   }) async {
-    await serviceManager.syncService.putDbDeltas(
+    await serviceManager.recordSyncService.putDbDeltas(
       dataType: dataType,
       objList: objList,
       uploadNow: uploadNow,
@@ -52,7 +52,7 @@ mixin IsarServiceMixin {
   Future<void> deleteDbDelta(
     List<String?> dataIdList,
   ) async {
-    await serviceManager.syncService.removeDbDelta(
+    await serviceManager.recordSyncService.removeDbDelta(
         dataIdList.where((element) => element != null).map((e) => e!).toList());
   }
 }

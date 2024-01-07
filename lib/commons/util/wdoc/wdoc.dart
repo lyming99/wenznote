@@ -3,15 +3,14 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
-import 'package:note/commons/service/file_manager.dart';
 import 'package:note/commons/util/string.dart';
 import 'package:note/editor/block/element/element.dart';
 import 'package:note/editor/block/image/image_element.dart';
 import 'package:note/editor/block/table/table_element.dart';
 import 'package:note/editor/crdt/doc_utils.dart';
 import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/file/wen_file_service.dart';
-import 'package:note/service/user/user_service.dart';
+import 'package:note/service/edit/doc_edit_service.dart';
+import 'package:note/service/file/file_manager.dart';
 
 class WdocInfo {
   String path;
@@ -121,7 +120,7 @@ Future<WdocInfo> readWdocFile(FileManager fileManager, String file) async {
 /// docContent
 /// assets/
 Future<String> exportWdocFile(
-    FileManager fileManager, WenFileService wenFileService, DocPO doc) async {
+    FileManager fileManager, DocEditService wenFileService, DocPO doc) async {
   var docDir = await fileManager.getDocDir();
   var wdocFile = "$docDir/${doc.uuid}.wdoc".replaceAll("//", "/");
   ZipEncoder zipEncoder = ZipEncoder();
@@ -141,6 +140,9 @@ Future<String> exportWdocFile(
     for (var file in fileList) {
       if (file is WenImageElement) {
         var imageFile = await fileManager.getImageFile(file.id);
+        if (imageFile == null) {
+          continue;
+        }
         if (!File(imageFile).existsSync()) {
           continue;
         }
@@ -212,6 +214,9 @@ Future<List<ImageFile>> getImageFileList(
   for (var assetsFile in assetsFileList) {
     if (assetsFile is WenImageElement) {
       var path = await fileManager.getImageFile(assetsFile.id);
+      if (path == null) {
+        continue;
+      }
       result.add(ImageFile(uuid: assetsFile.id, path: path));
     }
   }

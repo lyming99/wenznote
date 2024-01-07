@@ -191,13 +191,17 @@ class DropMenuWidgetState extends State<DropMenuWidget> {
                 right: 4,
               ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
-          color: EditTheme.of(context).bgColor2,
+          borderRadius: BorderRadius.circular(8),
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.grey.shade900
+              : Colors.white,
           boxShadow: [
             BoxShadow(
-              blurRadius: 2,
+              blurRadius: 10,
               // blurStyle: BlurStyle.outer,
-              color: Colors.grey.shade500,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black.withAlpha(200)
+                  : Colors.grey.shade500,
             ),
           ],
         ),

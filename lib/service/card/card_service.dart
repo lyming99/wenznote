@@ -134,6 +134,13 @@ class CardService with IsarServiceMixin {
     });
   }
 
+  Future<void> deleteCardByUuid(String uuid) async {
+    await deleteDbDelta([uuid]);
+    await documentIsar.writeTxn(() async {
+      await documentIsar.cardPOs.filter().uuidEqualTo(uuid).deleteFirst();
+    });
+  }
+
   Future<CardPO?> queryCard(String? cardId) async {
     return documentIsar.cardPOs.filter().uuidEqualTo(cardId).findFirst();
   }
@@ -145,5 +152,12 @@ class CardService with IsarServiceMixin {
         dataType: "card",
         properties: diffMap(oldItem?.toMap() ?? {}, card.toMap()));
     await documentIsar.writeTxn(() => documentIsar.cardPOs.put(card));
+  }
+
+  Future<CardSetPO?> queryCardSet(String? cardSetId) async {
+    return await documentIsar.cardSetPOs
+        .filter()
+        .uuidEqualTo(cardSetId)
+        .findFirst();
   }
 }

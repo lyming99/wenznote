@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
@@ -21,11 +20,11 @@ import '../../config/app_constants.dart';
 /// 1.下载 delta 数据，解析到数据库 -> 需要校验的地方：pid死环
 /// 2.保存 delta 数据，触发同步任务
 ///
-class SyncService with IsarServiceMixin {
+class RecordSyncService with IsarServiceMixin {
   @override
   ServiceManager serviceManager;
 
-  SyncService(this.serviceManager);
+  RecordSyncService(this.serviceManager);
 
   var pullLock = Lock();
   var pushLock = Lock();
@@ -197,6 +196,8 @@ class SyncService with IsarServiceMixin {
         }
         await documentIsar
             .writeTxn(() => documentIsar.dbDeltas.putAll(dbDeltas));
+        serviceManager.p2pService
+            .sendUpdateRecordMessage(dbDeltas.map((e) => e.dataId!).toList());
         return true;
       }
       return false;
@@ -224,7 +225,6 @@ class SyncService with IsarServiceMixin {
     if (!hasNoteServer) {
       return;
     }
-    Int64();
     pullLock.lock();
     try {
       /**
@@ -265,6 +265,7 @@ class SyncService with IsarServiceMixin {
           data: {
             "queryAll": pullAll,
             "clientStates": clientStates,
+            "dataIdList": dataIdList,
           });
       /**
        * 3.将查询的数据解析，并且存入数据库
@@ -384,6 +385,7 @@ class SyncService with IsarServiceMixin {
     if (properties == null) {
       await documentIsar.writeTxn(
           () => documentIsar.docPOs.filter().uuidEqualTo(dataId).deleteAll());
+      serviceManager.docService.notifyListeners();
       return;
     }
     //将属性转为笔记记录，存到笔记数据库中
@@ -398,6 +400,7 @@ class SyncService with IsarServiceMixin {
       item.id = doc.id;
       item.uuid = dataId;
       await documentIsar.writeTxn(() => documentIsar.docPOs.put(item));
+      serviceManager.docService.notifyListeners();
     } catch (e) {
       e.printError();
     }

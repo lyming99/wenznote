@@ -3,9 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:note/app/windows/controller/doc_list/win_select_doc_dir_list_controller.dart';
 import 'package:note/app/windows/view/doc_list/win_select_doc_list.dart';
+import 'package:note/commons/mvc/view.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/widgets/custom_navgator_observer.dart';
-import 'package:note/widgets/local_get_builder.dart';
 
 class SelectDocDirDialog extends StatefulWidget {
   final String? openDirId;
@@ -13,6 +13,8 @@ class SelectDocDirDialog extends StatefulWidget {
   final String? actionLabel;
   final bool Function(List<DocDirPO> path)? filter;
   final Function(DocDirPO dir)? onSelect;
+  final double width;
+  final double height;
 
   const SelectDocDirDialog({
     Key? key,
@@ -21,6 +23,8 @@ class SelectDocDirDialog extends StatefulWidget {
     this.actionLabel,
     this.filter,
     this.onSelect,
+    this.width=400,
+    this.height=320,
   }) : super(key: key);
 
   @override
@@ -36,8 +40,8 @@ class SelectDocDirDialogState extends State<SelectDocDirDialog> {
     return fluent.ContentDialog(
       title: Text("${widget.title}"),
       constraints: BoxConstraints(
-        maxWidth: 400,
-        maxHeight: 320,
+        maxWidth: widget.width,
+        maxHeight: widget.height,
       ),
       content: buildNavigatorView(context),
       actions: [
@@ -101,10 +105,11 @@ class SelectDocDirDialogState extends State<SelectDocDirDialog> {
       Animation<double> animation,
       Animation<double> secondaryAnimation,
       WinSelectDocDirListController controller) {
-    return createLocalGetBuilder(
-        controller: controller,
-        builder: (ctl) {
-          return WinSelectDocDirListView(controller: controller);
-        });
+    return MvcView(
+      controller: controller,
+      builder: (context) {
+        return WinSelectDocDirListView(controller: controller);
+      },
+    );
   }
 }

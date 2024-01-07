@@ -15,6 +15,7 @@ import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:image_size_getter/file_input.dart';
 import 'package:image_size_getter/image_size_getter.dart' as image_size;
 import 'package:note/commons/service/copy_service.dart';
+import 'package:note/commons/util/file_utils.dart';
 import 'package:note/commons/util/html/html.dart';
 import 'package:note/commons/util/image.dart';
 import 'package:note/commons/util/markdown/markdown.dart';
@@ -30,14 +31,13 @@ import 'package:note/editor/theme/theme.dart';
 import 'package:note/editor/widget/drop_menu.dart';
 import 'package:note/editor/widget/formula_dialog.dart';
 import 'package:note/editor/widget/modal_widget.dart';
-import 'package:note/service/user/user_service.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:rich_clipboard/rich_clipboard.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../commons/data/entity/entity.dart';
-import '../commons/service/file_manager.dart';
+import '../service/file/file_manager.dart';
 import 'block/block.dart';
 import 'block/block_manager.dart';
 import 'block/element/element.dart';
@@ -397,7 +397,6 @@ class EditController with ChangeNotifier {
   var bgColorPickerController = FlyoutController();
   var contextMenuController = FlyoutController();
   bool showHeadList = false;
-  DocPO? doc;
   EditReader? reader;
   EditWriter? writer;
   EdgeInsets padding;
@@ -439,7 +438,6 @@ class EditController with ChangeNotifier {
 
   EditController({
     this.reader,
-    this.doc,
     this.onContentChanged,
     this.writer,
     this.initFocus = true,
@@ -3288,15 +3286,18 @@ class EditController with ChangeNotifier {
                 fileManager.writeImage(image!),
               ));
       if (fileId != null) {
-        var imageFileName = await fileManager.getImageFile(fileId!);
-        var size = readImageFileSize(imageFileName);
+        var filepath = await fileManager.getImageFile(fileId.uuid);
+        if (filepath == null) {
+          return;
+        }
+        var size = readImageFileSize(filepath);
         insertContent([
           ImageBlock(
               editController: this,
               context: context,
               element: WenImageElement(
-                id: fileId!,
-                file: imageFileName,
+                id: fileId.uuid,
+                file: filepath,
                 width: size.width,
                 height: size.height,
               ))
@@ -3317,22 +3318,25 @@ class EditController with ChangeNotifier {
     if (!isImage) {
       return;
     }
-    var fileId = await fileManager.writeImage(
+    var fileItem = await fileManager.writeImage(
       image,
       isFile: isFile,
       suffix: suffix,
     );
-    if (fileId == null) {
+    if (fileItem == null) {
       return;
     }
-    var imageFile = await fileManager.getImageFile(fileId);
+    var imageFile = await fileManager.getImageFile(fileItem.uuid);
+    if (imageFile == null) {
+      return;
+    }
     var size = readImageFileSize(imageFile);
     insertContent([
       ImageBlock(
           editController: this,
           context: context,
           element: WenImageElement(
-            id: fileId,
+            id: fileItem.uuid!,
             file: imageFile,
             width: size.width,
             height: size.height,
@@ -3346,18 +3350,21 @@ class EditController with ChangeNotifier {
     if (!isImage) {
       return;
     }
-    var fileId = await fileManager.writeImageFile(path);
-    if (fileId == null) {
+    var fileItem = await fileManager.writeImageFile(path);
+    if (fileItem == null) {
       return;
     }
-    var imageFile = await fileManager.getImageFile(fileId);
+    var imageFile = await fileManager.getImageFile(fileItem.uuid);
+    if (imageFile == null) {
+      return;
+    }
     var size = readImageFileSize(imageFile);
     insertContent([
       ImageBlock(
           editController: this,
           context: context,
           element: WenImageElement(
-            id: fileId,
+            id: fileItem.uuid!,
             file: imageFile,
             width: size.width,
             height: size.height,
@@ -4897,12 +4904,4 @@ class EditController with ChangeNotifier {
       }
     });
   }
-}
-
-String getFileSuffix(String file) {
-  var index = file.lastIndexOf(".");
-  if (index != -1) {
-    return file.substring(index);
-  }
-  return "";
 }

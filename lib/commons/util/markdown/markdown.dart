@@ -9,10 +9,9 @@ import 'package:note/editor/block/image/image_element.dart';
 import 'package:note/editor/block/line/line_element.dart';
 import 'package:note/editor/block/table/table_element.dart';
 import 'package:note/editor/block/text/text.dart';
-import 'package:note/service/user/user_service.dart';
 import 'package:path/path.dart';
 
-import '../../service/file_manager.dart';
+import '../../../service/file/file_manager.dart';
 import '../image.dart';
 
 class MarkdownFileInfo {
@@ -22,7 +21,8 @@ class MarkdownFileInfo {
   List<WenElement>? elements;
 }
 
-Future<MarkdownFileInfo?> readMarkdownInfo(FileManager fileManager,String filepath) async {
+Future<MarkdownFileInfo?> readMarkdownInfo(
+    FileManager fileManager, String filepath) async {
   var file = File(filepath);
   var stat = file.statSync();
   if (stat.type != FileSystemEntityType.file) {
@@ -47,12 +47,13 @@ Future<MarkdownFileInfo?> readMarkdownInfo(FileManager fileManager,String filepa
   var nodes = markdown.parse(content);
   var elements = getElements(nodes);
   var dirPath = File(filepath).parent.path;
-  await readImageFile(fileManager,dirPath, elements);
+  await readImageFile(fileManager, dirPath, elements);
   ans.elements = elements;
   return ans;
 }
 
-Future<List<WenElement>> parseMarkdown(FileManager fileManager,String content) async {
+Future<List<WenElement>> parseMarkdown(
+    FileManager fileManager, String content) async {
   var markdown = Markdown(
     enableTaskList: true,
     extensions: [
@@ -68,7 +69,7 @@ Future<List<WenElement>> parseMarkdown(FileManager fileManager,String content) a
   );
   var nodes = markdown.parse(content);
   var elements = getElements(nodes);
-  await readImageFile(fileManager,"", elements);
+  await readImageFile(fileManager, "", elements);
   return elements;
 }
 
@@ -82,20 +83,25 @@ List<WenElement> getElements(List<Node> nodes) {
   return elements;
 }
 
-Future<void> readImageFile(FileManager fileManager,String dir, List<WenElement> elements) async {
+Future<void> readImageFile(
+    FileManager fileManager, String dir, List<WenElement> elements) async {
   for (var element in elements) {
     try {
       if (element is WenImageElement) {
         var filepath = join(dir, element.file);
-        var id = await fileManager.downloadImageFile(filepath);
-        if (id != null) {
-          var imageFile = await fileManager.getImageFile(id);
-          var size = readImageFileSize(imageFile);
-          element.id = id;
-          element.file = imageFile;
-          element.width = size.width;
-          element.height = size.height;
+        var file = await fileManager.downloadImageFile(filepath);
+        if (file == null) {
+          continue;
         }
+        var imageFile = await fileManager.getImageFile(file.uuid);
+        if (imageFile == null) {
+          continue;
+        }
+        var size = readImageFileSize(imageFile);
+        element.id = file.uuid ?? "";
+        element.file = imageFile;
+        element.width = size.width;
+        element.height = size.height;
       }
     } on Exception catch (e) {
       break;
@@ -104,7 +110,7 @@ Future<void> readImageFile(FileManager fileManager,String dir, List<WenElement> 
       var rows = element.rows;
       if (rows != null) {
         for (var row in rows) {
-          await readImageFile(fileManager,dir, row);
+          await readImageFile(fileManager, dir, row);
         }
       }
     }

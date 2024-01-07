@@ -10,6 +10,7 @@ import 'package:note/model/note/po/doc_state_po.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:note/service/sync/p2p_packet.pb.dart';
 import 'package:web_socket_channel/io.dart';
+
 class MessageType {
   static const int heart = -1;
   static const int updateRecordEvent = 1;
@@ -68,17 +69,12 @@ class P2pService {
         _onReceive(data);
       },
       onDone: () {
-        _reconnect();
+        Timer(const Duration(seconds: 5), () {
+          _reconnect();
+        });
       },
       onError: (err) {
         err.printError();
-        Timer.periodic(const Duration(seconds: 5), (timer) {
-          try {
-            _reconnect();
-          } finally {
-            timer.cancel();
-          }
-        });
       },
     );
     heartTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
@@ -90,7 +86,7 @@ class P2pService {
     if (data is! Uint8List) {
       return;
     }
-    int clientCount = readInt(data, 0);
+    int clientCount = readInt32(data, 0);
     if (clientCount < 0) {
       // 心跳消息
       return;
@@ -104,7 +100,7 @@ class P2pService {
     switch (pkt.type) {
       case MessageType.updateRecordEvent:
         // 记录更新消息
-        serviceManager.syncService.pullDbData(dataIdList: pkt.dataIdList);
+        serviceManager.recordSyncService.pullDbData(dataIdList: pkt.dataIdList);
         break;
       case MessageType.docEditEvent:
         // 编辑文档消息
@@ -134,7 +130,7 @@ class P2pService {
   }
 
   void sendHeartMessage() {
-    var bytes = writeInt(-1);
+    var bytes = writeInt32(-1);
     var buff = Uint8List.fromList(bytes);
     socket?.sink.add(buff);
   }
@@ -144,7 +140,11 @@ class P2pService {
     List<int>? toClientIds,
     List<String>? dataIdList,
     List<int>? content,
+    int? clientTime,
   }) {
+    if (socket == null) {
+      return;
+    }
     var pkt = P2pPacket.create();
     pkt.clientId = Int64(serviceManager.userService.clientId);
     pkt.type = messageType;
@@ -154,14 +154,17 @@ class P2pService {
     if (dataIdList != null) {
       pkt.dataIdList.addAll(dataIdList);
     }
+    if (clientTime != null) {
+      pkt.clientTime = Int64(clientTime);
+    }
     List<int> data;
     if (toClientIds != null && toClientIds.isNotEmpty) {
-      data = writeInt(toClientIds.length);
+      data = writeInt32(toClientIds.length);
       for (var clientId in toClientIds) {
         data.addAll(writeLong(clientId));
       }
     } else {
-      data = writeInt(0);
+      data = writeInt32(0);
     }
     var pktContent = serviceManager.cryptService.encode(pkt.writeToBuffer());
     data.addAll(pktContent);
@@ -192,11 +195,12 @@ class P2pService {
   }
 
   void sendDocDeltaMessage(
-      int toClientId, String dataId, Uint8List docContent) {
+      int toClientId, String dataId, int clientTime, Uint8List docContent) {
     sendPkt(
       toClientIds: [toClientId],
       messageType: MessageType.docDelta,
       content: docContent,
+      clientTime: clientTime,
       dataIdList: [dataId],
     );
   }
@@ -224,5 +228,18 @@ class P2pService {
     var content = utf8.encode(jsonEncode(stateMap));
     sendPkt(messageType: MessageType.queryDocState, content: content);
   }
-}
 
+  void sendDownloadDocMessage(int clientId, String dataId) {
+    sendPkt(
+        messageType: MessageType.downloadDoc,
+        dataIdList: [dataId],
+        toClientIds: [clientId]);
+  }
+
+  void sendDocStateMessage(int clientId, String states) {
+    sendPkt(
+        messageType: MessageType.docState,
+        toClientIds: [clientId],
+        content: utf8.encode(states));
+  }
+}

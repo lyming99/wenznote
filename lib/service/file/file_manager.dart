@@ -9,13 +9,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_size_getter/image_size_getter.dart';
-import 'package:note/editor/edit_controller.dart';
+import 'package:note/commons/util/file_utils.dart';
+import 'package:note/model/file/file_po.dart';
 import 'package:note/service/service_manager.dart';
-import 'package:note/service/user/user_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
-import '../util/image.dart';
+import '../../commons/util/image.dart';
 
 class DocCacheMap {
   int maxContentSize;
@@ -58,11 +58,7 @@ class FileManager {
     return uuid.v1();
   }
 
-  String get _wenNoteDir {
-    return "WenNote";
-  }
-
-  Future<String?> writeImage(
+  Future<FilePO?> writeImage(
     Uint8List image, {
     bool isFile = false,
     String suffix = ".png",
@@ -73,7 +69,7 @@ class FileManager {
     if (isFile) {
       var file = File("$imageDir/$id$suffix");
       await file.writeAsBytes(image);
-      return id;
+      return writeImageFile(file.path);
     }
     var file = File("$imageDir/$id$suffix");
     var size = readImageSize(MemoryInput(image));
@@ -86,20 +82,46 @@ class FileManager {
     var bytes = await uiImage.toByteData(format: ui.ImageByteFormat.png);
     if (bytes != null) {
       await file.writeAsBytes(bytes.buffer.asUint8List());
-      return id;
+      return writeImageFile(file.path);
     }
     return null;
   }
 
-  Future<String?> writeImageFile(String filepath) async {
+  Future<FilePO?> writeImageFile(String filepath) async {
     var id = createUuid();
-    var imageDir = await getImageDir();
-    Directory(imageDir).createSync(recursive: true);
-    File(filepath).copySync("$imageDir/$id${getFileSuffix(filepath)}");
-    return id;
+    var filename = getFileName(filepath);
+    var savePath = await getFilePath(
+      id,
+      filename,
+      download: false,
+    );
+    File(filepath).copySync(savePath);
+    return serviceManager.fileSyncService.createAndUploadFile(
+      uuid: id,
+      name: filename,
+      path: filepath,
+      type: "image",
+      size: File(filepath).lengthSync(),
+    );
   }
 
-  Future<String> getImageFile(String id) async {
+  Future<String?> getImageFile(String? id) async {
+    String imageFile = await getOldImageFile(id);
+    if (File(imageFile).existsSync()) {
+      var fileItem = await writeImageFile(imageFile);
+      if (fileItem == null) {
+        return null;
+      }
+      return getFilePath(fileItem.uuid, fileItem.name);
+    }
+    var file = await serviceManager.fileSyncService.getFile(id);
+    if (file == null) {
+      return null;
+    }
+    return getFilePath(id, file.name);
+  }
+
+  Future<String> getOldImageFile(String? id) async {
     var imageDir = await getImageDir();
     const types = [
       ".png",
@@ -109,21 +131,25 @@ class FileManager {
       ".webp",
       "",
     ];
+    var imageFile = "$imageDir/$id";
     for (var item in types) {
       if (File("$imageDir/$id$item").existsSync()) {
-        return "$imageDir/$id$item";
+        imageFile = "$imageDir/$id$item";
+        break;
       }
     }
-    return "$imageDir/$id";
+    return imageFile;
   }
 
-  Future<String?> downloadImageFile(String file) async {
-    var id = createUuid();
-    var saveFile = await getImageFile(id);
+  Future<FilePO?> downloadImageFile(String file) async {
     if (File(file).existsSync()) {
-      File(file).copySync(saveFile);
-      return id;
+      return writeImageFile(file);
     } else if (file.startsWith("http")) {
+      var downloadDir = await getDownloadDir();
+      if (!Directory(downloadDir).existsSync()) {
+        Directory(downloadDir).createSync(recursive: true);
+      }
+      var saveFile = "$downloadDir/${getFileName(file)}";
       var get = await Dio().get(file,
           options: Options(
             responseType: ResponseType.bytes,
@@ -131,25 +157,52 @@ class FileManager {
           ));
       if (get.statusCode == 200) {
         File(saveFile).writeAsBytesSync(get.data);
-        return id;
+        return writeImageFile(saveFile);
       }
     }
     return null;
   }
 
+  Future<String> getRootDir() async {
+    if (Platform.isWindows) {
+      var exePath = getExePath();
+      return "${exePath}local";
+    }
+    return (await getApplicationDocumentsDirectory()).path;
+  }
+
+  String getExePath() {
+    var exe = Platform.executable.replaceAll("\\\\", "/");
+    int i = exe.lastIndexOf("/");
+    if (i == -1) {
+      return "./";
+    }
+    return "${exe.substring(0, i)}/";
+  }
+
   Future<String> getDocDir() async {
-    var dir = await getApplicationDocumentsDirectory();
-    return "${dir.path}/$_wenNoteDir/${serviceManager.userService.userPath}documents";
+    var dir = await getRootDir();
+    return "$dir/${serviceManager.userService.userPath}notes";
   }
 
   Future<String> getImageDir() async {
-    var dir = await getApplicationDocumentsDirectory();
-    return "${dir.path}/$_wenNoteDir/${serviceManager.userService.userPath}images";
+    var dir = await getRootDir();
+    return "$dir/${serviceManager.userService.userPath}images";
+  }
+
+  Future<String> getAssetsDir() async {
+    var dir = await getRootDir();
+    return "$dir/${serviceManager.userService.userPath}assets";
+  }
+
+  Future<String> getDownloadDir() async {
+    var dir = await getRootDir();
+    return "$dir/${serviceManager.userService.userPath}download";
   }
 
   Future<String> getConfigDir() async {
-    var dir = await getApplicationDocumentsDirectory();
-    return "${dir.path}/$_wenNoteDir/${serviceManager.userService.userPath}config";
+    var dir = await getRootDir();
+    return "$dir/${serviceManager.userService.userPath}config";
   }
 
   Future<List<FileSystemEntity>> get docFileList async {
@@ -163,8 +216,7 @@ class FileManager {
   }
 
   Future<String> getWenNoteRootDir() async {
-    var dir = await getApplicationDocumentsDirectory();
-    String docDir = "${dir.path}/$_wenNoteDir";
+    var docDir = await getRootDir();
     if (!Directory(docDir).existsSync()) {
       Directory(docDir).createSync(recursive: true);
     }
@@ -285,6 +337,23 @@ class FileManager {
     String docDir = await getDocDir();
     String docFile = "$docDir/$uuid.wennote";
     File(docFile).deleteSync();
+  }
+
+  Future<String> getFilePath(
+    String? dataId,
+    String? name, {
+    bool download = true,
+  }) async {
+    var assetsDir = await getAssetsDir();
+    var fileDir = "$assetsDir/$dataId";
+    if (!Directory(fileDir).existsSync()) {
+      Directory(fileDir).createSync(recursive: true);
+    }
+    var file = "$fileDir/$name";
+    if (download && !File(file).existsSync()) {
+      await serviceManager.fileSyncService.downloadFile(dataId, file);
+    }
+    return file;
   }
 }
 

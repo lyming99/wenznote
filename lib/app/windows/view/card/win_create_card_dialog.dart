@@ -131,10 +131,10 @@ Future<void> _generateCard(
     updateTime: DateTime.now().millisecondsSinceEpoch,
   );
   var serviceManager = ServiceManager.of(context);
-  var wenFileService = serviceManager.wenFileService;
+  var editService = serviceManager.editService;
   await serviceManager.cardService.createCardSet(cardSet);
   for (var doc in docList) {
-    var yDoc = await wenFileService.readDoc(doc.uuid);
+    var yDoc = await editService.readDoc(doc.uuid);
     if (yDoc == null) {
       continue;
     }

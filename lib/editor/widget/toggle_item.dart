@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 typedef CheckItemBuilder = Widget Function(
@@ -6,12 +7,16 @@ typedef CheckItemBuilder = Widget Function(
 typedef VoidCallback = void Function(BuildContext context);
 typedef EventCallback = void Function(
     BuildContext context, TapDownDetails details);
+typedef LongPressCallback = void Function(
+    BuildContext context, LongPressDownDetails details);
 
 class ToggleItem extends StatefulWidget {
   bool checked;
   CheckItemBuilder itemBuilder;
   ValueChanged<bool?>? onChanged;
   VoidCallback? onTap;
+  VoidCallback? onTapDown;
+  LongPressCallback? onLongPress;
   EventCallback? onSecondaryTap;
   VoidCallback? onHoverEnter;
   VoidCallback? onHoverExit;
@@ -23,6 +28,8 @@ class ToggleItem extends StatefulWidget {
     required this.itemBuilder,
     this.onChanged,
     this.onTap,
+    this.onTapDown,
+    this.onLongPress,
     this.onHoverEnter,
     this.onHoverExit,
     this.onSecondaryTap,
@@ -38,6 +45,7 @@ class _ToggleItemState extends State<ToggleItem> {
   bool checked = false;
   bool hover = false;
   bool pressed = false;
+  LongPressDownDetails? longPressDownDetails;
 
   @override
   void initState() {
@@ -55,6 +63,7 @@ class _ToggleItemState extends State<ToggleItem> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTapDown: (d) {
+        widget.onTapDown?.call(context);
         setState(() {
           pressed = true;
         });
@@ -75,13 +84,25 @@ class _ToggleItemState extends State<ToggleItem> {
         widget.onTap?.call(context);
         setState(() {});
       },
-      onSecondaryTapDown: (details) {
-        widget.onSecondaryTap?.call(context, details);
-      },
+      onSecondaryTapDown: widget.onSecondaryTap == null
+          ? null
+          : (details) {
+              widget.onSecondaryTap?.call(context, details);
+            },
+      onLongPressDown: widget.onLongPress == null
+          ? null
+          : (details) {
+              longPressDownDetails = details;
+            },
+      onLongPress: widget.onLongPress == null
+          ? null
+          : () {
+              widget.onLongPress?.call(context, longPressDownDetails!);
+            },
       child: MouseRegion(
           cursor: widget.cursor,
           onEnter: (e) {
-            if(hover==true){
+            if (hover == true) {
               return;
             }
             setState(() {
@@ -90,7 +111,7 @@ class _ToggleItemState extends State<ToggleItem> {
             });
           },
           onExit: (e) {
-            if(hover==false){
+            if (hover == false) {
               return;
             }
             setState(() {

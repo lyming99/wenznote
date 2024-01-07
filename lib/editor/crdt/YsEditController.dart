@@ -26,7 +26,6 @@ class YsEditController extends EditController {
 
   YsEditController({
     super.reader,
-    super.doc,
     super.onContentChanged,
     super.writer,
     super.initFocus = true,

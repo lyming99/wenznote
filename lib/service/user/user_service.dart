@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:note/config/app_constants.dart';
 import 'package:note/model/client/client_vo.dart';
@@ -29,7 +30,7 @@ class UserService with ChangeNotifier {
   bool get hasLogin => currentUser != null;
 
   String get userPath {
-    return currentUser == null ? "" : "user-${currentUser!.id}/";
+    return currentUser == null ? "user-local/" : "user-${currentUser!.id}/";
   }
 
   Dio get dio {
@@ -40,7 +41,7 @@ class UserService with ChangeNotifier {
 
   int? get uid => currentUser?.id;
 
-  int get clientId => client?.id ?? 0;
+  int get clientId => client?.id ?? generateNewClientId();
 
   Future<bool> login({
     required String email,

@@ -33,7 +33,7 @@ class EditState extends State<EditWidget> {
     return ModalContainer(
       controller: widget.controller.modalController,
       child: Material(
-        color: Colors.transparent,
+        color:  EditTheme.of(context).mobileNavBgColor,
         textStyle: TextStyle(
           fontSize: editTheme.fontSize,
           color: editTheme.fontColor,

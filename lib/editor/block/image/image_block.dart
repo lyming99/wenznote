@@ -5,13 +5,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:note/editor/widget/modal_widget.dart';
-import 'package:note/service/user/user_service.dart';
 import 'package:octo_image/octo_image.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
-import '../../../commons/service/file_manager.dart';
 import '../../edit_controller.dart';
 import '../block.dart';
 import '../element/element.dart';
@@ -39,7 +36,8 @@ class ImageBlock extends WenBlock {
 
   void readImageId() async {
     if (element.file == "" || !File(element.file).existsSync()) {
-      element.file = await editController.fileManager.getImageFile(element.id);
+      element.file =
+          (await editController.fileManager.getImageFile(element.id)) ?? "";
       relayoutFlag = true;
       editController.updateWidgetState();
     }
@@ -86,7 +84,10 @@ class ImageBlock extends WenBlock {
                   suggestedName: 'image.png',
                 );
                 var imageFile =
-                await editController.fileManager.getImageFile(element.id);
+                    await editController.fileManager.getImageFile(element.id);
+                if (imageFile == null) {
+                  return item;
+                }
                 var bytes = await File(imageFile).readAsBytes();
                 // item.add(Formats.png(await createImageData(Colors.green)));
                 item.add(Formats.png(bytes));
@@ -115,10 +116,14 @@ class ImageBlock extends WenBlock {
                                 //图片的真实路径是什么
                                 var imageFile = await editController.fileManager
                                     .getImageFile(element.id);
+                                if (imageFile == null) {
+                                  return Uint8List(0);
+                                }
                                 return File(imageFile).readAsBytes();
                               }),
                         ]);
-                        Timer.periodic(const Duration(milliseconds: 200), (timer) {
+                        Timer.periodic(const Duration(milliseconds: 200),
+                            (timer) {
                           timer.cancel();
                           showPopup = false;
                         });
@@ -135,17 +140,16 @@ class ImageBlock extends WenBlock {
                         colorBlendMode: isSelected ? BlendMode.darken : null,
                         width: element.width.toDouble(),
                         height: element.height.toDouble(),
-                        placeholderBuilder: (context) =>
-                            Container(
-                              color: Colors.black.withOpacity(0.6),
-                              child: Center(
-                                child: Container(
-                                  width: min(100, min(width, height)),
-                                  height: min(100, min(width, height)),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
+                        placeholderBuilder: (context) => Container(
+                          color: Colors.black.withOpacity(0.6),
+                          child: Center(
+                            child: Container(
+                              width: min(100, min(width, height)),
+                              height: min(100, min(width, height)),
+                              child: CircularProgressIndicator(),
                             ),
+                          ),
+                        ),
                         image: MultiSourceFileImage(
                             imageId: element.id,
                             reader: (id) async {
@@ -154,6 +158,9 @@ class ImageBlock extends WenBlock {
                               //图片的真实路径是什么
                               var imageFile = await editController.fileManager
                                   .getImageFile(element.id);
+                              if (imageFile == null) {
+                                return Uint8List(0);
+                              }
                               return File(imageFile).readAsBytes();
                             }),
                       ),
@@ -171,8 +178,7 @@ class ImageBlock extends WenBlock {
   Future<Uint8List> createImageData(Color color) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(recorder);
-    final paint = Paint()
-      ..color = color;
+    final paint = Paint()..color = color;
     canvas.drawOval(const Rect.fromLTWH(0, 0, 200, 200), paint);
     final picture = recorder.endRecording();
     final image = await picture.toImage(200, 200);
@@ -183,7 +189,7 @@ class ImageBlock extends WenBlock {
   Future<void> showImageViewerModal(BuildContext context) async {
     var controller = ModalController.of(context);
     await controller?.showModal(
-          (ctx) {
+      (ctx) {
         return GestureDetector(
           onTap: () {
             controller.pop();
@@ -199,22 +205,24 @@ class ImageBlock extends WenBlock {
                 child: OctoImage(
                   // width: element.width.toDouble(),
                   // height: element.height.toDouble(),
-                  placeholderBuilder: (context) =>
-                      Container(
-                        color: Colors.black.withOpacity(0.6),
-                        child: Center(
-                          child: Container(
-                            width: min(100, min(width, height)),
-                            height: min(100, min(width, height)),
-                            child: CircularProgressIndicator(),
-                          ),
-                        ),
+                  placeholderBuilder: (context) => Container(
+                    color: Colors.black.withOpacity(0.6),
+                    child: Center(
+                      child: Container(
+                        width: min(100, min(width, height)),
+                        height: min(100, min(width, height)),
+                        child: CircularProgressIndicator(),
                       ),
+                    ),
+                  ),
                   image: MultiSourceFileImage(
                       imageId: element.id,
                       reader: (id) async {
-                        var imageFile =
-                        await editController.fileManager.getImageFile(element.id);
+                        var imageFile = await editController.fileManager
+                            .getImageFile(element.id);
+                        if (imageFile == null) {
+                          return Uint8List(0);
+                        }
                         return File(imageFile).readAsBytes();
                       }),
                 ),
@@ -359,8 +367,8 @@ class ImageBlock extends WenBlock {
   }
 
   @override
-  void visitElement(TextPosition start, TextPosition end,
-      WenElementVisitor visit) {
+  void visitElement(
+      TextPosition start, TextPosition end, WenElementVisitor visit) {
     if (start.offset == 0 && end.offset == 1) {
       visit.call(this, element);
     }

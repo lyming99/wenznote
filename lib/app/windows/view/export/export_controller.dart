@@ -235,7 +235,7 @@ class ExportController extends GetxController {
       }
       if (isWdoc.value) {
         String wdocFile = await exportWdocFile(
-            serviceManager.fileManager, serviceManager.wenFileService, doc);
+            serviceManager.fileManager, serviceManager.editService, doc);
         var savePath = "$nodeFilePath$name.wdoc".replaceAll("//", "/");
         if (zipEncoder != null) {
           zipEncoder
@@ -246,7 +246,7 @@ class ExportController extends GetxController {
           await File(wdocFile).copy(getGeneratorFilePath(savePath));
         }
       } else {
-        var doc = await serviceManager.wenFileService.readDoc(uuid);
+        var doc = await serviceManager.editService.readDoc(uuid);
         if (doc == null) {
           return;
         }
@@ -269,6 +269,9 @@ class ExportController extends GetxController {
             var name = getAssetsFilePath(assetsFile.id);
             var imageFile =
                 await serviceManager.fileManager.getImageFile(assetsFile.id);
+            if (imageFile == null) {
+              continue;
+            }
             if (!File(imageFile).existsSync()) {
               continue;
             }
