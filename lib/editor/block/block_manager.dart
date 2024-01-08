@@ -62,7 +62,7 @@ class BlockManager {
         if (element.level == 0) {
           blocks.add(TextBlock(
             textElement: element,
-            context: editController.context,
+            context: editController.viewContext,
             editController: editController,
           ));
         } else {
@@ -367,7 +367,7 @@ class BlockManager {
   void undo(EditController controller) {
     var change = changeStack.undo();
     if (change != null) {
-      parseContent(controller.context, controller);
+      parseContent(controller.viewContext, controller);
       var attr = change.attributes;
       if (attr != null) {
         restoreCursorState(
@@ -387,7 +387,7 @@ class BlockManager {
   void redo(EditController controller) {
     var change = changeStack.redo();
     if (change != null) {
-      parseContent(controller.context, controller);
+      parseContent(controller.viewContext, controller);
       var attr = change.attributes;
       if (attr != null) {
         restoreCursorState(
@@ -412,7 +412,7 @@ class BlockManager {
   }) {
     if (cursorBlockIndex != null && blockVisionTop != null) {
       layoutPreviousBlockWithHeight(
-          controller.context,
+          controller.viewContext,
           Size(controller.visionWidth, controller.visionHeight),
           cursorBlockIndex,
           controller.visionHeight);

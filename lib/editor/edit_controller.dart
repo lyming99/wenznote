@@ -36,7 +36,6 @@ import 'package:rich_clipboard/rich_clipboard.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../commons/data/entity/entity.dart';
 import '../service/file/file_manager.dart';
 import 'block/block.dart';
 import 'block/block_manager.dart';
@@ -376,7 +375,7 @@ class SearchState {
 }
 
 class EditController with ChangeNotifier {
-  late BuildContext context;
+  late BuildContext viewContext;
   late EventManager eventManager;
   late BlockManager blockManager;
   late CursorState cursorState;
@@ -472,7 +471,7 @@ class EditController with ChangeNotifier {
   }
 
   EditTheme get editTheme {
-    return Theme.of(context).brightness == Brightness.dark
+    return Theme.of(viewContext).brightness == Brightness.dark
         ? EditTheme.dark
         : EditTheme.light;
   }
@@ -513,7 +512,7 @@ class EditController with ChangeNotifier {
 
   Future<void> reset(List content) async {
     blockManager.changeStack.reset(content);
-    blockManager.parseContent(context, this);
+    blockManager.parseContent(viewContext, this);
     blockManager.onContentChanged(this);
   }
 
@@ -548,8 +547,8 @@ class EditController with ChangeNotifier {
   void gotoPosition(int blockIndex, int textOffset) {
     waitLayout(() {
       if (blockIndex < blockManager.blocks.length) {
-        blockManager.layoutPreviousBlockWithHeight(
-            context, Size(visionWidth, visionHeight), blockIndex, visionWidth);
+        blockManager.layoutPreviousBlockWithHeight(viewContext,
+            Size(visionWidth, visionHeight), blockIndex, visionWidth);
         var block = blockManager.blocks[blockIndex];
         scrollToBlock(block);
         toPosition(
@@ -576,10 +575,10 @@ class EditController with ChangeNotifier {
   /// widget init state
   void onWidgetInitState(State state) {
     this.state = state;
-    context = state.context;
+    viewContext = state.context;
     eventManager.emit(EventType.initState);
     readContent(
-      context,
+      viewContext,
       initContent: true,
     );
     if (editable) {
@@ -621,7 +620,7 @@ class EditController with ChangeNotifier {
   /// 创建内容widget，背景绘制
   List<Widget> buildContentBlocksWidget(BuildContext context,
       BoxConstraints parentConstrains, BoxConstraints constrains) {
-    this.context = context;
+    viewContext = context;
     if (constrains.maxWidth < 0) {
       return [];
     }
@@ -781,7 +780,7 @@ class EditController with ChangeNotifier {
         width: cursorRect.width,
         height: cursorRect.height,
         child: Container(
-          color: EditTheme.of(context).cursorColor,
+          color: EditTheme.of(viewContext).cursorColor,
         ),
       );
     }
@@ -870,7 +869,7 @@ class EditController with ChangeNotifier {
                           cursorState.hoverPosition = null;
                           updateWidgetState();
                           showMobileDialog(
-                              context: context,
+                              context: viewContext,
                               builder: (context) {
                                 var linkController =
                                     fluent.TextEditingController(
@@ -1037,21 +1036,21 @@ class EditController with ChangeNotifier {
             selectState.dragCursorStartEvent = event;
             selectState.dragCursorStartPosition = cursorEventStart;
             selectState.isCursorDragging = true;
-            SelectDragListener.emitChange(context);
-            EditState.of(context).updateState();
+            SelectDragListener.emitChange(viewContext);
+            EditState.of(viewContext).updateState();
           },
           onPointerUp: (event) {
             selectState.isCursorDragging = false;
             isFloatWidgetDragging = false;
-            EditState.of(context).updateState();
+            EditState.of(viewContext).updateState();
             mouseKeyboardState.stopMouseScrollTimer();
-            SelectDragListener.emitChange(context);
+            SelectDragListener.emitChange(viewContext);
           },
           onPointerCancel: (event) {
             isFloatWidgetDragging = false;
-            EditState.of(context).updateState();
+            EditState.of(viewContext).updateState();
             mouseKeyboardState.stopMouseScrollTimer();
-            SelectDragListener.emitChange(context);
+            SelectDragListener.emitChange(viewContext);
           },
           onPointerMove: (event) {
             startMouseScrollTimer();
@@ -1070,12 +1069,18 @@ class EditController with ChangeNotifier {
               var newBlockIndex = newPosition.blockIndex!;
               var endBlockIndex = selectState.realEnd!.blockIndex!;
               if (newBlockIndex < endBlockIndex) {
+                if (selectState.start?.equalsCursorIndex(newPosition)!=true) {
+                  HapticFeedback.selectionClick();
+                }
                 selectState.start = newPosition;
                 updateWidgetState();
               } else if (newBlockIndex == endBlockIndex) {
                 var newTextIndex = newPosition.textPosition!.offset;
                 var rightTextIndex = selectState.realEnd!.textPosition!.offset;
-                if (newTextIndex < rightTextIndex) {
+                if (newTextIndex <= rightTextIndex) {
+                  if (selectState.start?.equalsCursorIndex(newPosition)!=true) {
+                    HapticFeedback.selectionClick();
+                  }
                   selectState.start = newPosition;
                   updateWidgetState();
                 }
@@ -1085,12 +1090,18 @@ class EditController with ChangeNotifier {
               var newBlockIndex = newPosition.blockIndex!;
               var startBlockIndex = selectState.realStart!.blockIndex!;
               if (newBlockIndex > startBlockIndex) {
+                if (selectState.end?.equalsCursorIndex(newPosition)!=true) {
+                  HapticFeedback.selectionClick();
+                }
                 selectState.end = newPosition;
                 updateWidgetState();
               } else if (newBlockIndex == startBlockIndex) {
                 var newTextIndex = newPosition.textPosition!.offset;
                 var leftTextIndex = selectState.realStart!.textPosition!.offset;
-                if (newTextIndex > leftTextIndex) {
+                if (newTextIndex >= leftTextIndex) {
+                  if (selectState.end?.equalsCursorIndex(newPosition)!=true) {
+                    HapticFeedback.selectionClick();
+                  }
                   selectState.end = newPosition;
                   updateWidgetState();
                 }
@@ -1242,7 +1253,7 @@ class EditController with ChangeNotifier {
       }
       mouseKeyboardState.mouseLeftDown = false;
       mouseKeyboardState.stopMouseScrollTimer();
-      if (mouseKeyboardState.mouseDrag) {
+      if (!mouseKeyboardState.mouseDrag) {
         scrollToCursorPosition();
       }
       mouseKeyboardState.mouseDrag = false;
@@ -1269,29 +1280,33 @@ class EditController with ChangeNotifier {
     //选择文字
     var cursor = getCursorPosition(location);
     if (cursor.isValid) {
-      var pos = cursor.textPosition!;
-      var block = cursor.block!;
-      var range = block.getWordBoundary(pos);
-      if (range == null) {
-        return;
-      }
-      var start = TextPosition(
-        offset: range.start,
-        affinity: TextAffinity.upstream,
-      );
-      var end = TextPosition(
-        offset: range.end,
-        affinity: TextAffinity.downstream,
-      );
-      recordSelectStart(CursorPosition(block: block, textPosition: start));
-      updateCursor(
-        CursorPosition(
-            block: block, textPosition: end, rect: block.getCursorRect(end)),
-        applyUpdate: true,
-      );
-      recordSelectEnd(CursorPosition(block: block, textPosition: end));
-      updateWidgetState();
+      selectCursor(cursor);
     }
+  }
+
+  void selectCursor(CursorPosition cursorPosition) {
+    var pos = cursorPosition.textPosition!;
+    var block = cursorPosition.block!;
+    var range = block.getWordBoundary(pos);
+    if (range == null) {
+      return;
+    }
+    var start = TextPosition(
+      offset: range.start,
+      affinity: TextAffinity.upstream,
+    );
+    var end = TextPosition(
+      offset: range.end,
+      affinity: TextAffinity.downstream,
+    );
+    recordSelectStart(CursorPosition(block: block, textPosition: start));
+    updateCursor(
+      CursorPosition(
+          block: block, textPosition: end, rect: block.getCursorRect(end)),
+      applyUpdate: true,
+    );
+    recordSelectEnd(CursorPosition(block: block, textPosition: end));
+    updateWidgetState();
   }
 
   ///单击
@@ -1427,8 +1442,8 @@ class EditController with ChangeNotifier {
       position.blockVisionTop = block.top - scrollOffset;
     }
     cursorRecord.updateCursorPosition(position);
-    if (!focusNode.hasFocus && editable) {
-      FocusScope.of(context).requestFocus(focusNode);
+    if (!focusNode.hasFocus && editable && viewContext.mounted) {
+      FocusScope.of(viewContext).requestFocus(focusNode);
     }
     var old = cursorState.cursorPosition;
     if (old != null) {
@@ -1625,7 +1640,7 @@ class EditController with ChangeNotifier {
     BoxConstraints parentConstrains,
     BoxConstraints constrains,
   ) {
-    this.context = context;
+    viewContext = context;
     inputManager.context = context;
     for (var block in blockManager.blocks) {
       block.context = context;
@@ -1982,7 +1997,7 @@ class EditController with ChangeNotifier {
       if (start!.block! == end!.block) {
         WenElement element =
             start.block!.copyElement(start.textPosition!, end.textPosition!);
-        await copyService.saveCopyCache(context, [element]);
+        await copyService.saveCopyCache(viewContext, [element]);
         String html = "<!DOCTYPE html>\n"
             "<html>\n<head>\n"
             "<meta charset=\"utf-8\"></meta></head><body copyid='${copyService.copyId}'>";
@@ -2013,7 +2028,8 @@ class EditController with ChangeNotifier {
         var endSubElement =
             end.block!.copyElement(end.block!.startPosition, end.textPosition!);
         copyElements.add(endSubElement);
-        await copyService.saveCopyCache(context, copyElements, copyId: copyId);
+        await copyService.saveCopyCache(viewContext, copyElements,
+            copyId: copyId);
         html += endSubElement.getHtml();
         text += "\n" + endSubElement.getText();
         html += "</body></html>";
@@ -2023,7 +2039,7 @@ class EditController with ChangeNotifier {
   }
 
   void requestFocus() {
-    FocusScope.of(context).requestFocus(focusNode);
+    FocusScope.of(viewContext).requestFocus(focusNode);
   }
 
   /// 由系统拖入事件响应
@@ -2048,7 +2064,7 @@ class EditController with ChangeNotifier {
       await comp.future;
     }
     showMobileDialog(
-        context: context,
+        context: viewContext,
         builder: (context) => FutureProgressDialog(
               () async {
                 for (var file in fileList) {
@@ -2383,7 +2399,7 @@ class EditController with ChangeNotifier {
         block: first,
         textPosition: const TextPosition(offset: 0),
         rect: first.getCursorRect(const TextPosition(offset: 0))));
-    end.layout(context, Size(blockMaxWidth, visionHeight));
+    end.layout(viewContext, Size(blockMaxWidth, visionHeight));
     var pos = end
         .getPositionForOffset(const Offset(double.infinity, double.infinity))!;
 
@@ -2466,7 +2482,7 @@ class EditController with ChangeNotifier {
     startBlockIndex = blockManager.getValidIndex(startBlockIndex);
     endBlockIndex = blockManager.getValidIndex(endBlockIndex);
     var anchor = scrollOffset - anchorBlock.top;
-    blockManager.layoutBlockRange(context, startBlockIndex, endBlockIndex,
+    blockManager.layoutBlockRange(viewContext, startBlockIndex, endBlockIndex,
         Size(blockMaxWidth, visionHeight));
     var newScrollOffset = anchor + anchorBlock.top;
     try {
@@ -2480,7 +2496,7 @@ class EditController with ChangeNotifier {
   void layoutCurrentBlock(WenBlock anchorBlock, {bool jump = false}) {
     int startBlockIndex = blockManager.indexOfBlockByBlock(anchorBlock);
     var anchor = scrollOffset - anchorBlock.top;
-    blockManager.layoutBlockRange(context, startBlockIndex, startBlockIndex,
+    blockManager.layoutBlockRange(viewContext, startBlockIndex, startBlockIndex,
         Size(blockMaxWidth, visionHeight));
     var newScrollOffset = anchor + anchorBlock.top;
     try {
@@ -2642,8 +2658,9 @@ class EditController with ChangeNotifier {
   void showDropContextMenu(BuildContext content, Offset position) async {
     rightMenuShowing = true;
     updateWidgetState();
-    var box = context.findRenderObject() as RenderBox;
-    await showMouseDropMenu(context, box.localToGlobal(position) & Size(1, 1),
+    var box = viewContext.findRenderObject() as RenderBox;
+    await showMouseDropMenu(
+        viewContext, box.localToGlobal(position) & Size(1, 1),
         childrenWidth: 260,
         childrenHeight: 30,
         margin: 4,
@@ -2967,7 +2984,7 @@ class EditController with ChangeNotifier {
   }
 
   void showContextMenu(Offset localPosition) async {
-    showDropContextMenu(context, localPosition);
+    showDropContextMenu(viewContext, localPosition);
   }
 
   void onDragIn(DropOverEvent event) {
@@ -2989,7 +3006,7 @@ class EditController with ChangeNotifier {
     var rowController = fluent.TextEditingController(text: "4");
     var colController = fluent.TextEditingController(text: "3");
     await showMobileDialog(
-        context: context,
+        context: viewContext,
         builder: (context) {
           return fluent.ContentDialog(
             constraints: isMobile
@@ -3156,17 +3173,17 @@ class EditController with ChangeNotifier {
         return;
       }
       blockManager.layoutNextBlockWithHeight(
-          context, Size(visionWidth, visionHeight), 0, visionHeight);
+          viewContext, Size(visionWidth, visionHeight), 0, visionHeight);
       blockManager.layoutPreviousBlockWithHeight(
-          context,
+          viewContext,
           Size(visionWidth, visionHeight),
           blockManager.blocks.length - 1,
           visionHeight);
     } else {
       blockManager.layoutNextBlockWithHeight(
-          context, Size(visionWidth, visionHeight), index, visionHeight);
+          viewContext, Size(visionWidth, visionHeight), index, visionHeight);
       blockManager.layoutPreviousBlockWithHeight(
-          context, Size(visionWidth, visionHeight), index, visionHeight);
+          viewContext, Size(visionWidth, visionHeight), index, visionHeight);
     }
     var contentHeight = getContentHeight();
     double maxExtend = max(0, contentHeight - visionHeight);
@@ -3253,7 +3270,7 @@ class EditController with ChangeNotifier {
     if (pasteMarkdown) {
       var elements = await parseMarkdown(fileManager, text ?? "");
       var blocks =
-          elements.map((e) => createWenBlock(context, this, e)).toList();
+          elements.map((e) => createWenBlock(viewContext, this, e)).toList();
       insertContent(blocks, null);
       record();
       return;
@@ -3262,12 +3279,12 @@ class EditController with ChangeNotifier {
     html = pasteHtml ? text : html;
     if (html != null) {
       List<WenBlock>? blocks = await showMobileDialog(
-          context: context,
+          context: viewContext,
           builder: (ctx) => FutureProgressDialog(
                 parseHtmlBlock(
                   this,
                   copyService,
-                  context,
+                  viewContext,
                   html!,
                 ),
               ));
@@ -3281,7 +3298,7 @@ class EditController with ChangeNotifier {
       record();
     } else if (image != null) {
       var fileId = await showMobileDialog(
-          context: context,
+          context: viewContext,
           builder: (context) => FutureProgressDialog(
                 fileManager.writeImage(image!),
               ));
@@ -3290,11 +3307,11 @@ class EditController with ChangeNotifier {
         if (filepath == null) {
           return;
         }
-        var size = readImageFileSize(filepath);
+        var size =  await readImageFileSize(filepath);
         insertContent([
           ImageBlock(
               editController: this,
-              context: context,
+              context: viewContext,
               element: WenImageElement(
                 id: fileId.uuid,
                 file: filepath,
@@ -3330,11 +3347,11 @@ class EditController with ChangeNotifier {
     if (imageFile == null) {
       return;
     }
-    var size = readImageFileSize(imageFile);
+    var size = await readImageFileSize(imageFile);
     insertContent([
       ImageBlock(
           editController: this,
-          context: context,
+          context: viewContext,
           element: WenImageElement(
             id: fileItem.uuid!,
             file: imageFile,
@@ -3348,7 +3365,7 @@ class EditController with ChangeNotifier {
   Future<void> pasteImageFile(String path) async {
     var isImage = isValidImage(FileInput(File(path)));
     if (!isImage) {
-      return;
+      // return;
     }
     var fileItem = await fileManager.writeImageFile(path);
     if (fileItem == null) {
@@ -3358,11 +3375,11 @@ class EditController with ChangeNotifier {
     if (imageFile == null) {
       return;
     }
-    var size = readImageFileSize(imageFile);
+    var size = await readImageFileSize(imageFile);
     insertContent([
       ImageBlock(
           editController: this,
-          context: context,
+          context: viewContext,
           element: WenImageElement(
             id: fileItem.uuid!,
             file: imageFile,
@@ -3405,7 +3422,7 @@ class EditController with ChangeNotifier {
         blockManager.blocks[i].relayoutFlag = true;
       }
       blockManager.layoutBlockRange(
-          context, startIndex, endIndex, Size(visionWidth, visionHeight));
+          viewContext, startIndex, endIndex, Size(visionWidth, visionHeight));
       refreshCursorPosition();
     }
   }
@@ -3438,7 +3455,7 @@ class EditController with ChangeNotifier {
         blockManager.blocks[i].element.indent = indent;
       }
       blockManager.layoutBlockRange(
-          context, startIndex, endIndex, Size(visionWidth, visionHeight));
+          viewContext, startIndex, endIndex, Size(visionWidth, visionHeight));
       refreshCursorPosition();
     }
   }
@@ -3495,7 +3512,7 @@ class EditController with ChangeNotifier {
         }
         blockManager.blocks[blockIndex] = TextBlock(
             editController: this,
-            context: context,
+            context: viewContext,
             textElement: WenTextElement(type: newType))
           ..top = oldBlock.top;
         layoutBlock(blockManager.blocks[blockIndex], blockIndex, blockIndex);
@@ -3522,7 +3539,7 @@ class EditController with ChangeNotifier {
       }
       var textBlock = TextBlock(
           editController: this,
-          context: context,
+          context: viewContext,
           textElement: WenTextElement(
             type: type,
             itemType: itemType,
@@ -3540,7 +3557,7 @@ class EditController with ChangeNotifier {
       }
       var textBlock = TextBlock(
           editController: this,
-          context: context,
+          context: viewContext,
           textElement: WenTextElement(
             text: "",
             type: type,
@@ -3809,7 +3826,7 @@ class EditController with ChangeNotifier {
           }
           blockManager.blocks[blockIndex] = TextBlock(
               editController: this,
-              context: context,
+              context: viewContext,
               textElement: WenTextElement(
                 indent: block.element.indent,
                 type: type,
@@ -3825,11 +3842,11 @@ class EditController with ChangeNotifier {
         if (block.isEmpty) {
           block = TextBlock(
               editController: this,
-              context: context,
+              context: viewContext,
               textElement: WenTextElement())
             ..top = block.top;
           blockManager.blocks[blockIndex] = block;
-          blockManager.layoutBlockRange(context, blockIndex, blockIndex,
+          blockManager.layoutBlockRange(viewContext, blockIndex, blockIndex,
               Size(blockMaxWidth, visionHeight));
           toPosition(blockManager.blocks[blockIndex].startCursorPosition, true);
           updateWidgetState();
@@ -3840,8 +3857,8 @@ class EditController with ChangeNotifier {
         if (block.isEmpty) {
           //空白block，直接删除即可
           blockManager.blocks.removeRange(blockIndex, blockIndex + 1);
-          blockManager.layoutBlockRange(context, blockIndex - 1, blockIndex - 1,
-              Size(blockMaxWidth, visionHeight));
+          blockManager.layoutBlockRange(viewContext, blockIndex - 1,
+              blockIndex - 1, Size(blockMaxWidth, visionHeight));
           toPosition(
               blockManager.blocks[blockIndex - 1].endCursorPosition, true);
         } else if (blockManager.blocks[blockIndex - 1].isEmpty) {
@@ -3849,8 +3866,8 @@ class EditController with ChangeNotifier {
           var y = blockManager.blocks[blockIndex - 1].top;
           blockManager.blocks[blockIndex].top = y;
           blockManager.blocks.removeRange(blockIndex - 1, blockIndex);
-          blockManager.layoutBlockRange(context, blockIndex - 1, blockIndex - 1,
-              Size(blockMaxWidth, visionHeight));
+          blockManager.layoutBlockRange(viewContext, blockIndex - 1,
+              blockIndex - 1, Size(blockMaxWidth, visionHeight));
           toPosition(cursorPosition, true);
         } else {
           //合并后删除对应的block
@@ -3861,7 +3878,7 @@ class EditController with ChangeNotifier {
             preBlock = merge;
             blockManager.blocks[blockIndex - 1] = preBlock;
             blockManager.blocks.removeRange(blockIndex, blockIndex + 1);
-            blockManager.layoutBlockRange(context, blockIndex - 1,
+            blockManager.layoutBlockRange(viewContext, blockIndex - 1,
                 blockIndex - 1, Size(blockMaxWidth, visionHeight));
           }
           toPosition(preBlock.getCursorPosition(newPosition), true);
@@ -3873,13 +3890,13 @@ class EditController with ChangeNotifier {
       if (block.isEmpty && !block.canEmpty) {
         block = TextBlock(
             editController: this,
-            context: context,
+            context: viewContext,
             textElement: WenTextElement())
           ..top = block.top;
         blockManager.blocks[blockIndex] = block;
       }
-      blockManager.layoutBlockRange(
-          context, blockIndex, blockIndex, Size(blockMaxWidth, visionHeight));
+      blockManager.layoutBlockRange(viewContext, blockIndex, blockIndex,
+          Size(blockMaxWidth, visionHeight));
       var cursor = block.getCursorPosition(
           TextPosition(offset: textPosition.offset - deleteLength));
       toPosition(cursor, true);
@@ -3926,7 +3943,7 @@ class EditController with ChangeNotifier {
         startBlock = TextBlock(
             editController: this,
             textElement: WenTextElement(),
-            context: context)
+            context: viewContext)
           ..top = startBlock.top;
         blockManager.blocks[startBlockIndex] = startBlock;
       }
@@ -3937,7 +3954,7 @@ class EditController with ChangeNotifier {
         startBlock = TextBlock(
             editController: this,
             textElement: WenTextElement(type: startBlockTextType),
-            context: context)
+            context: viewContext)
           ..top = startBlock.top;
         blockManager.blocks[startBlockIndex] = startBlock;
       }
@@ -3947,7 +3964,7 @@ class EditController with ChangeNotifier {
         endBlock = TextBlock(
             editController: this,
             textElement: WenTextElement(type: startBlockTextType),
-            context: context)
+            context: viewContext)
           ..top = endBlock.top;
         blockManager.blocks[endBlockIndex] = endBlock;
       }
@@ -3966,8 +3983,8 @@ class EditController with ChangeNotifier {
       }
     }
     //重新布局
-    blockManager.layoutBlockRange(context, startBlockIndex, startBlockIndex + 1,
-        Size(blockMaxWidth, visionHeight));
+    blockManager.layoutBlockRange(viewContext, startBlockIndex,
+        startBlockIndex + 1, Size(blockMaxWidth, visionHeight));
     //刷新光标位置
     var cursor = blockManager.blocks[startBlockIndex]
         .getCursorPosition(start.textPosition!);
@@ -4086,7 +4103,7 @@ class EditController with ChangeNotifier {
       for (var line in lines)
         TextBlock(
             editController: this,
-            context: context,
+            context: viewContext,
             textElement: WenTextElement(
               text: line,
             )),
@@ -4139,7 +4156,7 @@ class EditController with ChangeNotifier {
           element.level = 0;
           element.fontSize = null;
           blockManager.blocks[blockIndex] = TextBlock(
-              editController: this, textElement: element, context: context)
+              editController: this, textElement: element, context: viewContext)
             ..top = block.top
             ..height = block.height;
         } else {
@@ -4151,7 +4168,7 @@ class EditController with ChangeNotifier {
           blockManager.blocks[blockIndex] = TitleBlock(
             editController: this,
             textElement: element,
-            context: context,
+            context: viewContext,
           )
             ..top = block.top
             ..height = block.height;
@@ -4221,7 +4238,7 @@ class EditController with ChangeNotifier {
             code: code,
             language: language,
           ),
-          context: context);
+          context: viewContext);
       if (cBlock.isEmpty) {
         blockManager.blocks[blockIndex] = codeBlock;
         codeBlock.top = cBlock.top;
@@ -4273,7 +4290,7 @@ class EditController with ChangeNotifier {
       var textBlock = TextBlock(
           editController: this,
           textElement: WenTextElement(),
-          context: context);
+          context: viewContext);
       textBlock.top = cBlock.top + cBlock.height;
       blockManager.blocks.insert(blockIndex + 1, textBlock);
       layoutCurrentBlock(textBlock);
@@ -4294,7 +4311,7 @@ class EditController with ChangeNotifier {
       var textBlock = TextBlock(
           editController: this,
           textElement: WenTextElement(),
-          context: context);
+          context: viewContext);
       textBlock.top = cBlock.top;
       blockManager.blocks.insert(blockIndex, textBlock);
       layoutCurrentBlock(textBlock);
@@ -4311,7 +4328,7 @@ class EditController with ChangeNotifier {
     var textController = fluent.TextEditingController(text: "");
     var ok = false;
     showMobileDialog(
-        context: context,
+        context: viewContext,
         builder: (context) {
           return fluent.ContentDialog(
             title: const fluent.Text("添加链接"),
@@ -4373,7 +4390,7 @@ class EditController with ChangeNotifier {
         insertContent([
           TextBlock(
               editController: this,
-              context: context,
+              context: viewContext,
               textElement: WenTextElement(
                 children: [
                   WenTextElement(
@@ -4394,7 +4411,7 @@ class EditController with ChangeNotifier {
     var textController = fluent.TextEditingController(text: getSelectText());
     var ok = false;
     showMobileDialog(
-        context: context,
+        context: viewContext,
         builder: (context) {
           return fluent.ContentDialog(
             constraints: isMobile
@@ -4477,11 +4494,11 @@ class EditController with ChangeNotifier {
           textElement.level == 0
               ? TextBlock(
                   editController: this,
-                  context: context,
+                  context: viewContext,
                   textElement: linkElement)
               : TitleBlock(
                   editController: this,
-                  context: context,
+                  context: viewContext,
                   textElement: linkElement),
         ], null);
         record();
@@ -4561,7 +4578,7 @@ class EditController with ChangeNotifier {
 
   Future<void> addFormula() async {
     var formula = await showMobileDialog(
-        context: context,
+        context: viewContext,
         builder: (context) {
           return FormulaWidget();
         });
@@ -4570,7 +4587,7 @@ class EditController with ChangeNotifier {
       insertContent([
         TextBlock(
           editController: this,
-          context: context,
+          context: viewContext,
           textElement: WenTextElement(children: [
             WenTextElement(
               itemType: "formula",
@@ -4594,7 +4611,7 @@ class EditController with ChangeNotifier {
     }
     addBlock(TableBlock(
       editController: this,
-      context: context,
+      context: viewContext,
       tableElement: WenTableElement(rows: rows),
     ));
     record();
@@ -4602,7 +4619,7 @@ class EditController with ChangeNotifier {
 
   void addLine() {
     addBlock(LineBlock(
-        context: context, element: LineElement(), editController: this));
+        context: viewContext, element: LineElement(), editController: this));
     record();
   }
 
@@ -4711,7 +4728,7 @@ class EditController with ChangeNotifier {
       replaceBlock(blockIndex, 0, [
         CodeBlock(
           element: WenCodeElement(code: code, language: language),
-          context: context,
+          context: viewContext,
           editController: this,
         )
       ]);
@@ -4725,7 +4742,7 @@ class EditController with ChangeNotifier {
         .replaceRange(startIndex, startIndex + replaceCount, blocks);
     if (blockManager.blocks.isEmpty) {
       blockManager.blocks.add(TextBlock(
-          context: context,
+          context: viewContext,
           editController: this,
           textElement: WenTextElement()));
     }
@@ -4840,7 +4857,8 @@ class EditController with ChangeNotifier {
   }
 
   void adjustTable(TableBlock tableBlock, int newRowCount, int newColCount) {
-    tableBlock.rows = tableBlock.addJustRows(newRowCount, newColCount, context);
+    tableBlock.rows =
+        tableBlock.addJustRows(newRowCount, newColCount, viewContext);
     tableBlock.calcLength();
     tableBlock.tableElement.rows = tableBlock.rows
         .map((e) => e.map((cell) => cell.element).toList())

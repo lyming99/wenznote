@@ -14,8 +14,6 @@ import '../../widgets/inner_darawer.dart';
 import 'doc_edit_controller.dart';
 
 class MobileDocEditWidget extends MvcView<MobileDocEditController> {
-  const MobileDocEditWidget({super.key, required super.controller});
-
   @override
   Widget build(BuildContext context) {
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
@@ -98,6 +96,8 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
       ),
     );
   }
+
+  const MobileDocEditWidget({super.key, required super.controller});
 
   SelectDragListener buildEditContentBody(fluent.BuildContext context) {
     return SelectDragListener(

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_code_editor/flutter_code_editor.dart';
 
 typedef InputCallback = Function(TextEditingValue value);
 typedef InputComposingCallback = Function(TextEditingValue value);
 typedef InputStartCallback = Function(TextEditingValue value);
 typedef ActionCallback = Function(TextInputAction action);
 
-class InputManager with TextInputClient {
+class InputManager with TextInputClient, DeltaTextInputClient {
   InputManager({
     this.inputCallback,
     this.inputComposingCallback,
@@ -19,7 +18,7 @@ class InputManager with TextInputClient {
   InputStartCallback? inputStartCallback;
   InputCallback? inputCallback;
   TextInputConnection? connection;
-  TextEditingValue? value;
+  TextEditingValue? textEditingValue;
   ActionCallback? actionCallback;
 
   bool get isOpen {
@@ -34,10 +33,12 @@ class InputManager with TextInputClient {
       conn.show();
       return;
     }
+    connection?.close();
     connection = TextInput.attach(
       this,
       const TextInputConfiguration(
         inputAction: TextInputAction.newline,
+        enableDeltaModel: true,
       ),
     )..setEditingState(const TextEditingValue());
     connection!.show();
@@ -60,7 +61,7 @@ class InputManager with TextInputClient {
 
   @override
   TextEditingValue? get currentTextEditingValue {
-    return value;
+    return textEditingValue;
   }
 
   @override
@@ -78,7 +79,7 @@ class InputManager with TextInputClient {
 
   @override
   void updateEditingValue(TextEditingValue value) {
-    this.value = value;
+    textEditingValue = value;
     if (!value.composing.isValid) {
       if (value.text.isNotEmpty) {
         inputCallback?.call(value);
@@ -145,5 +146,18 @@ class InputManager with TextInputClient {
       return ret;
     }
     return null;
+  }
+
+  @override
+  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+    for (var delta in textEditingDeltas) {
+      if (delta is TextEditingDeltaInsertion) {
+        inputCallback?.call(TextEditingValue(
+          text: delta.textInserted,
+          composing: delta.composing,
+          selection: delta.selection,
+        ));
+      }
+    }
   }
 }

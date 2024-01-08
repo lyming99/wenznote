@@ -62,7 +62,7 @@ class _CardEditorState extends State<CardEditor>
 
   Future<void> readDoc() async {
     var doc = await jsonToDoc(widget.card.content);
-    widget.editController.context = context;
+    widget.editController.viewContext = context;
     tree = YsTree(
       context: context,
       editController: widget.editController,

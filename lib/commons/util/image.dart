@@ -44,10 +44,16 @@ bool isValidImage(ImageInput input) {
   return false;
 }
 
-ImageSize readImageFileSize(String file) {
-  var size = ImageSizeGetter.getSize(FileInput(File(file)));
-  return ImageSize(width: size.width, height: size.height);
+Future<ImageSize> readImageFileSize(String file) async{
+  try {
+    var size = ImageSizeGetter.getSize(FileInput(File(file)));
+    return ImageSize(width: size.width, height: size.height);
+  } catch (e) {
+    var image = await decodeImageFromList(File(file).readAsBytesSync());
+    return ImageSize(width: image.width, height: image.height);
+  }
 }
+
 
 Future createImageFromWidget(Widget widget) {
   final RenderRepaintBoundary repaintBoundary = RenderRepaintBoundary();

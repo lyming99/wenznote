@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:date_format/date_format.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
@@ -32,7 +34,9 @@ class SearchResultVO with ChangeNotifier {
     docContent = doc;
     notifyListeners();
   }
-
+  void refresh(){
+    notifyListeners();
+  }
   void readContent(BuildContext context) {
     var elements = getWenElements().map((e) => e.toJson()).toList();
     var controller = EditController(
@@ -64,8 +68,10 @@ class SearchResultVO with ChangeNotifier {
             child: SizedBox(
               width: cons.maxWidth * scale,
               height: cons.maxHeight * scale,
-              child: EditWidget(
-                controller: editController!,
+              child: IgnorePointer(
+                child: EditWidget(
+                  controller: editController!,
+                ),
               ),
             ),
           );
@@ -80,7 +86,7 @@ class SearchResultVO with ChangeNotifier {
     if (blocks is! YArray) {
       return result;
     }
-    for (int i = elementIndex; i < blocks.length && i < elementIndex + 6; i++) {
+    for (int i = max(0,elementIndex-2); i < blocks.length && i < elementIndex + 20; i++) {
       var block = blocks.get(i);
       if (block is! YMap) {
         continue;

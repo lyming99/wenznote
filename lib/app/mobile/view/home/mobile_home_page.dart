@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:note/app/mobile/theme/mobile_theme.dart';
+import 'package:note/service/service_manager.dart';
 
 class MobileHomePage extends StatelessWidget {
   const MobileHomePage({
@@ -43,6 +44,7 @@ class MobileHomePage extends StatelessWidget {
   }
 
   void _onTap(BuildContext context, int index) {
+    ServiceManager.of(context).setCanPopOnce();
     navigationShell.goBranch(
       index,
       initialLocation: index == navigationShell.currentIndex,

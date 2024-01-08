@@ -134,7 +134,12 @@ class MobileDocPageController extends ServiceManagerController {
 
   void moveSearchItem(BuildContext context, int index) {}
 
-  void deleteSearchItem(BuildContext context, int index) {}
+  void deleteSearchItem(BuildContext context, int index) async {
+    var searchItem = searchList[index];
+    await serviceManager.todayService.deleteNote(searchItem.doc);
+    await serviceManager.editService.deleteDocFile(searchItem.doc.uuid!);
+    fetchData();
+  }
 
   void openDocOrDirectory(BuildContext ctx, MobileDocModel docItem) {
     if (docItem.isFolder) {
@@ -197,6 +202,17 @@ class MobileDocPageController extends ServiceManagerController {
 
   void moveToDir(DocDirPO dir, List<MobileDocModel> list) async {
     await docListService.moveToDir(dir, list.map((e) => e.value).toList());
+    fetchData();
+  }
+
+  void deleteFolder(MobileDocModel docItem) async {
+    await serviceManager.docService.deleteDir(docItem.value.uuid!);
+    fetchData();
+  }
+
+  void deleteDoc(MobileDocModel docItem) async {
+    await serviceManager.todayService.deleteNote(docItem.value);
+    await serviceManager.editService.deleteDocFile(docItem.value.uuid!);
     fetchData();
   }
 }

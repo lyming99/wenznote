@@ -62,7 +62,7 @@ class WinNoteEditTabController extends WinEditTabController
     );
     editController.addListener(() {
       SchedulerBinding.instance.scheduleFrameCallback((timeStamp) {
-        outlineController.updateTree(editController.context, editController);
+        outlineController.updateTree(editController.viewContext, editController);
       });
     });
   }
@@ -81,7 +81,7 @@ class WinNoteEditTabController extends WinEditTabController
     var doc = await serviceManager.editService.readDoc(this.doc.uuid);
     if (doc != null) {
       var context = Get.context!;
-      editController.context = context;
+      editController.viewContext = context;
       tree = YsTree(
         context: context,
         editController: editController,

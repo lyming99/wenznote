@@ -1,21 +1,20 @@
 import 'dart:async';
 
+import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:note/app/mobile/view/move/move_controller.dart';
+import 'package:note/app/windows/view/doc_list/win_select_doc_dir_dialog.dart';
 import 'package:note/commons/mvc/controller.dart';
 import 'package:note/model/note/enum/note_order_type.dart';
 import 'package:note/model/note/enum/note_type.dart';
+import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';
 import 'package:note/service/search/search_result_vo.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
-
-import '../move/move_widget.dart';
-import 'mobile_today_model.dart';
 
 /// 日记、便签、笔记、卡片*、待办*、重点*
 class MobileTodayController extends ServiceManagerController {
@@ -24,9 +23,7 @@ class MobileTodayController extends ServiceManagerController {
   var orderParam = OrderProperty.updateTime.obs;
 
   var showDoc = true.obs;
-  var showTagNote = true.obs;
-  var showDiary = true.obs;
-  var showCard = false.obs;
+  var showNote = true.obs;
   var scrollController = ScrollController();
   var searchController = TextEditingController();
   var searchFocusNode = FocusNode();
@@ -42,61 +39,45 @@ class MobileTodayController extends ServiceManagerController {
       doSearch(searchController.text);
     });
     orderParam.listen((val) {
-      // sortDoc(docList);
+      sortDoc(searchList);
     });
     orderType.listen((val) {
-      // sortDoc(docList);
+      sortDoc(searchList);
     });
 
     showDoc.listen((val) {
       fetchDoc();
     });
 
-    showTagNote.listen((val) {
+    showNote.listen((val) {
       fetchDoc();
     });
-
-    showDiary.listen((val) {
-      fetchDoc();
-    });
-    showCard.listen((val) {
-      fetchDoc();
-    });
-    Timer(const Duration(milliseconds: 100), () {
-      fetchDoc();
-    });
+    fetchDoc();
   }
 
   void fetchDoc({bool refreshList = true}) async {
-    searchList.clear();
-    serviceManager.searchService.searchDoc(
-        text: searchText.value,
-        callback: (doc, list) {
-          searchList.add(list.first);
-        });
+    doSearch(searchText.value);
   }
 
-  void sortDoc(List<MobileTodayModel> docList) {
-    var comparators = <Comparator<MobileTodayModel>>[];
+  void sortDoc(List<SearchResultVO> docList) {
+    var comparators = <Comparator<SearchResultVO>>[];
     switch (orderParam.value) {
       case OrderProperty.createTime:
-        comparators.add((a, b) => a.createTime.compareTo(b.createTime));
-        comparators.add((a, b) => a.updateTime.compareTo(b.updateTime));
-        comparators.add((a, b) => a.reviewTime.compareTo(b.reviewTime));
+        comparators
+            .add((a, b) => a.doc.createTime!.compareTo(b.doc.createTime!));
+        comparators.add((a, b) => a.updateTime!.compareTo(b.doc.updateTime!));
         break;
       case OrderProperty.updateTime:
-        comparators.add((a, b) => a.updateTime.compareTo(b.updateTime));
-        comparators.add((a, b) => a.createTime.compareTo(b.createTime));
-        comparators.add((a, b) => a.reviewTime.compareTo(b.reviewTime));
+        comparators
+            .add((a, b) => a.doc.updateTime!.compareTo(b.doc.updateTime!));
+        comparators
+            .add((a, b) => a.doc.createTime!.compareTo(b.doc.createTime!));
         break;
       case OrderProperty.memo:
-        comparators.add((a, b) => a.reviewTime.compareTo(b.reviewTime));
-        comparators.add((a, b) => a.createTime.compareTo(b.createTime));
-        comparators.add((a, b) => a.updateTime.compareTo(b.updateTime));
         break;
     }
     bool reverse = orderType.value == OrderType.desc;
-    docList.sort((MobileTodayModel a, MobileTodayModel b) {
+    docList.sort((SearchResultVO a, SearchResultVO b) {
       if (reverse) {
         return -compareMultiProperties(a, b, comparators);
       }
@@ -104,8 +85,9 @@ class MobileTodayController extends ServiceManagerController {
     });
   }
 
-  void openDoc(SearchResultVO docModel) {
-    context.push("/mobile/local/doc/edit", extra: {"doc": docModel.doc});
+  void openDoc(SearchResultVO docModel) async {
+    await context.push("/mobile/local/doc/edit", extra: {"doc": docModel.doc});
+    docModel.refresh();
   }
 
   void delete(BuildContext context, int index) {
@@ -120,24 +102,60 @@ class MobileTodayController extends ServiceManagerController {
     Fluttertoast.showToast(msg: "复制成功~");
   }
 
+  bool canMoveToPath(DocPO doc, List<DocDirPO> path) {
+    if (path.length <= 1) {
+      return true;
+    }
+    var pathIdSet =
+        path.map((e) => e.uuid).where((element) => element != null).toSet();
+
+    /// 如果 path 路径包含选择的路径，则无法移动
+    if (pathIdSet.contains(doc.uuid)) {
+      return false;
+    }
+    return true;
+  }
+
   void saveToDocTree(BuildContext context, int index) async {
     var doc = searchList[index];
     var po = doc.doc;
-    var result = await showModalBottomSheet(
-        context: context,
-        enableDrag: false,
-        builder: (context) {
-          return MoveWidget(
-            controller: MoveController(),
-          );
-        });
-    if (result != null) {
-      var pid = result["pid"];
-      po.type = "doc";
-      po.pid = pid;
-      await serviceManager.docService.updateDoc(po);
+    void moveToDir(DocDirPO dir, List<DocPO> list) async {
+      await serviceManager.docListService.moveToDir(dir, list);
       fetchDoc(refreshList: false);
     }
+
+    showModalBottomSheet(
+      context: context,
+      useRootNavigator: true,
+      builder: (context) {
+        return SelectDocDirDialog(
+          title: "移动到",
+          actionLabel: "移动到此处",
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height * 0.8,
+          filter: (path) {
+            return canMoveToPath(po, path);
+          },
+          onSelect: (dir) {
+            po.type = "doc";
+            po.name = "便签 ${formatDate(DateTime.now(), [
+                  yyyy,
+                  "-",
+                  mm,
+                  "-",
+                  dd,
+                  " ",
+                  HH,
+                  ":",
+                  nn,
+                  ":",
+                  ss
+                ])}";
+            moveToDir(dir, [po]);
+          },
+        );
+      },
+    );
   }
 
   void doSearch(String text) {
@@ -145,9 +163,18 @@ class MobileTodayController extends ServiceManagerController {
     serviceManager.searchService.searchDoc(
       text: text,
       callback: (doc, list) {
+        if (showNote.isFalse && doc.type == "note") {
+          return;
+        }
+        if (showDoc.isFalse && doc.type == "doc") {
+          return;
+        }
         if (list.isNotEmpty) {
           searchList.add(list.first);
         }
+      },
+      onEnd: () {
+        sortDoc(searchList);
       },
     );
   }
@@ -175,12 +202,27 @@ class MobileTodayController extends ServiceManagerController {
     serviceManager.p2pService
         .sendDocEditMessage(doc.uuid!, encodeStateAsUpdateV2(docContent, null));
     await serviceManager.editService.writeDoc(doc.uuid, docContent);
-    GoRouter.of(context).push("/mobile/local/doc/edit", extra: {"doc": doc});
+    await GoRouter.of(context)
+        .push("/mobile/local/doc/edit", extra: {"doc": doc});
+    fetchDoc(refreshList: true);
   }
 
   @override
   void onDidUpdateWidget(BuildContext context, MvcController oldController) {
     super.onDidUpdateWidget(context, oldController);
+    var old = (oldController as MobileTodayController);
+    showDoc = old.showDoc;
+    showNote = old.showNote;
+    searchList = old.searchList;
+    searchList = old.searchList;
+    orderType = old.orderType;
+    orderParam = old.orderParam;
+    showDoc = old.showDoc;
+    showNote = old.showNote;
+    scrollController = old.scrollController;
+    searchController = old.searchController;
+    searchFocusNode = old.searchFocusNode;
+    searchText = old.searchText;
     fetchDoc();
   }
 }

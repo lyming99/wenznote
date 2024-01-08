@@ -170,7 +170,7 @@ class WenPopupTool {
       top = min(top, endRect.top);
       bottom = max(bottom, endRect.bottom);
     }
-    var rendBox = controller.context.findRenderObject();
+    var rendBox = controller.viewContext.findRenderObject();
     if (rendBox is! RenderBox) {
       return null;
     }
@@ -271,7 +271,7 @@ class WenPopupTool {
     }
 
     var widget = DropMenuWidget(
-      buttonContext: controller.context,
+      buttonContext: controller.viewContext,
       menus: menus,
       anchorRect: range.rect,
       childrenWidth: 300,
@@ -283,13 +283,16 @@ class WenPopupTool {
       rootScrollController: ScrollController(initialScrollOffset: initOffset),
     );
     entry = OverlayEntry(builder: (context) {
-      return PopupWindowWidget(
-        entry: entry!,
-        focus: false,
-        child: widget,
+      return Padding(
+        padding: MediaQuery.of(context).viewInsets,
+        child: PopupWindowWidget(
+          entry: entry!,
+          focus: false,
+          child: widget,
+        ),
       );
     });
-    Overlay.of(controller.context, rootOverlay: true).insert(entry!);
+    Overlay.of(controller.viewContext, rootOverlay: true).insert(entry!);
     entry!.addListener(() {
       if (entry?.mounted == false) {
         entry = null;

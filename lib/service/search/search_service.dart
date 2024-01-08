@@ -24,51 +24,56 @@ class SearchService with IsarServiceMixin {
     String? type,
     required String text,
     required Function(DocPO doc, List<SearchResultVO> result) callback,
+    Function? onEnd,
     int maxElementCount = 1,
   }) async {
     searchTask?.cancel = true;
     searchTask = BaseTask.start((BaseTask task) async {
-      if (pid == null) {
-        List<DocPO> docList;
-        if (type != null) {
-          docList =
-              await documentIsar.docPOs.filter().typeEqualTo(type).findAll();
-        } else {
-          docList = await documentIsar.docPOs.where().findAll();
-        }
-        await searchDocListContent(docList, task, text, callback);
-      } else {
-        Queue<String> pidQueue = Queue();
-        pidQueue.addLast(pid);
-        while (pidQueue.isNotEmpty) {
-          if (task.cancel) {
-            break;
-          }
-          var pid = pidQueue.removeFirst();
-          var filter = documentIsar.docPOs.filter().pidEqualTo(pid);
+      try {
+        if (pid == null) {
+          List<DocPO> docList;
           if (type != null) {
-            filter = filter.typeEqualTo(type);
-          }
-          var docList = await filter.findAll();
-          if (task.cancel) {
-            break;
+            docList =
+                await documentIsar.docPOs.filter().typeEqualTo(type).findAll();
+          } else {
+            docList = await documentIsar.docPOs.where().findAll();
           }
           await searchDocListContent(docList, task, text, callback);
-          if (task.cancel) {
-            break;
-          }
-          var nextList = await documentIsar.docDirPOs
-              .filter()
-              .pidEqualTo(pid)
-              .uuidProperty()
-              .findAll();
-          for (var next in nextList) {
-            if (next == null) {
-              continue;
+        } else {
+          Queue<String> pidQueue = Queue();
+          pidQueue.addLast(pid);
+          while (pidQueue.isNotEmpty) {
+            if (task.cancel) {
+              break;
             }
-            pidQueue.addLast(next);
+            var pid = pidQueue.removeFirst();
+            var filter = documentIsar.docPOs.filter().pidEqualTo(pid);
+            if (type != null) {
+              filter = filter.typeEqualTo(type);
+            }
+            var docList = await filter.findAll();
+            if (task.cancel) {
+              break;
+            }
+            await searchDocListContent(docList, task, text, callback);
+            if (task.cancel) {
+              break;
+            }
+            var nextList = await documentIsar.docDirPOs
+                .filter()
+                .pidEqualTo(pid)
+                .uuidProperty()
+                .findAll();
+            for (var next in nextList) {
+              if (next == null) {
+                continue;
+              }
+              pidQueue.addLast(next);
+            }
           }
         }
+      } finally {
+        onEnd?.call();
       }
     });
   }

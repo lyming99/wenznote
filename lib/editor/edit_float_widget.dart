@@ -211,7 +211,7 @@ extension EditFloatToolController on EditController {
         endPosition = selectStart.textPosition!;
       }
       var blocks = blockManager.layout(
-          context, scrollOffset, Size(blockMaxWidth, visionHeight), padding);
+          viewContext, scrollOffset, Size(blockMaxWidth, visionHeight), padding);
       for (var block in blocks) {
         //判断block的y是否在start block和end block之间
         if (block.top < startBlock.top || block.top > endBlock.top) continue;

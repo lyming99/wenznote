@@ -3,12 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:note/editor/block/element/element.dart';
+import 'package:note/editor/crdt/doc_utils.dart';
 import 'package:note/service/service_manager.dart';
-import 'package:note/service/user/user_service.dart';
 import 'package:rich_clipboard/rich_clipboard.dart';
 import 'package:uuid/uuid.dart';
-
-import '../../service/file/file_manager.dart';
 
 class CopyService {
   ServiceManager serviceManager;
@@ -75,8 +73,8 @@ class CopyService {
         "<html>\n<head>\n"
         "<meta charset=\"utf-8\"></meta></head><body copyid='$copyId'>");
     StringBuffer text = StringBuffer();
-    var contentList = await serviceManager.fileManager.readDocFileContent(uuid);
-    var copyElements = contentList.map((e) => WenElement.parseJson(e)).toList();
+    var doc = await serviceManager.editService.readDoc(uuid);
+    var copyElements = yDocToWenElements(doc);
     this.copyId = copyId;
     await saveCopyCache(context, copyElements, copyId: copyId);
     for (var element in copyElements) {
@@ -90,8 +88,8 @@ class CopyService {
 
   Future<void> copyMarkdownContent(String uuid) async {
     StringBuffer markdown = StringBuffer();
-    var contentList = await serviceManager.fileManager.readDocFileContent(uuid);
-    var copyElements = contentList.map((e) => WenElement.parseJson(e)).toList();
+    var doc = await serviceManager.editService.readDoc(uuid);
+    var copyElements = yDocToWenElements(doc);
     for (var element in copyElements) {
       markdown.writeln(element.getMarkDown(filePathBuilder: (uuid) {
         return uuid;

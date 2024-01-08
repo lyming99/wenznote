@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:note/app/windows/outline/outline_controller.dart';
+import 'package:note/commons/mvc/controller.dart';
 import 'package:note/commons/widget/flayout.dart';
 import 'package:note/editor/crdt/YsEditController.dart';
 import 'package:note/editor/crdt/YsTree.dart';
@@ -60,7 +61,7 @@ class MobileDocEditController extends ServiceManagerController {
     );
     editController.addListener(() {
       SchedulerBinding.instance.scheduleFrameCallback((timeStamp) {
-        outlineController.updateTree(editController.context, editController);
+        outlineController.updateTree(editController.viewContext, editController);
       });
     });
     title.listen((val) {
@@ -72,13 +73,39 @@ class MobileDocEditController extends ServiceManagerController {
     canUndo.value = editController.canUndo;
     canRedo.value = editController.canRedo;
     editController.onContentChanged = () {
-      outlineController.updateTree(editController.context, editController);
+      outlineController.updateTree(editController.viewContext, editController);
       canUndo.value = editController.canUndo;
       canRedo.value = editController.canRedo;
       textLength.value = editController.textLength;
     };
-    editController.context = context;
+    editController.viewContext = context;
     readDoc();
+  }
+
+  @override
+  void onDidUpdateWidget(BuildContext context, MvcController oldController) {
+    super.onDidUpdateWidget(context, oldController);
+    var old = oldController as MobileDocEditController;
+    title = old.title;
+    editController = old.editController;
+    ysTree = old.ysTree;
+    toolbarMenuController = old.toolbarMenuController;
+    isShowBottomPane = old.isShowBottomPane;
+    keyboardHeight = old.keyboardHeight;
+    keyboardHeightRecord = old.keyboardHeightRecord;
+    bottomIndex = old.bottomIndex;
+    textLevel = old.textLevel;
+    outlineController = old.outlineController;
+    drawSwipeEnable = old.drawSwipeEnable;
+    canUndo = old.canUndo;
+    canRedo = old.canRedo;
+    textLength = old.textLength;
+    doc = old.doc;
+    hiderAppbar = old.hiderAppbar;
+    submitButton = old.submitButton;
+    editOnOpen = old.editOnOpen;
+    showOutline = old.showOutline;
+    canUpdateTitle = old.canUpdateTitle;
   }
 
   Future<void> readDoc() async {
@@ -147,5 +174,4 @@ class MobileDocEditController extends ServiceManagerController {
   void undo() {
     editController.undo();
   }
-
 }

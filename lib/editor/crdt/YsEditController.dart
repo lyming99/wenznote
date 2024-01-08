@@ -213,7 +213,7 @@ class YsEditController extends EditController {
     var textController = fluent.TextEditingController(text: "");
     var ok = false;
     showMobileDialog(
-        context: context,
+        context: viewContext,
         builder: (context) {
           return fluent.ContentDialog(
             title: const fluent.Text("添加链接"),
@@ -275,7 +275,7 @@ class YsEditController extends EditController {
         insertContent([
           TextBlock(
               editController: this,
-              context: context,
+              context: viewContext,
               textElement: WenTextElement(
                 children: [
                   WenTextElement(
@@ -354,7 +354,7 @@ class YsEditController extends EditController {
     var textController = fluent.TextEditingController(text: getSelectText());
     var ok = false;
     showMobileDialog(
-        context: context,
+        context: viewContext,
         builder: (context) {
           return fluent.ContentDialog(
             constraints: isMobile

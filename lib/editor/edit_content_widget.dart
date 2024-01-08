@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:note/commons/widget/popup_stack.dart';
 import 'package:note/editor/edit_controller.dart';
 import 'package:note/editor/mouse/mouse.dart';
@@ -60,6 +61,7 @@ class EditContentWidgetState extends State<EditContentWidget> {
 
   @override
   Widget build(BuildContext context) {
+    widget.controller.viewContext = context;
     return LayoutBuilder(
       builder: (context, constraints) {
         double maxWidth =
@@ -123,18 +125,27 @@ class EditContentWidgetState extends State<EditContentWidget> {
                     }
                     return result;
                   },
-                  child: MouseEventListenerWidget(
-                    eventListener: (event, entry) {
-                      widget.controller.onMouseEvent(event.copyWith(
-                        position: event.position,
-                      ));
+                  child: GestureDetector(
+                    onLongPress: () {
+                      HapticFeedback.selectionClick();
+                      var eventQueue = widget.controller.mouseKeyboardState.mouseDownEvent1;
+                      if(eventQueue.isNotEmpty){
+                        widget.controller.selectWord(eventQueue.last.localPosition);
+                      }
                     },
-                    behavior: HitTestBehavior.opaque,
-                    child: SizedBox(
-                      width: blockConstrains.maxWidth,
-                      height: blockConstrains.maxHeight,
-                      child: Stack(
-                        children: contentWidgets,
+                    child: MouseEventListenerWidget(
+                      eventListener: (event, entry) {
+                        widget.controller.onMouseEvent(event.copyWith(
+                          position: event.position,
+                        ));
+                      },
+                      behavior: HitTestBehavior.opaque,
+                      child: SizedBox(
+                        width: blockConstrains.maxWidth,
+                        height: blockConstrains.maxHeight,
+                        child: Stack(
+                          children: contentWidgets,
+                        ),
                       ),
                     ),
                   ),

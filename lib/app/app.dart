@@ -23,6 +23,7 @@ import 'package:note/commons/mvc/controller.dart';
 import 'package:note/commons/mvc/view.dart';
 import 'package:note/commons/widget/ignore_parent_pointer.dart';
 import 'package:note/config/theme_settings.dart';
+import 'package:note/service/service_manager.dart';
 import 'package:note/widgets/root_widget.dart';
 import 'package:oktoast/oktoast.dart';
 
@@ -88,7 +89,7 @@ class AppWidget extends MvcView<AppController> {
               var map = state.extra as Map;
               return MobileCardSettingsPage(
                 controller:
-                MobileCardSettingsController(cardSet: map['cardSet']),
+                    MobileCardSettingsController(cardSet: map['cardSet']),
               );
             },
           ),
@@ -97,8 +98,7 @@ class AppWidget extends MvcView<AppController> {
             builder: (context, state) {
               var map = state.extra as Map;
               return MobileStudyPage(
-                controller:
-                MobileStudyController(cardSet: map['cardSet']),
+                controller: MobileStudyController(cardSet: map['cardSet']),
               );
             },
           ),
@@ -119,6 +119,9 @@ class AppWidget extends MvcView<AppController> {
           routes: <RouteBase>[
             GoRoute(
               path: 'today',
+              onExit: (context) async {
+                return ServiceManager.of(context).canPop();
+              },
               builder: (BuildContext context, GoRouterState state) {
                 return MobileTodayPageWidget(
                     controller: MobileTodayController());
@@ -131,6 +134,9 @@ class AppWidget extends MvcView<AppController> {
           routes: <RouteBase>[
             GoRoute(
               path: 'doc',
+              onExit: (context) async {
+                return ServiceManager.of(context).canPop();
+              },
               pageBuilder: (context, state) {
                 return CustomTransitionPage(
                   transitionDuration: Duration.zero,
@@ -174,6 +180,9 @@ class AppWidget extends MvcView<AppController> {
           routes: <RouteBase>[
             GoRoute(
               path: 'card',
+              onExit: (context) async {
+                return ServiceManager.of(context).canPop();
+              },
               builder: (BuildContext context, GoRouterState state) {
                 return MobileCardPage(controller: MobileCardPageController());
               },

@@ -497,33 +497,14 @@ class MobileTodayPageWidget extends MvcView<MobileTodayController> {
                                     () => Row(
                                       children: [
                                         const Expanded(child: Text("便签")),
-                                        if (controller.showTagNote.isTrue)
+                                        if (controller.showNote.isTrue)
                                           const Icon(Icons.check),
                                       ],
                                     ),
                                   ),
                                 ),
                                 onPress: (context) {
-                                  controller.showTagNote.toggle();
-                                },
-                              ),
-                              DropMenu(
-                                height: 48,
-                                text: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0),
-                                  child: Obx(
-                                    () => Row(
-                                      children: [
-                                        const Expanded(child: Text("日记")),
-                                        if (controller.showDiary.isTrue)
-                                          const Icon(Icons.check),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                onPress: (context) {
-                                  controller.showDiary.toggle();
+                                  controller.showNote.toggle();
                                 },
                               ),
                               DropMenu(
@@ -543,25 +524,6 @@ class MobileTodayPageWidget extends MvcView<MobileTodayController> {
                                 ),
                                 onPress: (context) {
                                   controller.showDoc.toggle();
-                                },
-                              ),
-                              DropMenu(
-                                height: 48,
-                                text: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8.0),
-                                  child: Obx(
-                                    () => Row(
-                                      children: [
-                                        const Expanded(child: Text("卡片")),
-                                        if (controller.showCard.isTrue)
-                                          const Icon(Icons.check),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                onPress: (context) {
-                                  controller.showCard.toggle();
                                 },
                               ),
                             ],

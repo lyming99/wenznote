@@ -148,7 +148,7 @@ abstract class WenBlock {
   void visitElement(
       TextPosition start, TextPosition end, WenElementVisitor visit) {}
 
-  EditTheme get theme => EditTheme.of(editController.context);
+  EditTheme get theme => EditTheme.of(editController.viewContext);
 
   List<PopupPositionWidget> buildFloatWidgets() {
     return [];

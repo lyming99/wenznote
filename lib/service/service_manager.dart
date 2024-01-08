@@ -70,6 +70,7 @@ class ServiceManager with ChangeNotifier {
   late FileSyncService fileSyncService;
   late SearchService searchService;
   bool isStart = false;
+  bool _canPop = false;
   int time = DateTime.now().millisecondsSinceEpoch;
   late BuildContext context;
 
@@ -126,5 +127,17 @@ class ServiceManager with ChangeNotifier {
     Get.offAllNamed("/");
     notifyListeners();
     startService();
+  }
+
+  bool canPop() {
+    if (_canPop) {
+      _canPop = false;
+      return true;
+    }
+    return _canPop;
+  }
+
+  void setCanPopOnce( ) {
+    _canPop = true;
   }
 }

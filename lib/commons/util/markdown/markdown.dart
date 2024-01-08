@@ -97,7 +97,7 @@ Future<void> readImageFile(
         if (imageFile == null) {
           continue;
         }
-        var size = readImageFileSize(imageFile);
+        var size = await readImageFileSize(imageFile);
         element.id = file.uuid ?? "";
         element.file = imageFile;
         element.width = size.width;

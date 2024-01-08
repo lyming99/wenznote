@@ -546,9 +546,9 @@ class MobileDocPage extends MvcView<MobileDocPageController> {
             onPress: (ctx) {
               hideDropMenu(ctx);
               if (docItem.isFolder) {
-                // controller.deleteFolder(docItem);
+                controller.deleteFolder(docItem);
               } else {
-                // controller.deleteDoc(docItem);
+                controller.deleteDoc(docItem);
               }
             },
           ),

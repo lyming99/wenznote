@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
 import '../block/block.dart';
-import '../block/element/element.dart';
 
 class CursorPosition {
   WenBlock? block;
@@ -37,6 +35,19 @@ class CursorPosition {
         other.blockIndex == blockIndex &&
         other.textPosition == textPosition &&
         other.rect == rect;
+  }
+
+  bool equalsCursorIndex(CursorPosition? other) {
+    if (other == null) {
+      return false;
+    }
+    if (other.blockIndex != blockIndex) {
+      return false;
+    }
+    if (other.textPosition?.offset != textPosition?.offset) {
+      return false;
+    }
+    return true;
   }
 }
 

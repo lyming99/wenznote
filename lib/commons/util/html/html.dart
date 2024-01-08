@@ -213,7 +213,7 @@ Future<void> _parseHtmlToBlockElement(
     var imageFile =
         await ServiceManager.of(context).fileManager.getImageFile(id);
     if (imageFile != null && File(imageFile).existsSync()) {
-      var size = readImageFileSize(imageFile);
+      var size =  await readImageFileSize(imageFile);
       result.add(WenImageElement(
         id: id,
         file: imageFile,
@@ -230,7 +230,7 @@ Future<void> _parseHtmlToBlockElement(
             .fileManager
             .getImageFile(fileItem.uuid);
         if (imageFile != null) {
-          var size = readImageFileSize(imageFile);
+          var size =  await readImageFileSize(imageFile);
           result.add(WenImageElement(
             id: fileItem.uuid!,
             file: imageFile,
