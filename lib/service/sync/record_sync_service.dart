@@ -53,13 +53,15 @@ class RecordSyncService with IsarServiceMixin {
           .dataIdEqualTo(dataId)
           .clientIdEqualTo(serviceManager.userService.clientId)
           .findFirstSync();
-      if (dbDelta == null) {
-        continue;
-      }
+      dbDelta ??= DbDelta(
+        clientId: serviceManager.userService.clientId,
+        dataId: dataId,
+      );
       dbDelta.deleted = true;
       dbDelta.content = "";
       dbDelta.hasUpload = false;
-      await documentIsar.writeTxn(() => documentIsar.dbDeltas.put(dbDelta));
+      dbDelta.updateTime = DateTime.now().millisecondsSinceEpoch;
+      await documentIsar.writeTxn(() => documentIsar.dbDeltas.put(dbDelta!));
     }
     pushDbDelta();
   }
@@ -253,13 +255,17 @@ class RecordSyncService with IsarServiceMixin {
       clientMap.forEach((key, value) {
         clientStates.add({'clientId': key, 'clientTime': value});
       });
+      var token = serviceManager.userService.token;
+      if (token == null) {
+        return;
+      }
       /**
        * 2.查询 db 数据
        */
       var result = await Dio().post("$noteServerUrl/db/queryDbDeltaList",
           options: Options(
             headers: {
-              "token": serviceManager.userService.token,
+              "token": token,
             },
           ),
           data: {
@@ -267,6 +273,9 @@ class RecordSyncService with IsarServiceMixin {
             "clientStates": clientStates,
             "dataIdList": dataIdList,
           });
+      if (result.statusCode != 200) {
+        return;
+      }
       /**
        * 3.将查询的数据解析，并且存入数据库
        */
@@ -300,6 +309,8 @@ class RecordSyncService with IsarServiceMixin {
         // 8.将下载的数据存到本地数据库
         saveDbDelta(localList, value);
       }
+    } catch (e) {
+      print(e);
     } finally {
       pullLock.unlock();
     }

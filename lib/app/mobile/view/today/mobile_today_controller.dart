@@ -86,7 +86,7 @@ class MobileTodayController extends ServiceManagerController {
   }
 
   void openDoc(SearchResultVO docModel) async {
-    await context.push("/mobile/local/doc/edit", extra: {"doc": docModel.doc});
+    await context.push("/mobile/doc/edit", extra: {"doc": docModel.doc});
     docModel.refresh();
   }
 
@@ -202,8 +202,7 @@ class MobileTodayController extends ServiceManagerController {
     serviceManager.p2pService
         .sendDocEditMessage(doc.uuid!, encodeStateAsUpdateV2(docContent, null));
     await serviceManager.editService.writeDoc(doc.uuid, docContent);
-    await GoRouter.of(context)
-        .push("/mobile/local/doc/edit", extra: {"doc": doc});
+    await GoRouter.of(context).push("/mobile/doc/edit", extra: {"doc": doc});
     fetchDoc(refreshList: true);
   }
 
@@ -224,5 +223,12 @@ class MobileTodayController extends ServiceManagerController {
     searchFocusNode = old.searchFocusNode;
     searchText = old.searchText;
     fetchDoc();
+  }
+
+  Widget getUserIcon(
+    BuildContext context, [
+    double size = 32,
+  ]) {
+    return serviceManager.userService.buildUserIcon(context, size);
   }
 }

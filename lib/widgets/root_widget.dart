@@ -37,12 +37,17 @@ class ServiceManagerWidgetState extends State<ServiceManagerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    serviceManager.context=context;
     if (!serviceManager.isStart) {
       return Container();
     }
     return Builder(builder: (context) {
       return widget.builder.call(context);
     });
+  }
+  @override
+  void didUpdateWidget(covariant ServiceManagerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
   }
 
   void changeUser(String userId) {

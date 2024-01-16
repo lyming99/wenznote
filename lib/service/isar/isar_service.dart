@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
+import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:note/model/card/po/card_po.dart';
 import 'package:note/model/card/po/card_set_po.dart';
@@ -16,9 +18,6 @@ import 'package:note/model/note/po/doc_state_po.dart';
 import 'package:note/model/note/po/upload_task_po.dart';
 import 'package:note/model/settings/settings_po.dart';
 import 'package:note/service/service_manager.dart';
-import 'package:note/service/user/user_service.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:synchronized/synchronized.dart';
 
 class IsarService {
   ServiceManager serviceManager;
@@ -31,12 +30,14 @@ class IsarService {
   IsarService(this.serviceManager);
 
   Future<bool> open() async {
-    return await lock.synchronized(() async {
-      await _documentIsar?.close();
+    lock.lock();
+    try{
       var dir = await serviceManager.fileManager.getRootDir();
       var databases = Directory(
           "$dir/${serviceManager.userService.userPath}databases");
-      databases.createSync(recursive: true);
+      if(!databases.existsSync()) {
+        databases.createSync(recursive: true);
+      }
       _documentIsar = await Isar.open(
         [
           DocDirPOSchema,
@@ -59,13 +60,19 @@ class IsarService {
         maxSizeMiB: 128000,
       );
       return _documentIsar!.isOpen;
-    });
+    }finally{
+      lock.unlock();
+    }
+
   }
 
   Future<void> close() async {
-    await lock.synchronized(() async {
+    lock.lock();
+    try{
       await _documentIsar?.close();
       _documentIsar = null;
-    });
+    }finally{
+      lock.unlock();
+    }
   }
 }

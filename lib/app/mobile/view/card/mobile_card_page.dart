@@ -9,6 +9,7 @@ import 'package:note/commons/mvc/view.dart';
 import 'package:note/editor/widget/drop_menu.dart';
 import 'package:note/editor/widget/toggle_item.dart';
 
+import '../user/mobile_user_icon.dart';
 import 'mobile_card_page_controller.dart';
 
 class MobileCardPage extends MvcView<MobileCardPageController> {
@@ -42,11 +43,7 @@ class MobileCardPage extends MvcView<MobileCardPageController> {
         onPressed: () {
           Scaffold.of(context).openDrawer();
         },
-        icon: Icon(
-          Icons.account_circle,
-          size: 32,
-          color: Colors.grey.shade600,
-        ),
+        icon: MobileUserIcon(),
       ),
       actions: [
         IconButton(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:note/app/mobile/theme/mobile_theme.dart';
+import 'package:note/app/mobile/view/user/mobile_user_icon.dart';
 import 'package:note/commons/mvc/view.dart';
 import 'package:note/editor/widget/drop_menu.dart';
 import 'package:note/model/note/enum/note_order_type.dart';
@@ -224,11 +225,7 @@ class MobileTodayPageWidget extends MvcView<MobileTodayController> {
         onPressed: () {
           Scaffold.of(context).openDrawer();
         },
-        icon: Icon(
-          Icons.account_circle,
-          size: 32,
-          color: Colors.grey.shade600,
-        ),
+        icon: MobileUserIcon(),
       ),
       actions: [
         IconButton(

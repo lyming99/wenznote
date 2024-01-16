@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:note/app/mobile/theme/mobile_theme.dart';
 import 'package:note/app/mobile/view/doc/mobile_doc_page_controller.dart';
 import 'package:note/app/mobile/view/doc/mobile_doc_page_model.dart';
+import 'package:note/app/mobile/view/user/mobile_user_icon.dart';
 import 'package:note/app/mobile/widgets/sticky_delegate.dart';
 import 'package:note/app/windows/view/card/win_create_card_dialog.dart';
 import 'package:note/app/windows/view/doc_list/win_select_doc_dir_dialog.dart';
@@ -46,11 +47,7 @@ class MobileDocPage extends MvcView<MobileDocPageController> {
         onPressed: () {
           Scaffold.of(context).openDrawer();
         },
-        icon: Icon(
-          Icons.account_circle,
-          size: 32,
-          color: Colors.grey.shade600,
-        ),
+        icon: MobileUserIcon(),
       ),
       actions: [
         fluent.Builder(builder: (context) {

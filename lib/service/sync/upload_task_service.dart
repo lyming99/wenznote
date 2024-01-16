@@ -114,15 +114,16 @@ class UploadTaskService {
     var filepath =
         await serviceManager.fileManager.getFilePath(dataId, filePO.name);
     if (File(filepath).existsSync()) {
-      var resp = await Dio().post("$noteServer/file/upload/$dataId",
-          options: Options(
-            headers: {"token": token, "Content-Type": "multipart/form-data;"},
-            responseType: ResponseType.json,
-          ),
-          data: FormData.fromMap({
-            "file":
-                await MultipartFile.fromFile(filepath, filename: filePO.name),
-          }));
+      var resp = await Dio().post(
+        "$noteServer/file/upload/$dataId",
+        options: Options(
+          headers: {"token": token, "Content-Type": "multipart/form-data;"},
+          responseType: ResponseType.json,
+        ),
+        data: FormData.fromMap({
+          "file": await MultipartFile.fromFile(filepath, filename: filePO.name),
+        }),
+      );
       if (resp.data['msg'] == AppConstants.success) {
         return true;
       }

@@ -16,7 +16,7 @@ class ThemeSettings with ChangeNotifier implements ValueListenable {
 
   void setThemeMode(ThemeMode mode) {
     if (mode == ThemeMode.light) {
-      saveConfig("themeMode", "light");
+      saveConfig("system.brightness", "light");
     } else if (mode == ThemeMode.dark) {
       saveConfig("themeMode", "dark");
     } else {

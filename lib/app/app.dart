@@ -3,7 +3,12 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:note/app/mobile/controller/settings/mobile_settings_controller.dart';
+import 'package:note/app/mobile/controller/user/mobile_user_info_controller.dart';
+import 'package:note/app/mobile/controller/user/mobile_user_login_controller.dart';
+import 'package:note/app/mobile/controller/user/mobile_user_sign_controller.dart';
 import 'package:note/app/mobile/view/card/detail/mobile_card_detail_controller.dart';
 import 'package:note/app/mobile/view/card/detail/mobile_card_detail_page.dart';
 import 'package:note/app/mobile/view/card/edit/mobile_card_edit_controller.dart';
@@ -18,16 +23,21 @@ import 'package:note/app/mobile/view/doc/mobile_doc_page_controller.dart';
 import 'package:note/app/mobile/view/edit/doc_edit_controller.dart';
 import 'package:note/app/mobile/view/edit/doc_edit_widget.dart';
 import 'package:note/app/mobile/view/home/mobile_home_page.dart';
+import 'package:note/app/mobile/view/settings/mobile_settings_page.dart';
 import 'package:note/app/mobile/view/today/mobile_today_controller.dart';
+import 'package:note/app/mobile/view/user/mobile_user_forget_password_page.dart';
+import 'package:note/app/mobile/view/user/mobile_user_info_page.dart';
+import 'package:note/app/mobile/view/user/mobile_user_sign_page.dart';
 import 'package:note/commons/mvc/controller.dart';
 import 'package:note/commons/mvc/view.dart';
 import 'package:note/commons/widget/ignore_parent_pointer.dart';
-import 'package:note/config/theme_settings.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:note/widgets/root_widget.dart';
 import 'package:oktoast/oktoast.dart';
 
+import 'mobile/controller/user/mobile_user_forget_password_controller.dart';
 import 'mobile/view/today/mobile_today_page.dart';
+import 'mobile/view/user/mobile_user_login_page.dart';
 
 class AppController extends MvcController {}
 
@@ -40,11 +50,11 @@ class AppWidget extends MvcView<AppController> {
   final GoRouter _router = GoRouter(
     navigatorKey: _appNavigatorKey,
     initialLocation: (Platform.isIOS || Platform.isAndroid)
-        ? "/mobile/local/today"
-        : "/mobile/local/today",
+        ? "/mobile/today"
+        : "/mobile/today",
     routes: [
       GoRoute(
-        path: "/mobile/:userId",
+        path: "/mobile",
         redirect: (context, state) {
           return null;
         },
@@ -100,6 +110,38 @@ class AppWidget extends MvcView<AppController> {
               return MobileStudyPage(
                 controller: MobileStudyController(cardSet: map['cardSet']),
               );
+            },
+          ),
+          GoRoute(
+            path: "login",
+            builder: (context, state) {
+              return MobileUserLoginPage(
+                  controller: MobileUserLoginController());
+            },
+          ),
+          GoRoute(
+            path: "sign",
+            builder: (context, state) {
+              return MobileUserSignPage(controller: MobileUserSignController());
+            },
+          ),
+          GoRoute(
+            path: "forgetPassword",
+            builder: (context, state) {
+              return MobileUserForgetPasswordPage(
+                  controller: MobileUserForgetPasswordController());
+            },
+          ),
+          GoRoute(
+            path: "userInfo",
+            builder: (context, state) {
+              return MobileUserInfoPage(controller: MobileUserInfoController());
+            },
+          ),
+          GoRoute(
+            path: "settings",
+            builder: (context, state) {
+              return MobileSettingsPage(controller: MobileSettingsController());
             },
           ),
         ],
@@ -195,37 +237,44 @@ class AppWidget extends MvcView<AppController> {
 
   @override
   Widget build(BuildContext context) {
-    var brightness = ThemeSettings.instance.getBrightness();
     return ServiceManagerWidget(builder: (context) {
+      var sm = ServiceManager.of(context);
+
       return OKToast(
         child: IgnoreParentMousePointerContainer(
-          child: MaterialApp.router(
-            title: "温知笔记",
-            routerConfig: _router,
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              fontFamily: "MiSans",
-              brightness: brightness,
-            ),
-            locale: const Locale('zh', 'CN'),
-            supportedLocales: const [
-              Locale('zh', 'CN'), // English, no country code
-            ],
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              fluent.FluentLocalizations.delegate,
-            ],
-            builder: (context, child) {
-              return fluent.FluentTheme(
-                data: fluent.FluentThemeData(
-                  fontFamily: "MiSans",
-                  brightness: brightness,
-                  acrylicBackgroundColor: Colors.grey.withAlpha(10),
-                ),
-                child: Container(child: child ?? Container()),
-              );
-            },
-          ),
+          child: Obx(() {
+            var brightness = sm.themeManager.getBrightness();
+            if (sm.themeManager.themeMode.value == ThemeMode.system) {
+              brightness = MediaQuery.of(context).platformBrightness;
+            }
+            return MaterialApp.router(
+              title: "温知笔记",
+              routerConfig: _router,
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData(
+                fontFamily: "MiSans",
+                brightness: brightness,
+              ),
+              locale: const Locale('zh', 'CN'),
+              supportedLocales: const [
+                Locale('zh', 'CN'), // English, no country code
+              ],
+              localizationsDelegates: const [
+                GlobalMaterialLocalizations.delegate,
+                fluent.FluentLocalizations.delegate,
+              ],
+              builder: (context, child) {
+                return fluent.FluentTheme(
+                  data: fluent.FluentThemeData(
+                    fontFamily: "MiSans",
+                    brightness: brightness,
+                    acrylicBackgroundColor: Colors.grey.withAlpha(10),
+                  ),
+                  child: Container(child: child ?? Container()),
+                );
+              },
+            );
+          }),
         ),
       );
     });

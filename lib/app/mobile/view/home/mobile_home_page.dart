@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:note/app/mobile/theme/mobile_theme.dart';
+import 'package:note/app/mobile/controller/user/mobile_user_controller.dart';
+import 'package:note/app/mobile/view/user/mobile_user_page.dart';
 import 'package:note/service/service_manager.dart';
 
 class MobileHomePage extends StatelessWidget {
@@ -19,6 +21,9 @@ class MobileHomePage extends StatelessWidget {
     var backgroundColor = MobileTheme.of(context).mobileNavBgColor;
     return Scaffold(
       body: navigationShell,
+      drawer: MobileUserPage(
+        controller: MobileUserController(),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: backgroundColor,
         selectedItemColor: activeColor,

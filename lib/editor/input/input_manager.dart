@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -36,9 +38,9 @@ class InputManager with TextInputClient, DeltaTextInputClient {
     connection?.close();
     connection = TextInput.attach(
       this,
-      const TextInputConfiguration(
+        TextInputConfiguration(
         inputAction: TextInputAction.newline,
-        enableDeltaModel: true,
+        enableDeltaModel: Platform.isAndroid?true:false,
       ),
     )..setEditingState(const TextEditingValue());
     connection!.show();

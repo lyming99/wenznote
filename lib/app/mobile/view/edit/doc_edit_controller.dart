@@ -174,4 +174,8 @@ class MobileDocEditController extends ServiceManagerController {
   void undo() {
     editController.undo();
   }
+
+  void copyContent(BuildContext ctx) {}
+
+  void deleteNote(BuildContext ctx) {}
 }

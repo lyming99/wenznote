@@ -161,14 +161,14 @@ class MobileCardDetailController extends ServiceManagerController {
 
   void openCardStudy() {
     GoRouter.of(context)
-        .push("/mobile/local/cardSet/$cardSetId/study", extra: {
+        .push("/mobile/cardSet/$cardSetId/study", extra: {
       "cardSet": model.value?.cardSet,
     });
   }
 
   void openCard(CardPO? card) {
     if (card != null) {
-      GoRouter.of(context).push("/mobile/local/card/edit", extra: {
+      GoRouter.of(context).push("/mobile/card/edit", extra: {
         "card": card,
         "editOnOpen": false,
       });
@@ -179,7 +179,7 @@ class MobileCardDetailController extends ServiceManagerController {
 
   void openCardConfig() {
     GoRouter.of(context)
-        .push("/mobile/local/cardSet/$cardSetId/settings", extra: {
+        .push("/mobile/cardSet/$cardSetId/settings", extra: {
       "cardSet": model.value?.cardSet,
     });
   }

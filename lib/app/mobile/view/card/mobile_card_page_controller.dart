@@ -57,7 +57,7 @@ class MobileCardPageController extends ServiceManagerController {
   }
 
   void openCardSet(BuildContext context, MobileCardModel cardSetItem) {
-    GoRouter.of(context).push("/mobile/local/cardSet/${cardSetItem.card.uuid}");
+    GoRouter.of(context).push("/mobile/cardSet/${cardSetItem.card.uuid}");
   }
 
   void deleteCardSet(MobileCardModel cardSetItem) async {

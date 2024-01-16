@@ -93,7 +93,7 @@ class MobileDocPageController extends ServiceManagerController {
     var router = GoRouter.of(context);
     if (uuid == null) {
       GoRouter.of(context).go(
-        "/mobile/local/doc",
+        "/mobile/doc",
       );
     } else {
       if (existPath(router, uuid)) {
@@ -103,7 +103,7 @@ class MobileDocPageController extends ServiceManagerController {
         }
       } else {
         GoRouter.of(context).push(
-          "/mobile/local/doc/dir/$uuid",
+          "/mobile/doc/dir/$uuid",
         );
       }
     }
@@ -146,7 +146,7 @@ class MobileDocPageController extends ServiceManagerController {
       openDirectory(context, docItem.uuid);
     } else {
       GoRouter.of(context)
-          .push("/mobile/local/doc/edit", extra: {"doc": docItem.value});
+          .push("/mobile/doc/edit", extra: {"doc": docItem.value});
     }
   }
 
@@ -164,7 +164,7 @@ class MobileDocPageController extends ServiceManagerController {
         .sendDocEditMessage(doc.uuid!, encodeStateAsUpdateV2(docContent, null));
     await serviceManager.editService.writeDoc(doc.uuid, docContent);
     fetchData();
-    GoRouter.of(context).push("/mobile/local/doc/edit", extra: {"doc": doc});
+    GoRouter.of(context).push("/mobile/doc/edit", extra: {"doc": doc});
   }
 
   void createDirectory(BuildContext context, String name) async {

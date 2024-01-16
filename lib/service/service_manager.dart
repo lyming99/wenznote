@@ -24,6 +24,7 @@ import 'package:note/service/user/user_service.dart';
 import 'package:note/widgets/root_widget.dart';
 
 import 'config/config_manager.dart';
+import 'theme/theme_manager.dart';
 
 class ServiceManagerController extends MvcController {
   late ServiceManager serviceManager;
@@ -40,6 +41,7 @@ class ServiceManagerController extends MvcController {
   void onDidUpdateWidget(BuildContext context, MvcController oldController) {
     super.onDidUpdateWidget(context, oldController);
     serviceManager = (oldController as ServiceManagerController).serviceManager;
+    serviceManager.context = context;
   }
 }
 
@@ -69,6 +71,7 @@ class ServiceManager with ChangeNotifier {
   late UploadTaskService uploadTaskService;
   late FileSyncService fileSyncService;
   late SearchService searchService;
+  late ThemeManager themeManager;
   bool isStart = false;
   bool _canPop = false;
   int time = DateTime.now().millisecondsSinceEpoch;
@@ -95,38 +98,43 @@ class ServiceManager with ChangeNotifier {
     uploadTaskService = UploadTaskService(this);
     fileSyncService = FileSyncService(this);
     searchService = SearchService(this);
+    themeManager = ThemeManager(this);
     startService();
   }
 
   Future<void> startService() async {
     Hive.init("${await fileManager.getRootDir()}/hive");
     await Hive.openBox("settings");
-    // await userService.login(email: "44185539@qq.com", password: "12345678");
     await isarService.open();
-    isStart = true;
-    recordSyncService.startPullTimer();
+    await themeManager.readConfig();
     p2pService.connect();
+    recordSyncService.startPullTimer();
     uploadTaskService.startUploadTimer();
     docSnapshotService.startDownloadTimer();
+    isStart = true;
     notifyListeners();
   }
 
   Future<void> stopService() async {
+    await Hive.close();
     await isarService.close();
+    isarService = IsarService(this);
     p2pService.close();
+    p2pService = P2pService(this);
     recordSyncService.stopPullTimer();
+    recordSyncService = RecordSyncService(this);
     uploadTaskService.stopUploadTimer();
+    uploadTaskService = UploadTaskService(this);
     docSnapshotService.stopDownloadTimer();
+    docSnapshotService = DocSnapshotService(this);
     isStart = false;
     notifyListeners();
   }
 
   Future<void> restartService() async {
-    await isarService.close();
-    isStart = false;
-    Get.offAllNamed("/");
-    notifyListeners();
-    startService();
+    await stopService();
+    await 100.milliseconds.delay();
+    await startService();
   }
 
   bool canPop() {
@@ -137,7 +145,7 @@ class ServiceManager with ChangeNotifier {
     return _canPop;
   }
 
-  void setCanPopOnce( ) {
+  void setCanPopOnce() {
     _canPop = true;
   }
 }

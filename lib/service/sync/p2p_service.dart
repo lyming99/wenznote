@@ -4,6 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:fixnum/fixnum.dart';
+import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:note/commons/util/serial_util.dart';
 import 'package:note/model/note/po/doc_state_po.dart';
@@ -59,11 +60,15 @@ class P2pService {
     if (noteServer == null) {
       return;
     }
+    var token = serviceManager.userService.token;
+    if(token==null){
+      return;
+    }
     var clientId = serviceManager.userService.clientId;
     var uri = Uri.parse(
         "ws://${noteServer.host}:${noteServer.port}/client/websocket/$clientId");
     socket = IOWebSocketChannel.connect(uri,
-        headers: {'token': serviceManager.userService.token});
+        headers: {'token': token});
     socket!.stream.listen(
       (data) {
         _onReceive(data);
@@ -74,7 +79,7 @@ class P2pService {
         });
       },
       onError: (err) {
-        err.printError();
+        print(err);
       },
     );
     heartTimer = Timer.periodic(const Duration(seconds: 10), (timer) {

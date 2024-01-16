@@ -10,6 +10,7 @@ class UserVO {
   String? mobile;
   String? note;
   String? address;
+  String?sign;
 
   UserVO({
     this.id,
@@ -23,6 +24,7 @@ class UserVO {
     this.mobile,
     this.note,
     this.address,
+    this.sign,
   });
 
   Map<String, dynamic> toMap() {
@@ -38,6 +40,7 @@ class UserVO {
       'mobile': this.mobile,
       'note': this.note,
       'address': this.address,
+      'sign':this.sign,
     };
   }
 
@@ -54,6 +57,7 @@ class UserVO {
       mobile: map['mobile'] as String?,
       note: map['note'] as String?,
       address: map['address'] as String?,
+      sign: map['sign'] as String?,
     );
   }
 }

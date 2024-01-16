@@ -2,14 +2,17 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
-import 'package:get/get.dart';
+import 'package:get/get_utils/get_utils.dart';
+import 'package:note/commons/util/file_utils.dart';
 import 'package:note/config/app_constants.dart';
+import 'package:note/editor/block/image/multi_source_file_image.dart';
 import 'package:note/model/client/client_vo.dart';
 import 'package:note/model/client/server_vo.dart';
 import 'package:note/model/user/user_vo.dart';
 import 'package:note/service/service_manager.dart';
+import 'package:octo_image/octo_image.dart';
 import 'package:oktoast/oktoast.dart';
 
 /// 登录
@@ -85,7 +88,7 @@ class UserService with ChangeNotifier {
     var data = result.data;
     if (data["msg"] == AppConstants.success) {
       var client = ClientVO.fromMap(data["data"]);
-      saveClientInfo(uid, client);
+      await saveClientInfo(uid, client);
       return client;
     }
     return null;
@@ -173,11 +176,10 @@ class UserService with ChangeNotifier {
   }
 
   Future<void> logout() async {
+    await sendLogout();
     currentUser = null;
     token = null;
     await saveUserInfo();
-    //重新加载界面
-    serviceManager.restartService();
     showToast("已退出登录！");
     notifyListeners();
   }
@@ -210,6 +212,186 @@ class UserService with ChangeNotifier {
           "emailCode": emailCode,
           "password": password,
         },
+        options: Options(contentType: "application/json"),
+      );
+      var data = result.data;
+      if (data["msg"] == AppConstants.success) {
+        return true;
+      }
+    } catch (e) {
+      e.printError();
+    }
+    return false;
+  }
+
+  Future<bool> updateSign(String content) async {
+    try {
+      var result = await Dio().post(
+        "${AppConstants.apiUrl}/user/editSign",
+        data: {
+          "sign": content,
+        },
+        options: Options(
+          contentType: "application/json",
+          headers: {
+            "token": token,
+          },
+        ),
+      );
+      var data = result.data;
+      if (data["msg"] == AppConstants.success) {
+        await fetchUserInfo();
+        return true;
+      }
+    } catch (e) {
+      e.printError();
+    }
+    return false;
+  }
+
+  Future<bool> updateAvatar(String path) async {
+    try {
+      var result = await Dio().post(
+        "${AppConstants.apiUrl}/user/editAvatar",
+        data: FormData.fromMap({
+          "file":
+              await MultipartFile.fromFile(path, filename: getFileName(path)),
+        }),
+        options: Options(
+          contentType: "application/json",
+          headers: {
+            "token": token,
+            "Content-Type": "multipart/form-data;",
+          },
+          responseType: ResponseType.json,
+        ),
+      );
+      var data = result.data;
+      if (data["msg"] == AppConstants.success) {
+        await fetchUserInfo();
+        await downloadAvatar();
+        return true;
+      }
+    } catch (e) {
+      e.printError();
+    }
+    return false;
+  }
+
+  Future<void> downloadAvatar() async {
+    var avatarFile = await getAvatarFile();
+    bool exist = File(avatarFile).existsSync();
+    if (exist) {
+      return;
+    }
+    await Dio().download(
+      "${AppConstants.apiUrl}/file/downloadAvatar",
+      avatarFile,
+      options: Options(
+        headers: {
+          "token": token,
+        },
+      ),
+    );
+    notifyListeners();
+  }
+
+  Widget defaultUserIcon(double size) {
+    return Icon(
+      Icons.account_circle,
+      size: 32,
+      color: Colors.grey.shade600,
+    );
+  }
+
+  Widget buildUserIcon(
+    BuildContext context, [
+    double size = 32,
+  ]) {
+    var userService = serviceManager.userService;
+    var imageId = userService.currentUser?.avatar;
+    if (imageId == null) {
+      return defaultUserIcon(size);
+    }
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(size),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: OctoImage(
+          color: null,
+          placeholderBuilder: (context) => defaultUserIcon(size),
+          image: MultiSourceFileImage(
+              imageId: imageId,
+              reader: (id) async {
+                await userService.downloadAvatar();
+                var file = await userService.getAvatarFile();
+                return File(file).readAsBytes();
+              }),
+        ),
+      ),
+    );
+  }
+
+  Future<String> getAvatarFile() async {
+    var downloadDir = await serviceManager.fileManager.getDownloadDir();
+    return "$downloadDir/${currentUser?.avatar}";
+  }
+
+  Future<bool> updateNickname(String content) async {
+    try {
+      var result = await Dio().post(
+        "${AppConstants.apiUrl}/user/editNickname",
+        data: {
+          "nickname": content,
+        },
+        options: Options(
+          contentType: "application/json",
+          headers: {
+            "token": token,
+          },
+        ),
+      );
+      var data = result.data;
+      if (data["msg"] == AppConstants.success) {
+        await fetchUserInfo();
+        return true;
+      }
+    } catch (e) {
+      e.printError();
+    }
+    return false;
+  }
+
+  Future<bool> updatePassword(
+      String email, String emailCode, String password) async {
+    try {
+      var result = await Dio().post(
+        "${AppConstants.apiUrl}/user/forgetPassword",
+        data: {
+          "email": email,
+          "emailCode": emailCode,
+          "password": password,
+        },
+        options: Options(contentType: "application/json"),
+      );
+      var data = result.data;
+      if (data["msg"] == AppConstants.success) {
+        return true;
+      }
+    } catch (e) {
+      e.printError();
+    }
+    return false;
+  }
+
+  Future<bool> sendLogout() async {
+    try {
+      var result = await Dio().post(
+        "${AppConstants.apiUrl}/user/logout",
         options: Options(contentType: "application/json"),
       );
       var data = result.data;

@@ -2,12 +2,14 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:note/app/mobile/theme/mobile_theme.dart';
 import 'package:note/app/windows/outline/outline_tree.dart';
+import 'package:note/app/windows/view/card/win_create_card_dialog.dart';
 import 'package:note/commons/mvc/view.dart';
 import 'package:note/commons/widget/flayout.dart';
 import 'package:note/editor/edit_controller.dart';
 import 'package:note/editor/edit_widget.dart';
-import 'package:note/editor/theme/theme.dart';
+import 'package:note/editor/widget/drop_menu.dart';
 import 'package:note/editor/widget/toggle_item.dart' as custom;
 
 import '../../widgets/inner_darawer.dart';
@@ -45,10 +47,10 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
                 size: 24,
               )),
           toolbarHeight: 56,
-          backgroundColor: EditTheme.of(context).mobileNavBgColor,
+          backgroundColor: MobileTheme.of(context).mobileNavBgColor,
           shadowColor: Colors.transparent,
-          foregroundColor: EditTheme.of(context).fontColor,
-          systemOverlayStyle: EditTheme.overlayStyle(context),
+          foregroundColor: MobileTheme.of(context).fontColor,
+          systemOverlayStyle: MobileTheme.overlayStyle(context),
           actions: [
             if (keyboardHeight > 10)
               Obx(() {
@@ -82,14 +84,18 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
                   );
                 },
               ),
-            IconButton(
-              enableFeedback: true,
-              onPressed: () {},
-              icon: Icon(
-                Icons.more_horiz_outlined,
-                size: 24,
-              ),
-            )
+            Builder(builder: (context) {
+              return IconButton(
+                enableFeedback: true,
+                onPressed: () {
+                  showMoreContextMenu(context);
+                },
+                icon: Icon(
+                  Icons.more_vert_outlined,
+                  size: 24,
+                ),
+              );
+            })
           ],
         ),
         body: buildEditContentBody(context),
@@ -131,7 +137,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
           rightAnimationType: InnerDrawerAnimation.quadratic,
           backgroundDecoration: const BoxDecoration(color: Colors.transparent),
           rightChild: Container(
-              color: EditTheme.of(context).bgColor,
+              color: MobileTheme.of(context).bgColor,
               child: OutlineTree(
                 controller: controller.outlineController,
                 itemHeight: 48,
@@ -151,7 +157,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
                             child: Text(
                               "字数: ${controller.textLength}",
                               style: TextStyle(
-                                color: EditTheme.of(context)
+                                color: MobileTheme.of(context)
                                     .fontColor
                                     .withOpacity(0.6),
                                 fontSize: 10,
@@ -189,10 +195,10 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
   Widget buildBottomToolbar(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: EditTheme.of(context).mobileNavBgColor,
+        color: MobileTheme.of(context).mobileNavBgColor,
         border: Border(
           top: BorderSide(
-            color: EditTheme.of(context).lineColor,
+            color: MobileTheme.of(context).lineColor,
           ),
         ),
       ),
@@ -377,7 +383,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
     if (controller.isShowBottomPane.isTrue) {
       return Container(
         height: controller.keyboardHeight.value,
-        color: EditTheme.of(context).mobileNavBgColor,
+        color: MobileTheme.of(context).mobileNavBgColor,
         child: GridView.extent(
           maxCrossAxisExtent: 180,
           padding: const EdgeInsets.all(10),
@@ -541,7 +547,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
       color: Colors.transparent,
       child: Ink(
           decoration: BoxDecoration(
-            color: EditTheme.of(context).fontColor.withOpacity(0.1),
+            color: MobileTheme.of(context).fontColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: InkWell(
@@ -554,7 +560,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
 
   Widget buildFontStylePane(BuildContext context) {
     return Container(
-      color: EditTheme.of(context).mobileNavBgColor,
+      color: MobileTheme.of(context).mobileNavBgColor,
       height: controller.keyboardHeight.value,
       child: SingleChildScrollView(
         child: Column(
@@ -569,7 +575,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
                 right: 10,
               ),
               decoration: BoxDecoration(
-                color: EditTheme.buildColor(
+                color: MobileTheme.buildColor(
                   context,
                   darkColor: Colors.black54,
                   lightColor: Colors.grey.withOpacity(0.1),
@@ -599,7 +605,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
                         right: 5,
                       ),
                       decoration: BoxDecoration(
-                        color: EditTheme.buildColor(
+                        color: MobileTheme.buildColor(
                           context,
                           darkColor: Colors.black54,
                           lightColor: Colors.grey.withOpacity(0.1),
@@ -614,7 +620,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
                               child: Icon(
                                 Icons.format_indent_increase_outlined,
                                 size: 24,
-                                color: EditTheme.of(context)
+                                color: MobileTheme.of(context)
                                     .fontColor
                                     .withOpacity(0.6),
                               ),
@@ -629,7 +635,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
                               child: Icon(
                                 Icons.format_indent_decrease_outlined,
                                 size: 24,
-                                color: EditTheme.of(context)
+                                color: MobileTheme.of(context)
                                     .fontColor
                                     .withOpacity(0.6),
                               ),
@@ -652,7 +658,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
                         right: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: EditTheme.buildColor(
+                        color: MobileTheme.buildColor(
                           context,
                           darkColor: Colors.black54,
                           lightColor: Colors.grey.withOpacity(0.1),
@@ -667,7 +673,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
                               child: Icon(
                                 Icons.format_align_left_outlined,
                                 size: 24,
-                                color: EditTheme.of(context)
+                                color: MobileTheme.of(context)
                                     .fontColor
                                     .withOpacity(0.6),
                               ),
@@ -682,7 +688,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
                               child: Icon(
                                 Icons.format_align_center_outlined,
                                 size: 24,
-                                color: EditTheme.of(context)
+                                color: MobileTheme.of(context)
                                     .fontColor
                                     .withOpacity(0.6),
                               ),
@@ -697,7 +703,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
                               child: Icon(
                                 Icons.format_align_right_outlined,
                                 size: 24,
-                                color: EditTheme.of(context)
+                                color: MobileTheme.of(context)
                                     .fontColor
                                     .withOpacity(0.6),
                               ),
@@ -739,7 +745,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
             margin: const EdgeInsets.all(4),
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: EditTheme.buildColor(
+                color: MobileTheme.buildColor(
                   context,
                   lightColor: isChecked ? Colors.white : null,
                   darkColor: isChecked ? Colors.grey : null,
@@ -768,7 +774,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
           margin: const EdgeInsets.all(4),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: EditTheme.buildColor(
+              color: MobileTheme.buildColor(
                 context,
                 lightColor: isChecked ? Colors.white : null,
                 darkColor: isChecked ? Colors.grey : null,
@@ -889,4 +895,86 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
       );
     });
   }
+
+  void showMoreContextMenu(BuildContext context) {
+    var editTheme = MobileTheme.of(context);
+    showDropMenu(
+      context,
+      childrenWidth: 180,
+      childrenHeight: 48,
+      offset: Offset(-10, 0),
+      menus: [
+        DropMenu(
+          text: Row(
+            children: [
+              Text(
+                "复制内容",
+                style: TextStyle(
+                  color: editTheme.fontColor,
+                ),
+              ),
+            ],
+          ),
+          onPress: (ctx) {
+            hideDropMenu(ctx);
+            controller.copyContent(ctx);
+          },
+        ),
+        if (controller.doc?.type != 'doc')
+          DropMenu(
+            text: Row(
+              children: [
+                Text(
+                  "存到笔记",
+                  style: TextStyle(
+                    color: editTheme.fontColor,
+                  ),
+                ),
+              ],
+            ),
+            onPress: (ctx) {
+              hideDropMenu(ctx);
+              showMoveToDocDialog(
+                ctx,
+              );
+            },
+          ),
+        DropMenu(
+          text: Row(
+            children: [
+              Text(
+                "制作卡片",
+                style: TextStyle(
+                  color: editTheme.fontColor,
+                ),
+              ),
+            ],
+          ),
+          onPress: (ctx) {
+            hideDropMenu(ctx);
+            showGenerateCardDialog(
+                context, controller.doc?.name ?? "新建卡片", [controller.doc!]);
+          },
+        ),
+        DropMenu(
+          text: Row(
+            children: [
+              Text(
+                "删除",
+                style: TextStyle(
+                  color: editTheme.fontColor,
+                ),
+              ),
+            ],
+          ),
+          onPress: (ctx) {
+            hideDropMenu(ctx);
+            controller.deleteNote(ctx);
+          },
+        ),
+      ],
+    );
+  }
+
+  void showMoveToDocDialog(BuildContext ctx) {}
 }
