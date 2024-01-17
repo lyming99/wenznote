@@ -25,20 +25,20 @@
 
 ### 主界面
 
-![](snapshot/3b7a6510-b4a3-11ee-b208-872289e2244b)
+![](snapshot/3b7a6510-b4a3-11ee-b208-872289e2244b =480)
 
 ### 编辑器
 
-![](snapshot/3b7b9d90-b4a3-11ee-b208-872289e2244b)
+![](snapshot/3b7b9d90-b4a3-11ee-b208-872289e2244b =480)
 
 ### 笔记列表
 
-![](snapshot/3b7dc071-b4a3-11ee-b208-872289e2244b)
+![](snapshot/3b7dc071-b4a3-11ee-b208-872289e2244b =480)
 
 ### 卡片详情
 
-![](snapshot/3b8365c0-b4a3-11ee-b208-872289e2244b)
+![](snapshot/3b8365c0-b4a3-11ee-b208-872289e2244b =480)
 
 ### 侧滑界面
 
-![](snapshot/3786bcb0-b4a3-11ee-b208-872289e2244b)
+![](snapshot/3786bcb0-b4a3-11ee-b208-872289e2244b =480)
