@@ -22,7 +22,6 @@ import 'package:wenznote/editor/widget/drop_menu.dart';
 import 'package:wenznote/editor/widget/toggle_item.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:wenznote/widgets/mac_window_button.dart';
-import 'package:wenznote/widgets/window_button/decorated_button.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WinHomePage extends MvcView<WinHomeController> {
@@ -43,20 +42,21 @@ class WinHomePage extends MvcView<WinHomeController> {
   Widget buildAppBar(BuildContext context) {
     return SizedBox(
       height: 32,
-      child: Container(
-        child: Obx(() {
-          return Row(
-            children: [
-              if (Platform.isMacOS) Container(),
-              Expanded(
-                  child: controller.showNavPage.isTrue
-                      ? DragToMoveArea(child: Container())
-                      : Container()),
-              if (Platform.isWindows) const WindowButtons(),
-            ],
-          );
-        }),
-      ),
+      child: Obx(() {
+        return Row(
+          children: [
+            if (Platform.isMacOS && controller.showNavPage.isTrue)
+              SizedBox(
+                width: 60,
+              ),
+            Expanded(
+                child: controller.showNavPage.isTrue
+                    ? DragToMoveArea(child: Container())
+                    : Container()),
+            if (Platform.isWindows) const WindowButtons(),
+          ],
+        );
+      }),
     );
   }
 
@@ -594,8 +594,6 @@ class WinHomePage extends MvcView<WinHomeController> {
       modal: true,
     );
   }
-
-
 }
 
 class Keep extends StatefulWidget {

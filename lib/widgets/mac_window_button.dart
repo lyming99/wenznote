@@ -1,17 +1,18 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:wenznote/commons/widget/ignore_parent_pointer.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'window_button/decorated_button.dart';
 
 Widget buildMacWindowButton(BuildContext context) {
-  return Container(
+  return SizedBox(
     height: 40,
     child: Row(
       children: [
         if (Platform.isMacOS)
-          Container(
+          SizedBox(
             width: 20,
             height: 20,
             child: DecoratedCloseButton(
@@ -35,8 +36,13 @@ Widget buildMacWindowButton(BuildContext context) {
             width: 20,
             height: 20,
             child: DecoratedMaximizeButton(
-              onPressed: () {
-                windowManager.maximize();
+              onPressed: () async{
+                var isMax = await windowManager.isMaximized();
+                if(isMax) {
+                  windowManager.unmaximize();
+                }else{
+                  windowManager.maximize();
+                }
               },
             ),
           ),
