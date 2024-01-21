@@ -26,9 +26,7 @@ class WinTodayController extends ServiceManagerController {
   Rx<OrderType> orderType = Rx(OrderType.desc);
   TextEditingController searchController = TextEditingController();
   TabController? tabBarController;
-
   WinHomeController homeController;
-
 
   WinTodayController(this.homeController);
 
@@ -161,5 +159,14 @@ class WinTodayController extends ServiceManagerController {
 
   void onDocListUpdate() {
     startSearchTask();
+  }
+
+  void reloadDoc(DocPO doc, Doc content) {
+    for(var searchItem in searchResultList){
+      if(searchItem.doc.uuid==doc.uuid){
+        searchItem.updateContent(content);
+        break;
+      }
+    }
   }
 }

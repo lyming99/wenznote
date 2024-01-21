@@ -31,7 +31,7 @@ class WinNoteEditTabController extends WinEditTabController {
   bool isCreateMode;
   var title = "".obs;
   String firstCreatTitle = "";
-  Function? onUpdate;
+  Function(Doc content)? onUpdate;
   late YsEditController editController;
 
   YsTree? tree;
@@ -88,7 +88,7 @@ class WinNoteEditTabController extends WinEditTabController {
       );
       tree!.init();
       doc.on("update", (args) async {
-        onContentChanged();
+        onContentChanged(doc);
         var data = args[0];
         if (homeController.serviceManager.editService
             .isInUpdateCache(this.doc.uuid ?? "", data)) {
@@ -105,7 +105,7 @@ class WinNoteEditTabController extends WinEditTabController {
     }
   }
 
-  void onContentChanged() async {
+  void onContentChanged(Doc content) async {
     if (isCreateMode) {
       await TaskService.instance.executeTask(
           taskGroup: "createModeQueue",
@@ -131,7 +131,7 @@ class WinNoteEditTabController extends WinEditTabController {
             }
           });
     }
-    onUpdate?.call();
+    onUpdate?.call(content);
   }
 
   String getDocTitle() {

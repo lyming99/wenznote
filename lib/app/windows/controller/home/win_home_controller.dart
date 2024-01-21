@@ -108,7 +108,9 @@ class WinHomeController extends ServiceManagerController {
             homeController: this,
             doc: doc,
             isCreateMode: isCreateMode,
-            onUpdate: () {
+            onUpdate: (content) {
+              docController.reloadDoc(doc,content);
+              todayController.reloadDoc(doc,content);
               getDocTab(doc.uuid)?.controller.notifyListeners();
             }),
       ),

@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:wenznote/app/windows/controller/doc/win_doc_list_controller.dart';
 import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
@@ -13,6 +14,16 @@ class WinDocPageController extends MvcController {
   var docListControllerMap = <String, WinDocListController>{};
 
   WinDocPageController(this.homeController);
+
+  @override
+  void onDidUpdateWidget(BuildContext context, MvcController oldController) {
+    super.onDidUpdateWidget(context, oldController);
+    var old = oldController as WinDocPageController;
+    searchController = old.searchController;
+    searchContent = old.searchContent;
+    docListController = old.docListController;
+    docListControllerMap = old.docListControllerMap;
+  }
 
   void createDoc(BuildContext context, String text) async {
     var doc = await docListController?.createDoc(context, text);
@@ -29,6 +40,18 @@ class WinDocPageController extends MvcController {
   void onPopRoute(Route? route) {}
 
   void openDoc(DocPO doc, bool isCreateMode) {
-    homeController.openDoc(doc,isCreateMode);
+    homeController.openDoc(doc, isCreateMode);
+  }
+
+  void reloadDoc(DocPO doc, Doc content) {
+    for (var listController in docListControllerMap.values) {
+      var docList = listController.searchResultList;
+      for (var docItem in docList) {
+        if (docItem.doc.uuid == doc.uuid) {
+          docItem.updateContent(content);
+          break;
+        }
+      }
+    }
   }
 }
