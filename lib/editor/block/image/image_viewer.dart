@@ -1,9 +1,9 @@
 import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
-import 'package:note/app/windows/theme/colors.dart';
-import 'package:note/commons/widget/ignore_parent_pointer.dart';
-import 'package:note/editor/widget/drop_menu.dart';
-import 'package:note/editor/widget/toggle_item.dart';
+import 'package:wenznote/app/windows/theme/colors.dart';
+import 'package:wenznote/commons/widget/ignore_parent_pointer.dart';
+import 'package:wenznote/editor/widget/drop_menu.dart';
+import 'package:wenznote/editor/widget/toggle_item.dart';
 import 'package:window_manager/window_manager.dart';
 
 Future<void> showImageViewer(

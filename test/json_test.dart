@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:note/editor/block/element/element.dart';
+import 'package:wenznote/editor/block/element/element.dart';
 import 'package:rich_clipboard/rich_clipboard.dart';
 
 void main() {

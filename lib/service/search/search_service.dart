@@ -2,14 +2,14 @@ import 'dart:collection';
 
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:isar/isar.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/crdt/doc_utils.dart';
-import 'package:note/model/note/po/doc_dir_po.dart';
-import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/model/task/task.dart';
-import 'package:note/service/isar/isar_service_mixin.dart';
-import 'package:note/service/search/search_result_vo.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/crdt/doc_utils.dart';
+import 'package:wenznote/model/note/po/doc_dir_po.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:wenznote/model/task/task.dart';
+import 'package:wenznote/service/isar/isar_service_mixin.dart';
+import 'package:wenznote/service/search/search_result_vo.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 class SearchService with IsarServiceMixin {
   @override

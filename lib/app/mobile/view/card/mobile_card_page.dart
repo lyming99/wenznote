@@ -2,12 +2,12 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:note/app/mobile/theme/mobile_theme.dart';
-import 'package:note/app/mobile/view/card/mobile_card_page_model.dart';
-import 'package:note/app/mobile/widgets/sticky_delegate.dart';
-import 'package:note/commons/mvc/view.dart';
-import 'package:note/editor/widget/drop_menu.dart';
-import 'package:note/editor/widget/toggle_item.dart';
+import 'package:wenznote/app/mobile/theme/mobile_theme.dart';
+import 'package:wenznote/app/mobile/view/card/mobile_card_page_model.dart';
+import 'package:wenznote/app/mobile/widgets/sticky_delegate.dart';
+import 'package:wenznote/commons/mvc/view.dart';
+import 'package:wenznote/editor/widget/drop_menu.dart';
+import 'package:wenznote/editor/widget/toggle_item.dart';
 
 import '../user/mobile_user_icon.dart';
 import 'mobile_card_page_controller.dart';

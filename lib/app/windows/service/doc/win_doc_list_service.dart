@@ -1,11 +1,11 @@
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/home/win_home_controller.dart';
-import 'package:note/app/windows/model/doc/win_doc_list_item_vo.dart';
-import 'package:note/editor/crdt/YsText.dart';
-import 'package:note/model/note/po/doc_dir_po.dart';
-import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
+import 'package:wenznote/app/windows/model/doc/win_doc_list_item_vo.dart';
+import 'package:wenznote/editor/crdt/YsText.dart';
+import 'package:wenznote/model/note/po/doc_dir_po.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
 
 class WinDocListService {

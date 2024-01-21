@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
-import 'package:note/commons/mvc/view.dart';
-import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/commons/mvc/view.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 class DocTitleController extends ServiceManagerController {
   var title = "".obs;

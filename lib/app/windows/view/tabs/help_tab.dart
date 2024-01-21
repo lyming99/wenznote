@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/home/win_home_controller.dart';
-import 'package:note/commons/util/markdown/markdown.dart';
-import 'package:note/editor/edit_controller.dart';
-import 'package:note/editor/edit_widget.dart';
-import 'package:note/editor/widget/toggle_item.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
+import 'package:wenznote/commons/util/markdown/markdown.dart';
+import 'package:wenznote/editor/edit_controller.dart';
+import 'package:wenznote/editor/edit_widget.dart';
+import 'package:wenznote/editor/widget/toggle_item.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:window_manager/window_manager.dart';
 class WindowsHelpTab extends StatefulWidget {
   const WindowsHelpTab({Key? key}) : super(key: key);

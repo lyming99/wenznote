@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 class MobileUserHeaderController extends ServiceManagerController {
   var avatar = "".obs;

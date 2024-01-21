@@ -1,8 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
-import 'package:note/app/windows/controller/user/info.dart';
-import 'package:note/commons/mvc/view.dart';
-import 'package:note/editor/widget/drop_menu.dart';
+import 'package:wenznote/app/windows/controller/user/info.dart';
+import 'package:wenznote/commons/mvc/view.dart';
+import 'package:wenznote/editor/widget/drop_menu.dart';
 
 class WinUserInfoDialog extends MvcView<WinUserInfoController> {
   const WinUserInfoDialog({

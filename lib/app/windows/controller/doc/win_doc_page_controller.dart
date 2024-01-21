@@ -1,9 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/doc/win_doc_list_controller.dart';
-import 'package:note/app/windows/controller/home/win_home_controller.dart';
-import 'package:note/commons/mvc/controller.dart';
-import 'package:note/model/note/po/doc_po.dart';
+import 'package:wenznote/app/windows/controller/doc/win_doc_list_controller.dart';
+import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
+import 'package:wenznote/commons/mvc/controller.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
 
 class WinDocPageController extends MvcController {
   WinHomeController homeController;

@@ -2,11 +2,11 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:note/app/mobile/controller/settings/mobile_settings_controller.dart';
-import 'package:note/app/mobile/theme/mobile_theme.dart';
-import 'package:note/app/mobile/widgets/menu_group.dart';
-import 'package:note/commons/mvc/view.dart';
-import 'package:note/editor/widget/drop_menu.dart';
+import 'package:wenznote/app/mobile/controller/settings/mobile_settings_controller.dart';
+import 'package:wenznote/app/mobile/theme/mobile_theme.dart';
+import 'package:wenznote/app/mobile/widgets/menu_group.dart';
+import 'package:wenznote/commons/mvc/view.dart';
+import 'package:wenznote/editor/widget/drop_menu.dart';
 
 class MobileSettingsPage extends MvcView<MobileSettingsController> {
   const MobileSettingsPage({super.key, required super.controller});

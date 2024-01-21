@@ -1,6 +1,6 @@
 import 'package:flutter_crdt/flutter_crdt.dart';
-import 'package:note/editor/crdt/YsTable.dart';
-import 'package:note/editor/crdt/YsText.dart';
+import 'package:wenznote/editor/crdt/YsTable.dart';
+import 'package:wenznote/editor/crdt/YsText.dart';
 
 import 'YsTree.dart';
 

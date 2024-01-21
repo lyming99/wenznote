@@ -2,13 +2,13 @@ import 'dart:math';
 
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
-import 'package:note/commons/widget/flayout.dart';
-import 'package:note/commons/widget/popup_stack.dart';
-import 'package:note/editor/block/code/code.dart';
-import 'package:note/editor/block/table/table_block.dart';
-import 'package:note/editor/cursor/cursor.dart';
-import 'package:note/editor/edit_controller.dart';
-import 'package:note/editor/theme/theme.dart';
+import 'package:wenznote/commons/widget/flayout.dart';
+import 'package:wenznote/commons/widget/popup_stack.dart';
+import 'package:wenznote/editor/block/code/code.dart';
+import 'package:wenznote/editor/block/table/table_block.dart';
+import 'package:wenznote/editor/cursor/cursor.dart';
+import 'package:wenznote/editor/edit_controller.dart';
+import 'package:wenznote/editor/theme/theme.dart';
 
 import 'block/text/text.dart';
 import 'widget/toggle_item.dart';

@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter_crdt/flutter_crdt.dart';
-import 'package:note/editor/block/block.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/crdt/YsBlock.dart';
-import 'package:note/editor/crdt/YsCursor.dart';
+import 'package:wenznote/editor/block/block.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/crdt/YsBlock.dart';
+import 'package:wenznote/editor/crdt/YsCursor.dart';
 
 import 'YsTree.dart';
 

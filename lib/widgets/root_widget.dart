@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 
 class ServiceManagerWidget extends StatefulWidget {

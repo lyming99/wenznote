@@ -1,7 +1,7 @@
-import 'package:note/editor/block/block.dart';
-import 'package:note/editor/crdt/YsBlock.dart';
-import 'package:note/editor/crdt/YsCursor.dart';
-import 'package:note/editor/crdt/YsText.dart';
+import 'package:wenznote/editor/block/block.dart';
+import 'package:wenznote/editor/crdt/YsBlock.dart';
+import 'package:wenznote/editor/crdt/YsCursor.dart';
+import 'package:wenznote/editor/crdt/YsText.dart';
 
 class YsImage {
   YsBlock block;

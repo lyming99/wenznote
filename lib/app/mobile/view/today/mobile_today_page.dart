@@ -2,11 +2,11 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
-import 'package:note/app/mobile/theme/mobile_theme.dart';
-import 'package:note/app/mobile/view/user/mobile_user_icon.dart';
-import 'package:note/commons/mvc/view.dart';
-import 'package:note/editor/widget/drop_menu.dart';
-import 'package:note/model/note/enum/note_order_type.dart';
+import 'package:wenznote/app/mobile/theme/mobile_theme.dart';
+import 'package:wenznote/app/mobile/view/user/mobile_user_icon.dart';
+import 'package:wenznote/commons/mvc/view.dart';
+import 'package:wenznote/editor/widget/drop_menu.dart';
+import 'package:wenznote/model/note/enum/note_order_type.dart';
 
 import 'mobile_today_controller.dart';
 

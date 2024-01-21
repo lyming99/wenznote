@@ -5,7 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:note/editor/widget/modal_widget.dart';
+import 'package:wenznote/editor/widget/modal_widget.dart';
 import 'package:octo_image/octo_image.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 

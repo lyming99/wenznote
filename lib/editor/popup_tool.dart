@@ -1,11 +1,11 @@
 import 'dart:math';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:note/editor/block/text/text.dart';
-import 'package:note/editor/cursor/cursor.dart';
-import 'package:note/editor/edit_controller.dart';
-import 'package:note/editor/edit_float_widget.dart';
-import 'package:note/editor/widget/drop_menu.dart';
+import 'package:wenznote/editor/block/text/text.dart';
+import 'package:wenznote/editor/cursor/cursor.dart';
+import 'package:wenznote/editor/edit_controller.dart';
+import 'package:wenznote/editor/edit_float_widget.dart';
+import 'package:wenznote/editor/widget/drop_menu.dart';
 
 class IndexSelection {
   int start = 0;

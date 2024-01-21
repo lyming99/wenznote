@@ -2,9 +2,9 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:go_router/go_router.dart';
-import 'package:note/app/mobile/controller/user/mobile_user_login_controller.dart';
-import 'package:note/app/mobile/theme/mobile_theme.dart';
-import 'package:note/commons/mvc/view.dart';
+import 'package:wenznote/app/mobile/controller/user/mobile_user_login_controller.dart';
+import 'package:wenznote/app/mobile/theme/mobile_theme.dart';
+import 'package:wenznote/commons/mvc/view.dart';
 import 'package:oktoast/oktoast.dart';
 
 class MobileUserLoginPage extends MvcView<MobileUserLoginController> {

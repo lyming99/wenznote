@@ -1,7 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/settings/settings_controller.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/app/windows/settings/settings_controller.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 abstract class SettingsItem {
   String title;

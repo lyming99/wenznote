@@ -1,8 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:note/model/card/po/card_set_po.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/model/card/po/card_set_po.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 import 'mobile_card_page_model.dart';
 

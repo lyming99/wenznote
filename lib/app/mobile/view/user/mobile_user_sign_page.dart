@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:note/app/mobile/controller/user/mobile_user_sign_controller.dart';
-import 'package:note/app/mobile/theme/mobile_theme.dart';
-import 'package:note/commons/mvc/view.dart';
+import 'package:wenznote/app/mobile/controller/user/mobile_user_sign_controller.dart';
+import 'package:wenznote/app/mobile/theme/mobile_theme.dart';
+import 'package:wenznote/commons/mvc/view.dart';
 import 'package:oktoast/oktoast.dart';
 
 class MobileUserSignPage extends MvcView<MobileUserSignController> {

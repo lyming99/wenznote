@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:note/commons/widget/expand_node_icon.dart';
-import 'package:note/commons/widget/tree_view.dart';
-import 'package:note/editor/block/block.dart';
-import 'package:note/editor/block/text/text.dart';
-import 'package:note/editor/theme/theme.dart';
+import 'package:wenznote/commons/widget/expand_node_icon.dart';
+import 'package:wenznote/commons/widget/tree_view.dart';
+import 'package:wenznote/editor/block/block.dart';
+import 'package:wenznote/editor/block/text/text.dart';
+import 'package:wenznote/editor/theme/theme.dart';
 
 import 'outline_controller.dart';
 

@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ConfigManager {

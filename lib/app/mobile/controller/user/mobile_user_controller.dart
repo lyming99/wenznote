@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:note/service/service_manager.dart';
-import 'package:note/service/user/user_service.dart';
+import 'package:wenznote/service/service_manager.dart';
+import 'package:wenznote/service/user/user_service.dart';
 
 class MobileUserController extends ServiceManagerController {
   var accountName = "lyming".obs;

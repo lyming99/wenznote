@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/home/win_home_controller.dart';
-import 'package:note/app/windows/widgets/custom_tab_view.dart';
-import 'package:note/commons/mvc/controller.dart';
-import 'package:note/commons/mvc/view.dart';
+import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
+import 'package:wenznote/app/windows/widgets/custom_tab_view.dart';
+import 'package:wenznote/commons/mvc/controller.dart';
+import 'package:wenznote/commons/mvc/view.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WinTabController extends MvcController {

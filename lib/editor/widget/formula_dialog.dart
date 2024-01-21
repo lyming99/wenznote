@@ -6,9 +6,9 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter_math_fork/ast.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:flutter_math_fork/tex.dart';
-import 'package:note/commons/util/platform_util.dart';
-import 'package:note/commons/util/widget_util.dart';
-import 'package:note/editor/theme/theme.dart';
+import 'package:wenznote/commons/util/platform_util.dart';
+import 'package:wenznote/commons/util/widget_util.dart';
+import 'package:wenznote/editor/theme/theme.dart';
 
 class FormulaWidget extends StatefulWidget {
   String? title;

@@ -2,15 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/card/win_card_set_detail_page_controller.dart';
-import 'package:note/app/windows/controller/home/win_home_controller.dart';
-import 'package:note/app/windows/model/card/win_card_set_item_vo.dart';
-import 'package:note/app/windows/view/card/win_card_set_detail_page.dart';
-import 'package:note/model/card/po/card_po.dart';
-import 'package:note/model/card/po/card_set_po.dart';
-import 'package:note/service/card/card_service.dart';
-import 'package:note/service/card/card_study_service.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/app/windows/controller/card/win_card_set_detail_page_controller.dart';
+import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
+import 'package:wenznote/app/windows/model/card/win_card_set_item_vo.dart';
+import 'package:wenznote/app/windows/view/card/win_card_set_detail_page.dart';
+import 'package:wenznote/model/card/po/card_po.dart';
+import 'package:wenznote/model/card/po/card_set_po.dart';
+import 'package:wenznote/service/card/card_service.dart';
+import 'package:wenznote/service/card/card_study_service.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 class WinCardSetController extends ServiceManagerController {
   var searchController = TextEditingController();

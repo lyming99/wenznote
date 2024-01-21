@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter_crdt/flutter_crdt.dart';
-import 'package:note/editor/block/element/element.dart';
+import 'package:wenznote/editor/block/element/element.dart';
 
 import '../../proto/note.pb.dart';
 

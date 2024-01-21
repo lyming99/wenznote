@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_cropping/image_cropping.dart' as cropping;
 import 'package:image_picker/image_picker.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
 
 // Import package

@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:note/commons/widget/tree_view.dart';
-import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/commons/widget/tree_view.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 
 class MoveController extends ServiceManagerController {

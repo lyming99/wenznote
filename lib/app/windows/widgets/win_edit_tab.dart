@@ -1,7 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:note/app/windows/controller/home/win_home_controller.dart';
-import 'package:note/commons/mvc/controller.dart';
-import 'package:note/commons/mvc/view.dart';
+import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
+import 'package:wenznote/commons/mvc/controller.dart';
+import 'package:wenznote/commons/mvc/view.dart';
 import 'package:window_manager/window_manager.dart';
 
 mixin WinEditTabMixin {

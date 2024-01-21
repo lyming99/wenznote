@@ -3,14 +3,14 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
-import 'package:note/commons/util/string.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/block/image/image_element.dart';
-import 'package:note/editor/block/table/table_element.dart';
-import 'package:note/editor/crdt/doc_utils.dart';
-import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/edit/doc_edit_service.dart';
-import 'package:note/service/file/file_manager.dart';
+import 'package:wenznote/commons/util/string.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/block/image/image_element.dart';
+import 'package:wenznote/editor/block/table/table_element.dart';
+import 'package:wenznote/editor/crdt/doc_utils.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:wenznote/service/edit/doc_edit_service.dart';
+import 'package:wenznote/service/file/file_manager.dart';
 
 class WdocInfo {
   String path;

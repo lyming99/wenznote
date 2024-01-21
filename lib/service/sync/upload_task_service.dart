@@ -5,11 +5,11 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:isar/isar.dart';
-import 'package:note/config/app_constants.dart';
-import 'package:note/model/file/file_po.dart';
-import 'package:note/model/note/po/doc_state_po.dart';
-import 'package:note/model/note/po/upload_task_po.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/config/app_constants.dart';
+import 'package:wenznote/model/file/file_po.dart';
+import 'package:wenznote/model/note/po/doc_state_po.dart';
+import 'package:wenznote/model/note/po/upload_task_po.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 class UploadTaskService {
   ServiceManager serviceManager;

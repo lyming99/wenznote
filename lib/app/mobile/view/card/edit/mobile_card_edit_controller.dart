@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter_crdt/flutter_crdt.dart';
-import 'package:note/app/mobile/view/edit/doc_edit_controller.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/model/card/po/card_po.dart';
+import 'package:wenznote/app/mobile/view/edit/doc_edit_controller.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/model/card/po/card_po.dart';
 
 class MobileCardEditController extends MobileDocEditController {
   CardPO card;

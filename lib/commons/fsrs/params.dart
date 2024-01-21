@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:note/commons/fsrs/models.dart';
+import 'package:wenznote/commons/fsrs/models.dart';
 
 class Parameters {
   double requestRetention;

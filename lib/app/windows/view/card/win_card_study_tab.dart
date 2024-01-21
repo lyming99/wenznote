@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/card/win_card_study_controller.dart';
-import 'package:note/app/windows/widgets/card_editor.dart';
-import 'package:note/commons/mvc/view.dart';
-import 'package:note/editor/crdt/YsEditController.dart';
-import 'package:note/editor/widget/toggle_item.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/app/windows/controller/card/win_card_study_controller.dart';
+import 'package:wenznote/app/windows/widgets/card_editor.dart';
+import 'package:wenznote/commons/mvc/view.dart';
+import 'package:wenznote/editor/crdt/YsEditController.dart';
+import 'package:wenznote/editor/widget/toggle_item.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WinCardStudyTab extends MvcView<WinCardStudyController> {

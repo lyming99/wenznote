@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 class ThemeManager {
   ServiceManager serviceManager;

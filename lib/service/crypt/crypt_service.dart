@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:encrypt/encrypt.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 /// 加解密算法，建议使用 kms 算法
 class CryptService {

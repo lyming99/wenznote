@@ -1,7 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:note/commons/mvc/controller.dart';
-import 'package:note/service/service_manager.dart';
-import 'package:note/service/user/user_service.dart';
+import 'package:wenznote/commons/mvc/controller.dart';
+import 'package:wenznote/service/service_manager.dart';
+import 'package:wenznote/service/user/user_service.dart';
 
 class WinUserInfoController extends MvcController {
   var usernameController = TextEditingController();

@@ -6,10 +6,10 @@ import 'dart:typed_data';
 import 'package:fixnum/fixnum.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
-import 'package:note/commons/util/serial_util.dart';
-import 'package:note/model/note/po/doc_state_po.dart';
-import 'package:note/service/service_manager.dart';
-import 'package:note/service/sync/p2p_packet.pb.dart';
+import 'package:wenznote/commons/util/serial_util.dart';
+import 'package:wenznote/model/note/po/doc_state_po.dart';
+import 'package:wenznote/service/service_manager.dart';
+import 'package:wenznote/service/sync/p2p_packet.pb.dart';
 import 'package:web_socket_channel/io.dart';
 
 class MessageType {

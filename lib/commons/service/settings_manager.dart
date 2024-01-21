@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
-import 'package:note/model/settings/settings_po.dart';
-import 'package:note/service/isar/isar_service_mixin.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/model/settings/settings_po.dart';
+import 'package:wenznote/service/isar/isar_service_mixin.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 class SettingsManager with IsarServiceMixin implements ValueListenable {
   @override

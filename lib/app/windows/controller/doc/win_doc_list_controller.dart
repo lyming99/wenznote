@@ -3,17 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/doc/win_doc_page_controller.dart';
-import 'package:note/app/windows/controller/home/win_home_controller.dart';
-import 'package:note/app/windows/model/doc/win_doc_list_item_vo.dart';
-import 'package:note/app/windows/model/today/search_result_vo.dart';
-import 'package:note/app/windows/service/doc/win_doc_list_service.dart';
-import 'package:note/app/windows/service/today/win_today_service.dart';
-import 'package:note/model/note/po/doc_dir_po.dart';
-import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/model/task/task.dart';
-import 'package:note/service/edit/doc_edit_service.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/app/windows/controller/doc/win_doc_page_controller.dart';
+import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
+import 'package:wenznote/app/windows/model/doc/win_doc_list_item_vo.dart';
+import 'package:wenznote/app/windows/model/today/search_result_vo.dart';
+import 'package:wenznote/app/windows/service/doc/win_doc_list_service.dart';
+import 'package:wenznote/app/windows/service/today/win_today_service.dart';
+import 'package:wenznote/model/note/po/doc_dir_po.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:wenznote/model/task/task.dart';
+import 'package:wenznote/service/edit/doc_edit_service.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:oktoast/oktoast.dart';
 
 class WinDocListController extends ServiceManagerController {

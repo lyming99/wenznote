@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/edit_controller.dart';
-import 'package:note/editor/edit_widget.dart';
-import 'package:note/model/card/po/card_po.dart';
-import 'package:note/model/card/po/card_set_po.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/edit_controller.dart';
+import 'package:wenznote/editor/edit_widget.dart';
+import 'package:wenznote/model/card/po/card_po.dart';
+import 'package:wenznote/model/card/po/card_set_po.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 class CardDetailModel {
   CardSetPO? cardSet;

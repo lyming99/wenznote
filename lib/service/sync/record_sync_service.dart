@@ -5,15 +5,15 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
-import 'package:note/model/card/po/card_po.dart';
-import 'package:note/model/card/po/card_set_po.dart';
-import 'package:note/model/card/po/card_study_config_po.dart';
-import 'package:note/model/card/po/card_study_record_po.dart';
-import 'package:note/model/delta/db_delta.dart';
-import 'package:note/model/note/po/doc_dir_po.dart';
-import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/isar/isar_service_mixin.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/model/card/po/card_po.dart';
+import 'package:wenznote/model/card/po/card_set_po.dart';
+import 'package:wenznote/model/card/po/card_study_config_po.dart';
+import 'package:wenznote/model/card/po/card_study_record_po.dart';
+import 'package:wenznote/model/delta/db_delta.dart';
+import 'package:wenznote/model/note/po/doc_dir_po.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:wenznote/service/isar/isar_service_mixin.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 import '../../config/app_constants.dart';
 

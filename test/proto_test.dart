@@ -1,4 +1,4 @@
-import 'package:note/editor/proto/note.pb.dart';
+import 'package:wenznote/editor/proto/note.pb.dart';
 
 void testJson() {
   NoteElement element = NoteElement(

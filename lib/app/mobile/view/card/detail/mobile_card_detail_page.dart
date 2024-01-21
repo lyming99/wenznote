@@ -5,13 +5,13 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:note/app/mobile/theme/mobile_theme.dart';
-import 'package:note/app/mobile/view/card/detail/mobile_card_detail_controller.dart';
-import 'package:note/commons/mvc/view.dart';
-import 'package:note/commons/widget/stickey_widget.dart';
-import 'package:note/editor/widget/drop_menu.dart';
-import 'package:note/editor/widget/toggle_item.dart';
-import 'package:note/model/note/vo/xy_item.dart';
+import 'package:wenznote/app/mobile/theme/mobile_theme.dart';
+import 'package:wenznote/app/mobile/view/card/detail/mobile_card_detail_controller.dart';
+import 'package:wenznote/commons/mvc/view.dart';
+import 'package:wenznote/commons/widget/stickey_widget.dart';
+import 'package:wenznote/editor/widget/drop_menu.dart';
+import 'package:wenznote/editor/widget/toggle_item.dart';
+import 'package:wenznote/model/note/vo/xy_item.dart';
 
 import 'mobile_card_detail_model.dart';
 

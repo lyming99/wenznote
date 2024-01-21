@@ -6,10 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
-import 'package:note/editor/crdt/YsText.dart';
-import 'package:note/editor/crdt/doc_utils.dart';
-import 'package:note/model/note/po/doc_state_po.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/editor/crdt/YsText.dart';
+import 'package:wenznote/editor/crdt/doc_utils.dart';
+import 'package:wenznote/model/note/po/doc_state_po.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 /// 读取数据 = 读取全量数据(离线)+读取合并数据(用户)+增量数据(用户)
 /// 写入数据 = 写入全量数据+写入增量数据

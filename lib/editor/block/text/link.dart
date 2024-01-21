@@ -1,4 +1,4 @@
-import 'package:note/editor/block/text/text.dart';
+import 'package:wenznote/editor/block/text/text.dart';
 
 class BlockLink{
   WenTextElement textElement;

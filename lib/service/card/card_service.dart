@@ -2,11 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
-import 'package:note/model/card/po/card_po.dart';
-import 'package:note/model/card/po/card_set_po.dart';
-import 'package:note/model/card/po/card_study_config_po.dart';
-import 'package:note/service/isar/isar_service_mixin.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/model/card/po/card_po.dart';
+import 'package:wenznote/model/card/po/card_set_po.dart';
+import 'package:wenznote/model/card/po/card_study_config_po.dart';
+import 'package:wenznote/service/isar/isar_service_mixin.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
 
 class CardService with IsarServiceMixin {

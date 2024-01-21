@@ -4,10 +4,10 @@ import 'package:archive/archive_io.dart';
 import 'package:flutter/material.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:get/get.dart';
-import 'package:note/commons/mvc/controller.dart';
-import 'package:note/commons/service/document_manager.dart';
-import 'package:note/commons/util/string.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/commons/mvc/controller.dart';
+import 'package:wenznote/commons/service/document_manager.dart';
+import 'package:wenznote/commons/util/string.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:path/path.dart';
 

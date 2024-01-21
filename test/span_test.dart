@@ -1,5 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:note/editor/block/text/rich_text_painter.dart';
+import 'package:wenznote/editor/block/text/rich_text_painter.dart';
 /// 1.placeholder会占居1个字符长度
 void main() {
   var textSpan = TextSpan(text: "hello", children: [

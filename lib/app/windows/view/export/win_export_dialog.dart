@@ -1,9 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/export/win_export_single_markdown_file_controller.dart';
-import 'package:note/editor/widget/toggle_item.dart';
-import 'package:note/model/note/po/doc_po.dart';
+import 'package:wenznote/app/windows/controller/export/win_export_single_markdown_file_controller.dart';
+import 'package:wenznote/editor/widget/toggle_item.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
 
 class WinExportSingleMarkdownFileDialog
     extends GetView<WinExportSingleMarkdownFileController> {

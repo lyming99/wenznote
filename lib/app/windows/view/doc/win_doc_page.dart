@@ -1,14 +1,14 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/doc/win_doc_list_controller.dart';
-import 'package:note/app/windows/controller/doc/win_doc_page_controller.dart';
-import 'package:note/app/windows/view/doc/win_doc_list_view.dart';
-import 'package:note/commons/mvc/view.dart';
-import 'package:note/editor/theme/theme.dart';
-import 'package:note/editor/widget/drop_menu.dart';
-import 'package:note/editor/widget/toggle_item.dart';
-import 'package:note/widgets/custom_navgator_observer.dart';
+import 'package:wenznote/app/windows/controller/doc/win_doc_list_controller.dart';
+import 'package:wenznote/app/windows/controller/doc/win_doc_page_controller.dart';
+import 'package:wenznote/app/windows/view/doc/win_doc_list_view.dart';
+import 'package:wenznote/commons/mvc/view.dart';
+import 'package:wenznote/editor/theme/theme.dart';
+import 'package:wenznote/editor/widget/drop_menu.dart';
+import 'package:wenznote/editor/widget/toggle_item.dart';
+import 'package:wenznote/widgets/custom_navgator_observer.dart';
 
 class WinDocPage extends MvcView<WinDocPageController> {
   const WinDocPage({super.key, required super.controller});

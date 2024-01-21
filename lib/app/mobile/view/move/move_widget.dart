@@ -1,12 +1,12 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note/commons/mvc/view.dart';
-import 'package:note/commons/widget/expand_node_icon.dart';
-import 'package:note/commons/widget/tree_view.dart';
-import 'package:note/editor/theme/theme.dart';
-import 'package:note/editor/widget/toggle_item.dart';
-import 'package:note/editor/widget/window_button.dart';
+import 'package:wenznote/commons/mvc/view.dart';
+import 'package:wenznote/commons/widget/expand_node_icon.dart';
+import 'package:wenznote/commons/widget/tree_view.dart';
+import 'package:wenznote/editor/theme/theme.dart';
+import 'package:wenznote/editor/widget/toggle_item.dart';
+import 'package:wenznote/editor/widget/window_button.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'move_controller.dart';

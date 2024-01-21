@@ -1,10 +1,10 @@
 import 'dart:math';
 
 import 'package:flutter_crdt/flutter_crdt.dart';
-import 'package:note/editor/block/block.dart';
-import 'package:note/editor/crdt/YsBlock.dart';
-import 'package:note/editor/crdt/YsCursor.dart';
-import 'package:note/editor/crdt/YsSelection.dart';
+import 'package:wenznote/editor/block/block.dart';
+import 'package:wenznote/editor/crdt/YsBlock.dart';
+import 'package:wenznote/editor/crdt/YsCursor.dart';
+import 'package:wenznote/editor/crdt/YsSelection.dart';
 
 import 'YsText.dart';
 

@@ -5,10 +5,10 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
-import 'package:note/editor/edit_controller.dart';
-import 'package:note/editor/edit_widget.dart';
-import 'package:note/model/note/enum/note_order_type.dart';
-import 'package:note/model/note/po/doc_po.dart';
+import 'package:wenznote/editor/edit_controller.dart';
+import 'package:wenznote/editor/edit_widget.dart';
+import 'package:wenznote/model/note/enum/note_order_type.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
 
 import 'mobile_today_controller.dart';
 

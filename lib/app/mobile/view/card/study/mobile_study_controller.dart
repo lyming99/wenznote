@@ -4,16 +4,16 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get/get.dart';
-import 'package:note/commons/fsrs/fsrs.dart' as fsrs;
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/block/text/hide_text_mode.dart';
-import 'package:note/model/card/po/card_po.dart';
-import 'package:note/model/card/po/card_set_po.dart';
-import 'package:note/model/card/po/card_study_config_po.dart';
-import 'package:note/model/card/po/card_study_record_po.dart';
-import 'package:note/service/card/card_service.dart';
-import 'package:note/service/card/card_study_service.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/commons/fsrs/fsrs.dart' as fsrs;
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/block/text/hide_text_mode.dart';
+import 'package:wenznote/model/card/po/card_po.dart';
+import 'package:wenznote/model/card/po/card_set_po.dart';
+import 'package:wenznote/model/card/po/card_study_config_po.dart';
+import 'package:wenznote/model/card/po/card_study_record_po.dart';
+import 'package:wenznote/service/card/card_service.dart';
+import 'package:wenznote/service/card/card_study_service.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
 
 class MobileStudyController extends ServiceManagerController {

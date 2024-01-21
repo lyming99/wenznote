@@ -1,10 +1,10 @@
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
-import 'package:note/app/mobile/view/doc/mobile_doc_page_controller.dart';
-import 'package:note/app/mobile/view/today/mobile_today_controller.dart';
-import 'package:note/editor/crdt/YsText.dart';
-import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/app/mobile/view/doc/mobile_doc_page_controller.dart';
+import 'package:wenznote/app/mobile/view/today/mobile_today_controller.dart';
+import 'package:wenznote/editor/crdt/YsText.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
 
 class MobileHomePageController extends ServiceManagerController {

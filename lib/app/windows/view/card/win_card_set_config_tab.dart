@@ -1,10 +1,10 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/card/win_card_set_config_tab_controller.dart';
-import 'package:note/editor/theme/theme.dart';
-import 'package:note/editor/widget/drop_menu.dart';
-import 'package:note/editor/widget/toggle_item.dart';
+import 'package:wenznote/app/windows/controller/card/win_card_set_config_tab_controller.dart';
+import 'package:wenznote/editor/theme/theme.dart';
+import 'package:wenznote/editor/widget/drop_menu.dart';
+import 'package:wenznote/editor/widget/toggle_item.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WinCardSetConfigTab extends StatelessWidget {

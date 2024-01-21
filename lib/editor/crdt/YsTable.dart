@@ -1,14 +1,14 @@
 import 'dart:math';
 
 import 'package:flutter_crdt/flutter_crdt.dart';
-import 'package:note/editor/block/block.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/block/image/image_block.dart';
-import 'package:note/editor/block/table/table_block.dart';
-import 'package:note/editor/block/text/text.dart';
-import 'package:note/editor/crdt/YsBlock.dart';
-import 'package:note/editor/crdt/YsText.dart';
-import 'package:note/editor/crdt/YsTree.dart';
+import 'package:wenznote/editor/block/block.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/block/image/image_block.dart';
+import 'package:wenznote/editor/block/table/table_block.dart';
+import 'package:wenznote/editor/block/text/text.dart';
+import 'package:wenznote/editor/crdt/YsBlock.dart';
+import 'package:wenznote/editor/crdt/YsText.dart';
+import 'package:wenznote/editor/crdt/YsTree.dart';
 
 import 'YsCursor.dart';
 

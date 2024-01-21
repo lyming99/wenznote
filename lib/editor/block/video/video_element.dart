@@ -1,4 +1,4 @@
-import 'package:note/editor/block/element/element.dart';
+import 'package:wenznote/editor/block/element/element.dart';
 
 import '../../proto/note.pb.dart';
 

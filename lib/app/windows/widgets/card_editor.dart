@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/crdt/YsEditController.dart';
-import 'package:note/editor/crdt/YsTree.dart';
-import 'package:note/editor/edit_widget.dart';
-import 'package:note/model/card/po/card_po.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/crdt/YsEditController.dart';
+import 'package:wenznote/editor/crdt/YsTree.dart';
+import 'package:wenznote/editor/edit_widget.dart';
+import 'package:wenznote/model/card/po/card_po.dart';
 
 class CardEditor extends StatefulWidget {
   final CardPO card;

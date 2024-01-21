@@ -1,10 +1,10 @@
 import 'package:flutter_crdt/flutter_crdt.dart';
-import 'package:note/editor/block/code/code.dart';
-import 'package:note/editor/block/image/image_element.dart';
-import 'package:note/editor/block/line/line_element.dart';
-import 'package:note/editor/block/table/table_element.dart';
-import 'package:note/editor/block/text/text.dart';
-import 'package:note/editor/proto/note.pb.dart';
+import 'package:wenznote/editor/block/code/code.dart';
+import 'package:wenznote/editor/block/image/image_element.dart';
+import 'package:wenznote/editor/block/line/line_element.dart';
+import 'package:wenznote/editor/block/table/table_element.dart';
+import 'package:wenznote/editor/block/text/text.dart';
+import 'package:wenznote/editor/proto/note.pb.dart';
 import 'package:uuid/uuid.dart';
 
 typedef FilePathBuilder = String Function(String uuid);

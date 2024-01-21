@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
-import 'package:note/commons/util/file_utils.dart';
-import 'package:note/config/app_constants.dart';
-import 'package:note/model/file/file_po.dart';
-import 'package:note/service/isar/isar_service_mixin.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/commons/util/file_utils.dart';
+import 'package:wenznote/config/app_constants.dart';
+import 'package:wenznote/model/file/file_po.dart';
+import 'package:wenznote/service/isar/isar_service_mixin.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 class FileSyncService with IsarServiceMixin {
   @override

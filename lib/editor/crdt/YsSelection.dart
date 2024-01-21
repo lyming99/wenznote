@@ -1,4 +1,4 @@
-import 'package:note/editor/crdt/YsTree.dart';
+import 'package:wenznote/editor/crdt/YsTree.dart';
 
 import 'YsCursor.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:note/model/card/po/card_set_po.dart';
+import 'package:wenznote/model/card/po/card_set_po.dart';
 
 class MobileCardModel {
   MobileCardModel({

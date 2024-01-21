@@ -1,9 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
-import 'package:note/editor/block/table/table_cell.dart';
-import 'package:note/editor/block/text/text.dart';
-import 'package:note/editor/edit_controller.dart';
-import 'package:note/editor/widget/toggle_item.dart';
+import 'package:wenznote/editor/block/table/table_cell.dart';
+import 'package:wenznote/editor/block/text/text.dart';
+import 'package:wenznote/editor/edit_controller.dart';
+import 'package:wenznote/editor/widget/toggle_item.dart';
 
 import '../text/rich_text_painter.dart';
 import 'table_block.dart';

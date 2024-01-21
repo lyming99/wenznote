@@ -6,14 +6,14 @@ import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:note/app/windows/view/doc/win_select_doc_dir_dialog.dart';
-import 'package:note/commons/mvc/controller.dart';
-import 'package:note/model/note/enum/note_order_type.dart';
-import 'package:note/model/note/enum/note_type.dart';
-import 'package:note/model/note/po/doc_dir_po.dart';
-import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/search/search_result_vo.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/app/windows/view/doc/win_select_doc_dir_dialog.dart';
+import 'package:wenznote/commons/mvc/controller.dart';
+import 'package:wenznote/model/note/enum/note_order_type.dart';
+import 'package:wenznote/model/note/enum/note_type.dart';
+import 'package:wenznote/model/note/po/doc_dir_po.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:wenznote/service/search/search_result_vo.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
 
 /// 日记、便签、笔记、卡片*、待办*、重点*

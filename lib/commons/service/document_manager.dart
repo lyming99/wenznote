@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:isar/isar.dart';
-import 'package:note/commons/util/markdown/markdown.dart';
-import 'package:note/commons/util/string.dart';
-import 'package:note/commons/util/wdoc/wdoc.dart';
-import 'package:note/model/note/po/doc_dir_po.dart';
-import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/commons/util/markdown/markdown.dart';
+import 'package:wenznote/commons/util/string.dart';
+import 'package:wenznote/commons/util/wdoc/wdoc.dart';
+import 'package:wenznote/model/note/po/doc_dir_po.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
 
 enum ConflictMode { keepNew, keepAll }

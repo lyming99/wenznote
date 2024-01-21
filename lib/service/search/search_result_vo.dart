@@ -3,15 +3,15 @@ import 'dart:math';
 import 'package:date_format/date_format.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
-import 'package:note/editor/block/block.dart';
-import 'package:note/editor/block/block_manager.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/crdt/doc_utils.dart';
-import 'package:note/editor/edit_controller.dart';
-import 'package:note/editor/edit_widget.dart';
-import 'package:note/model/note/enum/note_order_type.dart';
-import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/editor/block/block.dart';
+import 'package:wenznote/editor/block/block_manager.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/crdt/doc_utils.dart';
+import 'package:wenznote/editor/edit_controller.dart';
+import 'package:wenznote/editor/edit_widget.dart';
+import 'package:wenznote/model/note/enum/note_order_type.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 class SearchResultVO with ChangeNotifier {
   DocPO doc;

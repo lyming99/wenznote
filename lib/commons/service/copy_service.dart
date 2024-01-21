@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/crdt/doc_utils.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/crdt/doc_utils.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:rich_clipboard/rich_clipboard.dart';
 import 'package:uuid/uuid.dart';
 

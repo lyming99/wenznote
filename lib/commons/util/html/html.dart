@@ -3,20 +3,20 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/src/css_parser.dart';
-import 'package:note/commons/service/copy_service.dart';
-import 'package:note/commons/util/image.dart';
-import 'package:note/editor/block/block.dart';
-import 'package:note/editor/block/code/code.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/block/image/image_block.dart';
-import 'package:note/editor/block/image/image_element.dart';
-import 'package:note/editor/block/table/table_block.dart';
-import 'package:note/editor/block/table/table_element.dart';
-import 'package:note/editor/block/text/text.dart';
-import 'package:note/editor/block/text/title.dart';
-import 'package:note/editor/block/video/video_element.dart';
-import 'package:note/editor/edit_controller.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/commons/service/copy_service.dart';
+import 'package:wenznote/commons/util/image.dart';
+import 'package:wenznote/editor/block/block.dart';
+import 'package:wenznote/editor/block/code/code.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/block/image/image_block.dart';
+import 'package:wenznote/editor/block/image/image_element.dart';
+import 'package:wenznote/editor/block/table/table_block.dart';
+import 'package:wenznote/editor/block/table/table_element.dart';
+import 'package:wenznote/editor/block/text/text.dart';
+import 'package:wenznote/editor/block/text/title.dart';
+import 'package:wenznote/editor/block/video/video_element.dart';
+import 'package:wenznote/editor/edit_controller.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 Future<List<WenBlock>> parseHtmlBlock(EditController editController,
     CopyService copyService, BuildContext context, String html) async {

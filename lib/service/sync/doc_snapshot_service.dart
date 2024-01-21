@@ -6,10 +6,10 @@ import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
-import 'package:note/config/app_constants.dart';
-import 'package:note/model/note/po/doc_state_po.dart';
-import 'package:note/service/service_manager.dart';
-import 'package:note/service/sync/p2p_packet.pb.dart';
+import 'package:wenznote/config/app_constants.dart';
+import 'package:wenznote/model/note/po/doc_state_po.dart';
+import 'package:wenznote/service/service_manager.dart';
+import 'package:wenznote/service/sync/p2p_packet.pb.dart';
 
 class DocSnapshotService {
   ServiceManager serviceManager;

@@ -4,9 +4,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:note/commons/widget/popup_stack.dart';
-import 'package:note/editor/edit_controller.dart';
-import 'package:note/editor/mouse/mouse.dart';
+import 'package:wenznote/commons/widget/popup_stack.dart';
+import 'package:wenznote/editor/edit_controller.dart';
+import 'package:wenznote/editor/mouse/mouse.dart';
 
 class EditContentWidget extends StatefulWidget {
   EditController controller;

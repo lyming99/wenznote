@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/outline/outline_controller.dart';
-import 'package:note/commons/mvc/controller.dart';
-import 'package:note/commons/widget/flayout.dart';
-import 'package:note/editor/crdt/YsEditController.dart';
-import 'package:note/editor/crdt/YsTree.dart';
-import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/app/windows/outline/outline_controller.dart';
+import 'package:wenznote/commons/mvc/controller.dart';
+import 'package:wenznote/commons/widget/flayout.dart';
+import 'package:wenznote/editor/crdt/YsEditController.dart';
+import 'package:wenznote/editor/crdt/YsTree.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 typedef DocReader = Future<Doc> Function(BuildContext context);
 

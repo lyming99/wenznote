@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:note/app/mobile/theme/mobile_theme.dart';
-import 'package:note/app/mobile/controller/user/mobile_user_controller.dart';
-import 'package:note/app/mobile/view/user/mobile_user_page.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/app/mobile/theme/mobile_theme.dart';
+import 'package:wenznote/app/mobile/controller/user/mobile_user_controller.dart';
+import 'package:wenznote/app/mobile/view/user/mobile_user_page.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 class MobileHomePage extends StatelessWidget {
   const MobileHomePage({

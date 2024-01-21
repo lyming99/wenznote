@@ -1,11 +1,11 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/doc/win_select_doc_dir_list_controller.dart';
-import 'package:note/app/windows/view/doc/win_select_doc_list.dart';
-import 'package:note/commons/mvc/view.dart';
-import 'package:note/model/note/po/doc_dir_po.dart';
-import 'package:note/widgets/custom_navgator_observer.dart';
+import 'package:wenznote/app/windows/controller/doc/win_select_doc_dir_list_controller.dart';
+import 'package:wenznote/app/windows/view/doc/win_select_doc_list.dart';
+import 'package:wenznote/commons/mvc/view.dart';
+import 'package:wenznote/model/note/po/doc_dir_po.dart';
+import 'package:wenznote/widgets/custom_navgator_observer.dart';
 
 class SelectDocDirDialog extends StatefulWidget {
   final String? openDirId;

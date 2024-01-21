@@ -2,11 +2,11 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/user/login.dart';
-import 'package:note/app/windows/controller/user/sign.dart';
-import 'package:note/app/windows/theme/colors.dart';
-import 'package:note/app/windows/view/user/login.dart';
-import 'package:note/commons/mvc/view.dart';
+import 'package:wenznote/app/windows/controller/user/login.dart';
+import 'package:wenznote/app/windows/controller/user/sign.dart';
+import 'package:wenznote/app/windows/theme/colors.dart';
+import 'package:wenznote/app/windows/view/user/login.dart';
+import 'package:wenznote/commons/mvc/view.dart';
 import 'package:oktoast/oktoast.dart';
 
 class WinSignDialog extends MvcView<WinSignController> {

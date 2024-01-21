@@ -1,8 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
-import 'package:note/app/mobile/controller/user/mobile_user_header_controller.dart';
-import 'package:note/app/mobile/theme/mobile_theme.dart';
-import 'package:note/commons/mvc/view.dart';
+import 'package:wenznote/app/mobile/controller/user/mobile_user_header_controller.dart';
+import 'package:wenznote/app/mobile/theme/mobile_theme.dart';
+import 'package:wenznote/commons/mvc/view.dart';
 
 import 'mobile_user_icon.dart';
 

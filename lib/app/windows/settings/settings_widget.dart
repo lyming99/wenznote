@@ -1,11 +1,11 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/settings/settings_controller.dart';
-import 'package:note/commons/widget/split_pane.dart';
-import 'package:note/editor/theme/theme.dart';
-import 'package:note/editor/widget/toggle_item.dart';
-import 'package:note/editor/widget/window_button.dart';
+import 'package:wenznote/app/windows/settings/settings_controller.dart';
+import 'package:wenznote/commons/widget/split_pane.dart';
+import 'package:wenznote/editor/theme/theme.dart';
+import 'package:wenznote/editor/widget/toggle_item.dart';
+import 'package:wenznote/editor/widget/window_button.dart';
 import 'package:window_manager/window_manager.dart';
 
 class SettingsWidget extends GetView<SettingsController> {

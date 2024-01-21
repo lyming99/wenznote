@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:note/commons/fsrs/models.dart';
-import 'package:note/commons/fsrs/params.dart';
+import 'package:wenznote/commons/fsrs/models.dart';
+import 'package:wenznote/commons/fsrs/params.dart';
 
 void main() {
   var p = defaultParameters();

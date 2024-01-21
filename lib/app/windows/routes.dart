@@ -1,10 +1,10 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/home/win_home_controller.dart';
-import 'package:note/app/windows/settings/settings_controller.dart';
-import 'package:note/app/windows/view/home/win_home_page.dart';
-import 'package:note/app/windows/view/import/import_controller.dart';
-import 'package:note/app/windows/view/import/import_widget.dart';
+import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
+import 'package:wenznote/app/windows/settings/settings_controller.dart';
+import 'package:wenznote/app/windows/view/home/win_home_page.dart';
+import 'package:wenznote/app/windows/view/import/import_controller.dart';
+import 'package:wenznote/app/windows/view/import/import_widget.dart';
 
 import 'settings/settings_widget.dart';
 import 'view/export/export_controller.dart';

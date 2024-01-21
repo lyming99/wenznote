@@ -2,12 +2,12 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter_crdt/flutter_crdt.dart';
-import 'package:note/editor/block/code/code.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/block/image/image_element.dart';
-import 'package:note/editor/block/line/line_element.dart';
-import 'package:note/editor/block/table/table_element.dart';
-import 'package:note/editor/block/text/text.dart';
+import 'package:wenznote/editor/block/code/code.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/block/image/image_element.dart';
+import 'package:wenznote/editor/block/line/line_element.dart';
+import 'package:wenznote/editor/block/table/table_element.dart';
+import 'package:wenznote/editor/block/text/text.dart';
 
 void applyYTextToTextElement(YText? yText, WenTextElement text) {
   if (yText == null) {

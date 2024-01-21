@@ -3,10 +3,10 @@ import 'dart:math';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:note/app/mobile/controller/user/mobile_user_header_controller.dart';
-import 'package:note/app/mobile/theme/mobile_theme.dart';
-import 'package:note/app/mobile/view/user/mobile_user_info_header.dart';
-import 'package:note/commons/mvc/view.dart';
+import 'package:wenznote/app/mobile/controller/user/mobile_user_header_controller.dart';
+import 'package:wenznote/app/mobile/theme/mobile_theme.dart';
+import 'package:wenznote/app/mobile/view/user/mobile_user_info_header.dart';
+import 'package:wenznote/commons/mvc/view.dart';
 
 import '../../controller/user/mobile_user_controller.dart';
 

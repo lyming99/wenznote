@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:note/commons/mvc/controller.dart';
+import 'package:wenznote/commons/mvc/controller.dart';
 
 typedef MvcBuilder<T> = Widget Function(T controller);
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:note/commons/mvc/view.dart';
+import 'package:wenznote/commons/mvc/view.dart';
 
 class MobileUserIconCropPage extends MvcView{
   const MobileUserIconCropPage({super.key, required super.controller});

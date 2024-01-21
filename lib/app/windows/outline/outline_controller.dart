@@ -1,10 +1,10 @@
 import 'dart:collection';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:note/commons/widget/tree_view.dart';
-import 'package:note/editor/block/block_manager.dart';
-import 'package:note/editor/block/text/text.dart';
-import 'package:note/editor/edit_controller.dart';
+import 'package:wenznote/commons/widget/tree_view.dart';
+import 'package:wenznote/editor/block/block_manager.dart';
+import 'package:wenznote/editor/block/text/text.dart';
+import 'package:wenznote/editor/edit_controller.dart';
 
 class OutlineController with ChangeNotifier {
   late TreeController<TextBlock> treeController;

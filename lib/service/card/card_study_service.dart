@@ -1,15 +1,15 @@
 import 'dart:math';
 
 import 'package:isar/isar.dart';
-import 'package:note/commons/util/date_util.dart';
-import 'package:note/model/card/po/card_po.dart';
-import 'package:note/model/card/po/card_study_config_po.dart';
-import 'package:note/model/card/po/card_study_queue_po.dart';
-import 'package:note/model/card/po/card_study_record_po.dart';
-import 'package:note/model/note/vo/xy_item.dart';
-import 'package:note/service/isar/isar_service_mixin.dart';
-import 'package:note/service/service_manager.dart';
-import 'package:note/service/task/task.dart';
+import 'package:wenznote/commons/util/date_util.dart';
+import 'package:wenznote/model/card/po/card_po.dart';
+import 'package:wenznote/model/card/po/card_study_config_po.dart';
+import 'package:wenznote/model/card/po/card_study_queue_po.dart';
+import 'package:wenznote/model/card/po/card_study_record_po.dart';
+import 'package:wenznote/model/note/vo/xy_item.dart';
+import 'package:wenznote/service/isar/isar_service_mixin.dart';
+import 'package:wenznote/service/service_manager.dart';
+import 'package:wenznote/service/task/task.dart';
 import 'package:uuid/uuid.dart';
 
 class CardStudyService with IsarServiceMixin {

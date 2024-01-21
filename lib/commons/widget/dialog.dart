@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note/commons/util/platform_util.dart';
+import 'package:wenznote/commons/util/platform_util.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 
 void showWarningDialog(BuildContext context) {

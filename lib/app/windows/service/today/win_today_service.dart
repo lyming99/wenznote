@@ -1,13 +1,13 @@
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:isar/isar.dart';
-import 'package:note/app/windows/model/today/search_result_vo.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/crdt/doc_utils.dart';
-import 'package:note/model/note/enum/note_order_type.dart';
-import 'package:note/model/note/enum/note_type.dart';
-import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/isar/isar_service_mixin.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/app/windows/model/today/search_result_vo.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/crdt/doc_utils.dart';
+import 'package:wenznote/model/note/enum/note_order_type.dart';
+import 'package:wenznote/model/note/enum/note_type.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:wenznote/service/isar/isar_service_mixin.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 class WinTodayService with IsarServiceMixin {
   @override

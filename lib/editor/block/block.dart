@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:note/service/file/file_manager.dart';
-import 'package:note/commons/widget/popup_stack.dart';
-import 'package:note/editor/theme/theme.dart';
+import 'package:wenznote/service/file/file_manager.dart';
+import 'package:wenznote/commons/widget/popup_stack.dart';
+import 'package:wenznote/editor/theme/theme.dart';
 
 import '../edit_controller.dart';
 import '../cursor/cursor.dart';

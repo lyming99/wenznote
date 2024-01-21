@@ -2,10 +2,10 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:note/editor/block/block.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/edit_controller.dart';
-import 'package:note/editor/theme/theme.dart';
+import 'package:wenznote/editor/block/block.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/edit_controller.dart';
+import 'package:wenznote/editor/theme/theme.dart';
 
 import '../text/text.dart';
 import 'line_element.dart';

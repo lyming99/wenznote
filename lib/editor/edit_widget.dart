@@ -1,10 +1,10 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
-import 'package:note/app/windows/theme/colors.dart';
-import 'package:note/commons/widget/ignore_parent_pointer.dart';
-import 'package:note/editor/edit_controller.dart';
-import 'package:note/editor/theme/theme.dart';
-import 'package:note/editor/widget/modal_widget.dart';
+import 'package:wenznote/app/windows/theme/colors.dart';
+import 'package:wenznote/commons/widget/ignore_parent_pointer.dart';
+import 'package:wenznote/editor/edit_controller.dart';
+import 'package:wenznote/editor/theme/theme.dart';
+import 'package:wenznote/editor/widget/modal_widget.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 import 'edit_content_widget.dart';

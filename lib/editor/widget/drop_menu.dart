@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:note/commons/widget/popup_stack.dart';
-import 'package:note/editor/widget/toggle_item.dart';
+import 'package:wenznote/commons/widget/popup_stack.dart';
+import 'package:wenznote/editor/widget/toggle_item.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 
 import '../theme/theme.dart';

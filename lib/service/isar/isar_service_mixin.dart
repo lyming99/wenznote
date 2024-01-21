@@ -1,6 +1,6 @@
 import 'package:isar/isar.dart';
 import 'package:json_diff/json_diff.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 mixin IsarServiceMixin {
   ServiceManager get serviceManager;

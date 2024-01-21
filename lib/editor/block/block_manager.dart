@@ -2,16 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:note/editor/block/code/code.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/block/image/image_block.dart';
-import 'package:note/editor/block/image/image_element.dart';
-import 'package:note/editor/block/line/line_block.dart';
-import 'package:note/editor/block/line/line_element.dart';
-import 'package:note/editor/block/table/table_block.dart';
-import 'package:note/editor/cursor/cursor.dart';
-import 'package:note/editor/edit_controller.dart';
-import 'package:note/editor/proto/note.pb.dart';
+import 'package:wenznote/editor/block/code/code.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/block/image/image_block.dart';
+import 'package:wenznote/editor/block/image/image_element.dart';
+import 'package:wenznote/editor/block/line/line_block.dart';
+import 'package:wenznote/editor/block/line/line_element.dart';
+import 'package:wenznote/editor/block/table/table_block.dart';
+import 'package:wenznote/editor/cursor/cursor.dart';
+import 'package:wenznote/editor/edit_controller.dart';
+import 'package:wenznote/editor/proto/note.pb.dart';
 
 import 'block.dart';
 import 'table/table_element.dart';

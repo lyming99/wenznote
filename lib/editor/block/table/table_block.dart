@@ -3,17 +3,17 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:note/commons/widget/ignore_parent_pointer.dart';
-import 'package:note/commons/widget/popup_stack.dart';
-import 'package:note/editor/block/block.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/block/image/image_element.dart';
-import 'package:note/editor/block/table/table_range.dart';
-import 'package:note/editor/block/text/link.dart';
-import 'package:note/editor/block/text/text.dart';
-import 'package:note/editor/edit_controller.dart';
-import 'package:note/editor/widget/drop_menu.dart';
-import 'package:note/editor/widget/toggle_item.dart';
+import 'package:wenznote/commons/widget/ignore_parent_pointer.dart';
+import 'package:wenznote/commons/widget/popup_stack.dart';
+import 'package:wenznote/editor/block/block.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/block/image/image_element.dart';
+import 'package:wenznote/editor/block/table/table_range.dart';
+import 'package:wenznote/editor/block/text/link.dart';
+import 'package:wenznote/editor/block/text/text.dart';
+import 'package:wenznote/editor/edit_controller.dart';
+import 'package:wenznote/editor/widget/drop_menu.dart';
+import 'package:wenznote/editor/widget/toggle_item.dart';
 
 import '../../cursor/cursor.dart';
 import '../image/image_block.dart';

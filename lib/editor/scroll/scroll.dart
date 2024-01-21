@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:note/editor/edit_controller.dart';
+import 'package:wenznote/editor/edit_controller.dart';
 
 class ScrollState {
   double _offset = 0;

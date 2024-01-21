@@ -9,9 +9,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_size_getter/image_size_getter.dart';
-import 'package:note/commons/util/file_utils.dart';
-import 'package:note/model/file/file_po.dart';
-import 'package:note/service/service_manager.dart';
+import 'package:wenznote/commons/util/file_utils.dart';
+import 'package:wenznote/model/file/file_po.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 

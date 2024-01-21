@@ -4,11 +4,11 @@ import 'dart:io';
 import 'package:dart_markdown/dart_markdown.dart';
 import 'package:dart_markdown/src/charcode.dart';
 import 'package:dart_markdown/src/inline_syntaxes/delimiter_syntax.dart';
-import 'package:note/editor/block/element/element.dart';
-import 'package:note/editor/block/image/image_element.dart';
-import 'package:note/editor/block/line/line_element.dart';
-import 'package:note/editor/block/table/table_element.dart';
-import 'package:note/editor/block/text/text.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/block/image/image_element.dart';
+import 'package:wenznote/editor/block/line/line_element.dart';
+import 'package:wenznote/editor/block/table/table_element.dart';
+import 'package:wenznote/editor/block/text/text.dart';
 import 'package:path/path.dart';
 
 import '../../../service/file/file_manager.dart';
