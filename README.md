@@ -23,8 +23,10 @@
 
 ## 电脑版界面
 
-## 手机端界面
 <img src="./snapshot/windows.png"/>
+
+## 手机端界面
+
 ### 主界面
 
 <img src="./snapshot/3b7a6510-b4a3-11ee-b208-872289e2244b" width = "480"/>
