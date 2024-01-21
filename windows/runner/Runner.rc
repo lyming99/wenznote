@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "note" "\0"
+            VALUE "CompanyName", "com.wenznote" "\0"
+            VALUE "FileDescription", "WenzNote" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "note" "\0"
+            VALUE "InternalName", "WenzNote" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2022 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "note.exe" "\0"
-            VALUE "ProductName", "note" "\0"
+            VALUE "OriginalFilename", "WenzNote.exe" "\0"
+            VALUE "ProductName", "WenzNote" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

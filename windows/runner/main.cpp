@@ -30,7 +30,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 //  Win32Window::Size size(1280, 720);
   //755, 545
   Win32Window::Size size(755, 545);
-  if (!window.CreateAndShow(L"note", origin, size)) {
+  if (!window.CreateAndShow(L"WenzNote", origin, size)) {
     return EXIT_FAILURE;
   }
   window.SetQuitOnClose(true);
