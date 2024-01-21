@@ -2,16 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:note/app/windows/controller/card/win_card_set_detail_page_controller.dart';
 import 'package:note/app/windows/controller/home/win_home_controller.dart';
 import 'package:note/app/windows/model/card/win_card_set_item_vo.dart';
-import 'package:note/app/windows/view/card/win_card_set_tab.dart';
+import 'package:note/app/windows/view/card/win_card_set_detail_page.dart';
 import 'package:note/model/card/po/card_po.dart';
 import 'package:note/model/card/po/card_set_po.dart';
 import 'package:note/service/card/card_service.dart';
 import 'package:note/service/card/card_study_service.dart';
 import 'package:note/service/service_manager.dart';
 
-class WinCardSetController extends GetxController {
+class WinCardSetController extends ServiceManagerController {
   var searchController = TextEditingController();
   var searchContent = "".obs;
   var cardSetList = RxList<WinCardSetItemVO>();
@@ -19,13 +20,15 @@ class WinCardSetController extends GetxController {
   late CardStudyService studyService;
   StreamSubscription? cardSetSubscription;
   StreamSubscription? cardSubscription;
+  WinHomeController homeController;
+
+  WinCardSetController(this.homeController);
 
   @override
-  void onInit() {
-    super.onInit();
-    var sm = ServiceManager.of(Get.context!);
-    cardSetService = sm.cardService;
-    studyService = sm.cardStudyService;
+  void onInitState(BuildContext context) {
+    super.onInitState(context);
+    cardSetService = serviceManager.cardService;
+    studyService = serviceManager.cardStudyService;
     fetchData();
     cardSetSubscription =
         cardSetService.documentIsar.cardSetPOs.watchLazy().listen((event) {
@@ -41,8 +44,8 @@ class WinCardSetController extends GetxController {
   }
 
   @override
-  void onClose() {
-    super.onClose();
+  void onDispose() {
+    super.onDispose();
     cardSetSubscription?.cancel();
   }
 
@@ -78,16 +81,21 @@ class WinCardSetController extends GetxController {
   }
 
   void openCardSet(BuildContext context, WinCardSetItemVO cardSetItem) {
-    WinHomeController home = Get.find();
-    home.openTab("cardSet-${cardSetItem.cardSet.uuid}", () {
-      return WinCardSetTab(cardSet: cardSetItem);
-    });
+    var body = WinCardSetDetailPage(
+        controller: WinCardSetDetailPageController(
+      homeController: homeController,
+      cardSet: cardSetItem,
+    ));
+    homeController.openTab(
+      id: "cardSet-${cardSetItem.cardSet.uuid}",
+      text: Text("${cardSetItem.cardSet.name}"),
+      body: body,
+    );
   }
 
   void deleteCardSet(WinCardSetItemVO cardSetItem) {
     cardSetService.deleteCardSet(cardSetItem.cardSet.uuid);
-    WinHomeController home = Get.find();
-    home.closeTab("cardSet-${cardSetItem.cardSet.uuid}");
+    homeController.closeTab("cardSet-${cardSetItem.cardSet.uuid}");
   }
 
   void renameCardSet(WinCardSetItemVO cardSetItem, String text) {

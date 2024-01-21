@@ -1,15 +1,16 @@
 import 'package:date_format/date_format.dart';
+import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/home/win_home_controller.dart';
 import 'package:note/app/windows/outline/outline_controller.dart';
 import 'package:note/app/windows/outline/outline_tree.dart';
 import 'package:note/app/windows/theme/colors.dart';
 import 'package:note/app/windows/view/card/win_create_card_dialog.dart';
-import 'package:note/app/windows/view/doc_list/win_select_doc_dir_dialog.dart';
+import 'package:note/app/windows/view/doc/win_select_doc_dir_dialog.dart';
 import 'package:note/app/windows/widgets/win_edit_tab.dart';
+import 'package:note/commons/mvc/view.dart';
 import 'package:note/commons/widget/split_pane.dart';
 import 'package:note/editor/crdt/YsEditController.dart';
 import 'package:note/editor/crdt/YsTree.dart';
@@ -21,14 +22,11 @@ import 'package:note/model/note/enum/note_order_type.dart';
 import 'package:note/model/note/enum/note_type.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';
-import 'package:note/service/service_manager.dart';
 import 'package:note/service/task/task.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:window_manager/window_manager.dart';
 
-class WinNoteEditTabController extends WinEditTabController
-    with ChangeNotifier {
-  ServiceManager serviceManager;
+class WinNoteEditTabController extends WinEditTabController {
   DocPO doc;
   bool isCreateMode;
   var title = "".obs;
@@ -39,18 +37,18 @@ class WinNoteEditTabController extends WinEditTabController
   YsTree? tree;
 
   var outlineController = OutlineController();
-  var showOutline = true.obs;
+  var showOutline = false.obs;
 
   WinNoteEditTabController({
-    required this.serviceManager,
+    required super.homeController,
     required this.doc,
     this.isCreateMode = false,
     this.onUpdate,
   }) {
     editController = YsEditController(
-      copyService: serviceManager.copyService,
-      fileManager: serviceManager.fileManager,
-      initFocus: true,
+      copyService: homeController.serviceManager.copyService,
+      fileManager: homeController.serviceManager.fileManager,
+      initFocus: false,
       padding: const EdgeInsets.only(
         top: 20,
         left: 20,
@@ -62,7 +60,8 @@ class WinNoteEditTabController extends WinEditTabController
     );
     editController.addListener(() {
       SchedulerBinding.instance.scheduleFrameCallback((timeStamp) {
-        outlineController.updateTree(editController.viewContext, editController);
+        outlineController.updateTree(
+            editController.viewContext, editController);
       });
     });
   }
@@ -71,16 +70,16 @@ class WinNoteEditTabController extends WinEditTabController
   String get tabId => "doc-${doc.uuid}";
 
   @override
-  void onOpenTab() {
-    super.onOpenTab();
+  void onInitState(BuildContext context) {
+    super.onInitState(context);
     title.value = getDocTitle();
     readDoc();
   }
 
   Future<void> readDoc() async {
-    var doc = await serviceManager.editService.readDoc(this.doc.uuid);
+    var doc =
+        await homeController.serviceManager.editService.readDoc(this.doc.uuid);
     if (doc != null) {
-      var context = Get.context!;
       editController.viewContext = context;
       tree = YsTree(
         context: context,
@@ -91,12 +90,14 @@ class WinNoteEditTabController extends WinEditTabController
       doc.on("update", (args) async {
         onContentChanged();
         var data = args[0];
-        if (serviceManager.editService
+        if (homeController.serviceManager.editService
             .isInUpdateCache(this.doc.uuid ?? "", data)) {
           return;
         }
-        await serviceManager.editService.writeDoc(this.doc.uuid, doc);
-        serviceManager.p2pService.sendDocEditMessage(this.doc.uuid ?? "", data);
+        await homeController.serviceManager.editService
+            .writeDoc(this.doc.uuid, doc);
+        homeController.serviceManager.p2pService
+            .sendDocEditMessage(this.doc.uuid ?? "", data);
       });
       editController.waitLayout(() {
         editController.requestFocus();
@@ -109,7 +110,8 @@ class WinNoteEditTabController extends WinEditTabController
       await TaskService.instance.executeTask(
           taskGroup: "createModeQueue",
           task: () async {
-            var docName = await serviceManager.docService.getDocName(doc.id);
+            var docName = await homeController.serviceManager.docService
+                .getDocName(doc.id);
             if (firstCreatTitle != docName) {
               isCreateMode = false;
             } else {
@@ -150,7 +152,7 @@ class WinNoteEditTabController extends WinEditTabController
   }
 
   void copyContent(BuildContext ctx) async {
-    await serviceManager.copyService
+    await homeController.serviceManager.copyService
         .copyWenElements(ctx, editController.blockManager.getWenElements());
     showToast(
       "复制成功",
@@ -159,9 +161,10 @@ class WinNoteEditTabController extends WinEditTabController
   }
 
   void deleteNote(BuildContext ctx) async {
-    Get.find<WinHomeController>().closeDoc(doc);
-    await serviceManager.docService.deleteDoc(doc);
-    await serviceManager.editService.deleteDocFile(doc.uuid!);
+    homeController.closeDoc(doc);
+
+    await homeController.serviceManager.docService.deleteDoc(doc);
+    await homeController.serviceManager.editService.deleteDocFile(doc.uuid!);
   }
 
   Future<void> moveToDocDir(DocDirPO dir) async {
@@ -169,7 +172,7 @@ class WinNoteEditTabController extends WinEditTabController
     doc.type = 'doc';
     doc.pid = dir.uuid;
     doc.updateTime = DateTime.now().millisecondsSinceEpoch;
-    await serviceManager.docService.updateDoc(doc);
+    await homeController.serviceManager.docService.updateDoc(doc);
   }
 
   String getTitleString() {
@@ -230,19 +233,14 @@ class WinNoteEditTabController extends WinEditTabController
   }
 }
 
-class WinNoteEditTab extends WinEditTab<WinNoteEditTabController>
-    with ChangeNotifier {
+class WinNoteEditTab extends MvcView<WinNoteEditTabController> {
   Doc? docContent;
   var updateTime = 0.obs;
 
+  WinNoteEditTab({super.key, required super.controller});
+
   @override
   WinNoteEditTabController get controller => super.controller!;
-
-  WinNoteEditTab({
-    required WinNoteEditTabController controller,
-  }) {
-    super.controller = controller;
-  }
 
   DocPO get doc => controller.doc;
 
@@ -258,27 +256,36 @@ class WinNoteEditTab extends WinEditTab<WinNoteEditTabController>
             },
             child: Obx(() {
               var showOutline = controller.showOutline.value;
+              var editWidget = EditWidget(
+                controller: controller.editController,
+              );
               return Stack(
                 children: [
                   LayoutBuilder(builder: (context, cons) {
-                    var editWidget = EditWidget(
-                      controller: controller.editController,
-                    );
                     if (cons.maxWidth >= 600 && showOutline) {
                       return SplitPane(
                         one: Container(
                           decoration: BoxDecoration(
-                              border: Border(
-                                  right: BorderSide(
-                                      color: systemColor(
-                                          context, "borderColor")))),
+                            border: Border(
+                              right: BorderSide(
+                                color: fluent.FluentTheme.of(context)
+                                    .resources
+                                    .cardStrokeColorDefaultSolid.withOpacity(0.1),
+                              ),
+                            ),
+                          ),
                           child: editWidget,
                         ),
-                        two: OutlineTree(
-                          controller: controller.outlineController,
-                          itemHeight: 32,
-                          iconSize: 32,
-                          indentWidth: 24,
+                        two: Container(
+                          color: fluent.FluentTheme.of(context)
+                              .resources
+                              .solidBackgroundFillColorQuarternary,
+                          child: OutlineTree(
+                            controller: controller.outlineController,
+                            itemHeight: 32,
+                            iconSize: 32,
+                            indentWidth: 24,
+                          ),
                         ),
                         primaryIndex: PaneIndex.two,
                         primaryMinSize: 300,
@@ -318,47 +325,44 @@ class WinNoteEditTab extends WinEditTab<WinNoteEditTabController>
     );
   }
 
-  @override
-  void onOpenPage() {
-    controller.onOpenTab();
-  }
-
-  @override
-  void onClosePage() {
-    super.onClosePage();
-    controller.onCloseTab();
-  }
-
   Widget buildNav(BuildContext context) {
+    var theme = fluent.FluentTheme.of(context);
     return Container(
       height: 40,
       decoration: BoxDecoration(
+        color: theme.resources.solidBackgroundFillColorTertiary,
         border: Border(
           bottom: BorderSide(
-            color: Colors.grey.shade300,
-            width: 0.5,
+            color: fluent.FluentTheme.of(context)
+                .resources
+                .cardStrokeColorDefaultSolid.withOpacity(0.1),
           ),
         ),
       ),
       child: Row(
         children: [
-          // drawer button
-          SizedBox(
-            width: 10,
-          ),
           Expanded(
-              child: DragToMoveArea(
-            child: Container(
-              alignment: Alignment.centerLeft,
-              child: Obx(
-                () => Text(
-                  "${controller.title.value}",
-                  style: const TextStyle(fontSize: 16),
+              child: Row(
+            children: [
+              SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: DragToMoveArea(
+                  child: Container(
+                    alignment: Alignment.centerLeft,
+                    child: Obx(
+                      () => Text(
+                        "${controller.title.value}",
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
+            ],
           )),
-          // actio
+
           ToggleItem(
             itemBuilder:
                 (BuildContext context, bool checked, bool hover, bool pressed) {
@@ -368,8 +372,8 @@ class WinNoteEditTab extends WinEditTab<WinNoteEditTabController>
                   Icons.list_alt_outlined,
                   size: 22,
                   color: hover
-                      ? systemColor(context, "textColor").withOpacity(0.8)
-                      : systemColor(context, "textColor").withOpacity(0.4),
+                      ? theme.resources.textFillColorSecondary
+                      : theme.resources.textFillColorSecondary.withOpacity(0.8),
                 ),
               );
             },
@@ -377,6 +381,8 @@ class WinNoteEditTab extends WinEditTab<WinNoteEditTabController>
               controller.showOutline.value = !controller.showOutline.isTrue;
             },
           ),
+
+          // actio
           SizedBox(
             width: 4,
           ),
@@ -389,6 +395,9 @@ class WinNoteEditTab extends WinEditTab<WinNoteEditTabController>
                 child: Icon(
                   Icons.more_horiz_outlined,
                   size: 22,
+                  color: hover
+                      ? theme.resources.textFillColorSecondary
+                      : theme.resources.textFillColorSecondary.withOpacity(0.8),
                 ),
               );
             },

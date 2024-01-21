@@ -8,7 +8,6 @@ import 'package:note/editor/edit_widget.dart';
 import 'package:note/editor/widget/toggle_item.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:window_manager/window_manager.dart';
-
 class WindowsHelpTab extends StatefulWidget {
   const WindowsHelpTab({Key? key}) : super(key: key);
 
@@ -29,16 +28,11 @@ class _WindowsHelpTabState extends State<WindowsHelpTab> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        buildNav(context),
         Expanded(
           child: buildContent(context),
         ),
       ],
     );
-  }
-
-  void closeTab() {
-    Get.find<WinHomeController>().closeTab("help_windows");
   }
 
   Widget buildNav(BuildContext context) {
@@ -57,7 +51,6 @@ class _WindowsHelpTabState extends State<WindowsHelpTab> {
           // drawer button
           ToggleItem(
             onTap: (ctx) {
-              closeTab();
             },
             itemBuilder:
                 (BuildContext context, bool checked, bool hover, bool pressed) {

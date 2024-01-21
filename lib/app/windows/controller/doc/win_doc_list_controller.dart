@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/doc_list/win_doc_page_controller.dart';
+import 'package:note/app/windows/controller/doc/win_doc_page_controller.dart';
 import 'package:note/app/windows/controller/home/win_home_controller.dart';
-import 'package:note/app/windows/model/doc_list/win_doc_list_item_vo.dart';
+import 'package:note/app/windows/model/doc/win_doc_list_item_vo.dart';
 import 'package:note/app/windows/model/today/search_result_vo.dart';
-import 'package:note/app/windows/service/doc_list/win_doc_list_service.dart';
+import 'package:note/app/windows/service/doc/win_doc_list_service.dart';
 import 'package:note/app/windows/service/today/win_today_service.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';
@@ -16,9 +16,7 @@ import 'package:note/service/edit/doc_edit_service.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:oktoast/oktoast.dart';
 
-class WinDocListController extends GetxController {
-  late ServiceManager serviceManager;
-  late WinDocListService docListService;
+class WinDocListController extends ServiceManagerController {
   String? docDirUuid;
   var pathList = RxList<DocDirPO>();
   var docList = RxList<WinDocListItemVO>();
@@ -27,23 +25,21 @@ class WinDocListController extends GetxController {
   StreamSubscription? searchListener;
   var searchResultList = RxList(<WinTodaySearchResultVO>[]);
   BaseTask? searchTask;
-
   late WinTodayService winTodayService;
-
+  late WinDocListService docListService;
   late DocEditService docEditService;
+  WinDocPageController docPageController;
 
   WinDocListController({
     this.docDirUuid,
+    required this.docPageController,
   });
-
-  WinDocPageController get docPageController => Get.find();
 
   String get searchText => docPageController.searchContent.value;
 
   @override
-  void onInit() {
-    super.onInit();
-    serviceManager = ServiceManager.of(Get.context!);
+  void onInitState(BuildContext context) {
+    super.onInitState(context);
     docEditService = serviceManager.editService;
     winTodayService = serviceManager.todayService;
     docListService = serviceManager.docListService;
@@ -130,7 +126,7 @@ class WinDocListController extends GetxController {
     if (uuid == null) {
       return;
     }
-    Get.find<WinHomeController>().openDoc(uuid, isCreateMode);
+    docPageController.openDoc(uuid,isCreateMode);
   }
 
   Future<DocPO> createDoc(BuildContext context, String text) async {
@@ -146,14 +142,15 @@ class WinDocListController extends GetxController {
   }
 
   @override
-  void onClose() {
-    super.onClose();
+  void onDispose() {
+    super.onDispose();
     subscription?.cancel();
     searchListener?.cancel();
   }
 
   Future<void> deleteDoc(WinDocListItemVO docItem) async {
     await docListService.deleteDoc(docItem);
+    docPageController.homeController.closeDoc(docItem.doc!);
   }
 
   Future<void> deleteFolder(WinDocListItemVO docItem) async {
@@ -162,7 +159,7 @@ class WinDocListController extends GetxController {
 
   Future<void> updateDocItemName(
       BuildContext context, WinDocListItemVO docItem, String text) async {
-    await docListService.updateName(docItem.doc??docItem.dir, text);
+    await docListService.updateName(docItem.doc ?? docItem.dir, text);
     if (!docItem.isFolder) {
       WinHomeController home = Get.find();
       var tab = home.getDocTab(docItem.uuid);
@@ -189,7 +186,7 @@ class WinDocListController extends GetxController {
   }
 
   void moveToDir(DocDirPO dir, List<WinDocListItemVO> list) {
-    docListService.moveToDir(dir, list.map((e) => e.doc??e.dir).toList());
+    docListService.moveToDir(dir, list.map((e) => e.doc ?? e.dir).toList());
   }
 
   void searchDoc(String text) async {
@@ -224,7 +221,7 @@ class WinDocListController extends GetxController {
   }
 
   Future<void> deleteNote(WinTodaySearchResultVO searchItem) async {
-    Get.find<WinHomeController>().closeDoc(searchItem.doc);
+    docPageController.homeController.closeDoc(searchItem.doc);
     await winTodayService.deleteNote(searchItem.doc);
     await docEditService.deleteDocFile(searchItem.doc.uuid!);
   }

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:note/app/windows/controller/card/win_card_set_detail_page_controller.dart';
 import 'package:note/app/windows/model/card/win_card_search_result_vo.dart';
+import 'package:note/commons/mvc/view.dart';
 import 'package:note/commons/widget/stickey_widget.dart';
 import 'package:note/editor/theme/theme.dart';
 import 'package:note/editor/widget/drop_menu.dart';
@@ -13,13 +14,10 @@ import 'package:note/editor/widget/toggle_item.dart';
 import 'package:note/model/note/vo/xy_item.dart';
 import 'package:window_manager/window_manager.dart';
 
-class WinCardSetDetailPage extends GetView<WinCardSetDetailPageController> {
-  @override
-  final WinCardSetDetailPageController controller;
-
+class WinCardSetDetailPage extends MvcView<WinCardSetDetailPageController> {
   const WinCardSetDetailPage({
     super.key,
-    required this.controller,
+    required super.controller,
   });
 
   @override
@@ -35,15 +33,12 @@ class WinCardSetDetailPage extends GetView<WinCardSetDetailPageController> {
   }
 
   Widget buildCardSetNav(BuildContext context) {
+    var theme = fluent.FluentTheme.of(context);
     return Container(
       height: 40,
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.grey.shade300,
-            width: 0.5,
-          ),
-        ),
+        color: theme.resources.solidBackgroundFillColorTertiary,
+        border: Border(bottom: BorderSide(color: theme.resources.cardStrokeColorDefaultSolid))
       ),
       child: Row(
         children: [
@@ -55,13 +50,7 @@ class WinCardSetDetailPage extends GetView<WinCardSetDetailPageController> {
                 child: Row(
                   children: [
                     // drawer button
-                    Container(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Icon(
-                        fluent.FluentIcons.nav2_d_map_view,
-                        size: 16,
-                      ),
-                    ),
+                    SizedBox(width: 10,),
                     Text(
                       "${controller.cardSet.title}",
                       style: TextStyle(fontSize: 16),
@@ -113,26 +102,29 @@ class WinCardSetDetailPage extends GetView<WinCardSetDetailPageController> {
   }
 
   Widget buildCardSetDetail(BuildContext context) {
-    return Obx(() {
-      return CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 10),
-            sliver: SliverToBoxAdapter(
-              child: buildStudyGraphx(context),
+    return Container(
+      color: fluent.FluentTheme.of(context).resources.solidBackgroundFillColorSecondary,
+      child: Obx(() {
+        return CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: EdgeInsets.only(top: 10, left: 10, right: 10, bottom: 10),
+              sliver: SliverToBoxAdapter(
+                child: buildStudyGraphx(context),
+              ),
             ),
-          ),
-          SliverPadding(
-            padding: EdgeInsets.only(left: 10, right: 10, bottom: 10),
-            sliver: buildCardListTitle(context),
-          ),
-          SliverPadding(
-            padding: EdgeInsets.only(left: 10, right: 10, bottom: 10),
-            sliver: buildCardList(),
-          ),
-        ],
-      );
-    });
+            SliverPadding(
+              padding: EdgeInsets.only(left: 10, right: 10, bottom: 10),
+              sliver: buildCardListTitle(context),
+            ),
+            SliverPadding(
+              padding: EdgeInsets.only(left: 10, right: 10, bottom: 10),
+              sliver: buildCardList(),
+            ),
+          ],
+        );
+      }),
+    );
   }
 
   Widget buildCardListTitle(fluent.BuildContext context) {
@@ -141,7 +133,7 @@ class WinCardSetDetailPage extends GetView<WinCardSetDetailPageController> {
       delegate: StickyWidgetDelegate(
         height: 100,
         child: Material(
-          color: EditTheme.of(context).bgColor3,
+          color: fluent.FluentTheme.of(context).resources.solidBackgroundFillColorSecondary,
           child: Container(
             margin: EdgeInsets.only(
               top: 10,
@@ -216,39 +208,32 @@ class WinCardSetDetailPage extends GetView<WinCardSetDetailPageController> {
   }
 
   Widget buildSearchEdit(BuildContext context) {
-    return Container(
-      width: 270,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Obx(
-        () => fluent.TextBox(
-          placeholder: "搜索卡片",
-          controller: controller.searchController,
-          onChanged: (v) {
-            controller.searchContent.value = v;
-          },
-          prefix: Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Icon(Icons.search),
-          ),
-          suffix: controller.searchContent.value.isEmpty
-              ? null
-              : ToggleItem(
-                  onTap: (ctx) {
-                    controller.searchController.clear();
-                    controller.searchContent.value = "";
-                  },
-                  itemBuilder: (BuildContext context, bool checked, bool hover,
-                      bool pressed) {
-                    return Container(
-                      color: hover ? Colors.grey.withOpacity(0.1) : null,
-                      child: Icon(Icons.close),
-                    );
-                  },
-                ),
+    return Obx(
+      () => fluent.TextBox(
+        placeholder: "搜索卡片",
+        controller: controller.searchController,
+        onChanged: (v) {
+          controller.searchContent.value = v;
+        },
+        prefix: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Icon(Icons.search),
         ),
+        suffix: controller.searchContent.value.isEmpty
+            ? null
+            : ToggleItem(
+                onTap: (ctx) {
+                  controller.searchController.clear();
+                  controller.searchContent.value = "";
+                },
+                itemBuilder: (BuildContext context, bool checked, bool hover,
+                    bool pressed) {
+                  return Container(
+                    color: hover ? Colors.grey.withOpacity(0.1) : null,
+                    child: Icon(Icons.close),
+                  );
+                },
+              ),
       ),
     );
   }

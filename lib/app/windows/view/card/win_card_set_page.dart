@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:note/app/windows/controller/card/win_card_set_controller.dart';
 import 'package:note/app/windows/model/card/win_card_set_item_vo.dart';
+import 'package:note/commons/mvc/view.dart';
 import 'package:note/editor/widget/drop_menu.dart';
 import 'package:note/editor/widget/toggle_item.dart';
 
-class WinCardSetPage extends GetView<WinCardSetController> {
+class WinCardSetPage extends MvcView<WinCardSetController> {
+  const WinCardSetPage({super.key, required super.controller});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -37,38 +40,32 @@ class WinCardSetPage extends GetView<WinCardSetController> {
   }
 
   Widget buildSearchEdit(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Obx(
-        () => fluent.TextBox(
-          placeholder: "搜索",
-          controller: controller.searchController,
-          onChanged: (v) {
-            controller.searchContent.value = v;
-          },
-          prefix: Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Icon(Icons.search),
-          ),
-          suffix: controller.searchContent.value.isEmpty
-              ? null
-              : ToggleItem(
-                  onTap: (ctx) {
-                    controller.searchController.clear();
-                    controller.searchContent.value = "";
-                  },
-                  itemBuilder: (BuildContext context, bool checked, bool hover,
-                      bool pressed) {
-                    return Container(
-                      color: hover ? Colors.grey.withOpacity(0.1) : null,
-                      child: Icon(Icons.close),
-                    );
-                  },
-                ),
+    return Obx(
+      () => fluent.TextBox(
+        placeholder: "搜索",
+        controller: controller.searchController,
+        onChanged: (v) {
+          controller.searchContent.value = v;
+        },
+        prefix: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Icon(Icons.search),
         ),
+        suffix: controller.searchContent.value.isEmpty
+            ? null
+            : ToggleItem(
+                onTap: (ctx) {
+                  controller.searchController.clear();
+                  controller.searchContent.value = "";
+                },
+                itemBuilder: (BuildContext context, bool checked, bool hover,
+                    bool pressed) {
+                  return Container(
+                    color: hover ? Colors.grey.withOpacity(0.1) : null,
+                    child: Icon(Icons.close),
+                  );
+                },
+              ),
       ),
     );
   }

@@ -8,7 +8,6 @@ import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:flutter_highlight/theme_map.dart';
 import 'package:highlight/highlight.dart' as hl;
 import 'package:note/app/windows/theme/colors.dart';
-import 'package:note/commons/service/copy_service.dart';
 import 'package:note/commons/util/html.dart';
 import 'package:note/commons/widget/ignore_parent_pointer.dart';
 import 'package:note/commons/widget/popup_stack.dart';
@@ -330,7 +329,7 @@ class CodeBlock extends WenBlock implements Key {
     var span = SpanBuilder(
       code: code,
       theme:
-          CodeThemeData(styles: theme.isDark ? themeMap['vs'] : themeMap['vs']),
+          CodeThemeData(styles: theme.isDark ? themeMap['atom-one-dark'] : themeMap['atom-one-light']),
       rootStyle: TextStyle(
           color: theme.fontColor,
           fontSize: theme.fontSize,

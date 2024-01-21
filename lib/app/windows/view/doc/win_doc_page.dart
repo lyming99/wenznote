@@ -1,16 +1,18 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/doc_list/win_doc_list_controller.dart';
-import 'package:note/app/windows/controller/doc_list/win_doc_page_controller.dart';
-import 'package:note/app/windows/view/doc_list/win_doc_list_view.dart';
+import 'package:note/app/windows/controller/doc/win_doc_list_controller.dart';
+import 'package:note/app/windows/controller/doc/win_doc_page_controller.dart';
+import 'package:note/app/windows/view/doc/win_doc_list_view.dart';
+import 'package:note/commons/mvc/view.dart';
 import 'package:note/editor/theme/theme.dart';
 import 'package:note/editor/widget/drop_menu.dart';
 import 'package:note/editor/widget/toggle_item.dart';
 import 'package:note/widgets/custom_navgator_observer.dart';
-import 'package:note/widgets/local_get_builder.dart';
 
-class WinDocPage extends GetView<WinDocPageController> {
+class WinDocPage extends MvcView<WinDocPageController> {
+  const WinDocPage({super.key, required super.controller});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -45,38 +47,32 @@ class WinDocPage extends GetView<WinDocPageController> {
   }
 
   Widget buildSearchEdit(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Obx(
-        () => fluent.TextBox(
-          placeholder: "搜索",
-          controller: controller.searchController,
-          onChanged: (v) {
-            controller.searchContent.value = v;
-          },
-          prefix: Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Icon(Icons.search),
-          ),
-          suffix: controller.searchContent.value.isEmpty
-              ? null
-              : ToggleItem(
-                  onTap: (ctx) {
-                    controller.searchController.clear();
-                    controller.searchContent.value = "";
-                  },
-                  itemBuilder: (BuildContext context, bool checked, bool hover,
-                      bool pressed) {
-                    return Container(
-                      color: hover ? Colors.grey.withOpacity(0.1) : null,
-                      child: Icon(Icons.close),
-                    );
-                  },
-                ),
+    return Obx(
+      () => fluent.TextBox(
+        placeholder: "搜索",
+        controller: controller.searchController,
+        onChanged: (v) {
+          controller.searchContent.value = v;
+        },
+        prefix: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Icon(Icons.search),
         ),
+        suffix: controller.searchContent.value.isEmpty
+            ? null
+            : ToggleItem(
+                onTap: (ctx) {
+                  controller.searchController.clear();
+                  controller.searchContent.value = "";
+                },
+                itemBuilder: (BuildContext context, bool checked, bool hover,
+                    bool pressed) {
+                  return Container(
+                    color: hover ? Colors.grey.withOpacity(0.1) : null,
+                    child: Icon(Icons.close),
+                  );
+                },
+              ),
       ),
     );
   }
@@ -218,6 +214,7 @@ class WinDocPage extends GetView<WinDocPageController> {
           docDirUuid: settings.name == "/" || settings.name == ""
               ? null
               : settings.name,
+          docPageController: this.controller,
         );
         this.controller.docListControllerMap[settings.name ?? "/"] = controller;
         return PageRouteBuilder(
@@ -226,11 +223,7 @@ class WinDocPage extends GetView<WinDocPageController> {
             reverseTransitionDuration: Duration.zero,
             pageBuilder: (context, animation, animationSecond) {
               this.controller.docListController = controller;
-              return createLocalGetBuilder(
-                  controller: controller,
-                  builder: (context) {
-                    return WinDocListView(controller: controller);
-                  });
+              return WinDocListView(controller: controller);
             });
       },
     );

@@ -4,6 +4,8 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
+import 'package:note/commons/mvc/view.dart';
 import 'package:note/editor/theme/theme.dart';
 import 'package:note/editor/widget/window_button.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
@@ -11,8 +13,8 @@ import 'package:window_manager/window_manager.dart';
 
 import 'import_controller.dart';
 
-class ImportWidget extends GetView<ImportController> {
-  const ImportWidget({super.key});
+class ImportWidget extends MvcView<ImportController> {
+  const ImportWidget({super.key, required super.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +52,7 @@ class ImportWidget extends GetView<ImportController> {
                     Builder(builder: (context) {
                       return WindowUserButton(
                         onPressed: () {
-                          Get.back();
+                          context.pop();
                         },
                         icon: const Icon(Icons.arrow_back),
                       );
@@ -120,7 +122,7 @@ class ImportWidget extends GetView<ImportController> {
               child: fluent.Button(
                 child: const Text("取消"),
                 onPressed: () {
-                  Get.back();
+                  context.pop();
                 },
               ),
             ),

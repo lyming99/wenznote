@@ -155,6 +155,12 @@ class UserService with ChangeNotifier {
 
   Future<void> readUserInfo() async {
     token = await serviceManager.configManager.readConfig("token", "");
+    if ((token ?? "").isEmpty) {
+      currentUser = null;
+      client = null;
+      noteServer = null;
+      return;
+    }
     var info = await serviceManager.configManager.readConfig("currentUser", "");
     if (info.isNotEmpty) {
       currentUser = UserVO.fromMap(jsonDecode(info));

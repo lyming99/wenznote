@@ -3,7 +3,8 @@ import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:note/app/windows/controller/home/win_home_controller.dart';
 import 'package:note/app/windows/model/today/search_result_vo.dart';
-import 'package:note/app/windows/view/doc_list/win_note_edit_tab.dart';
+import 'package:note/app/windows/view/doc/win_note_edit_tab.dart';
+import 'package:note/commons/mvc/controller.dart';
 import 'package:note/model/note/enum/note_order_type.dart';
 import 'package:note/model/note/enum/note_type.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
@@ -14,8 +15,7 @@ import 'package:note/widgets/ticker_widget.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:uuid/uuid.dart';
 
-class WinTodayController extends GetxController {
-  ServiceManager serviceManager;
+class WinTodayController extends ServiceManagerController {
   BaseTask? searchTask;
   RxList<WinTodaySearchResultVO> searchResultList =
       RxList(<WinTodaySearchResultVO>[]);
@@ -27,11 +27,14 @@ class WinTodayController extends GetxController {
   TextEditingController searchController = TextEditingController();
   TabController? tabBarController;
 
-  WinTodayController(this.serviceManager);
+  WinHomeController homeController;
+
+
+  WinTodayController(this.homeController);
 
   @override
-  void onInit() {
-    super.onInit();
+  void onInitState(BuildContext context) {
+    super.onInitState(context);
     startSearchTask();
     searchContent.listen((val) {
       startSearchTask();
@@ -47,9 +50,10 @@ class WinTodayController extends GetxController {
     });
     serviceManager.docService.addListener(onDocListUpdate);
   }
+
   @override
-  void onClose() {
-    super.onClose();
+  void onDispose() {
+    super.onDispose();
     serviceManager.docService.removeListener(onDocListUpdate);
   }
 
@@ -82,7 +86,7 @@ class WinTodayController extends GetxController {
       );
       docList.sort(sortDoc);
       if (noteType.contains(NoteType.open)) {
-        var openNotes = Get.find<WinHomeController>()
+        var openNotes = homeController
             .editTabList
             .whereType<WinNoteEditTab>()
             .map((e) => e.doc)
@@ -115,12 +119,12 @@ class WinTodayController extends GetxController {
     serviceManager.p2pService
         .sendDocEditMessage(doc.uuid!, encodeStateAsUpdateV2(docContent, null));
     await serviceManager.editService.writeDoc(doc.uuid, docContent);
-    Get.find<WinHomeController>().openDoc(doc);
+    homeController.openDoc(doc);
     startSearchTask();
   }
 
   void openDoc(DocPO doc) {
-    Get.find<WinHomeController>().openDoc(doc);
+    homeController.openDoc(doc);
   }
 
   Future<void> copyContent(
@@ -134,14 +138,14 @@ class WinTodayController extends GetxController {
   }
 
   Future<void> deleteNote(WinTodaySearchResultVO searchItem) async {
-    Get.find<WinHomeController>().closeDoc(searchItem.doc);
+    homeController.closeDoc(searchItem.doc);
     await serviceManager.todayService.deleteNote(searchItem.doc);
     await serviceManager.editService.deleteDocFile(searchItem.doc.uuid!);
     startSearchTask();
   }
 
   TabController createTabController(BuildContext context) {
-    return TabController(length: 4, vsync: findTickerProvider(context));
+    return TabController(length: 3, vsync: findTickerProvider(context));
   }
 
   Future<void> moveToDocDir(

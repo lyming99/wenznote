@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/model/doc_list/win_doc_list_item_vo.dart';
-import 'package:note/app/windows/service/doc_list/win_doc_list_service.dart';
+import 'package:note/app/windows/model/doc/win_doc_list_item_vo.dart';
+import 'package:note/app/windows/service/doc/win_doc_list_service.dart';
 import 'package:note/commons/mvc/controller.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';

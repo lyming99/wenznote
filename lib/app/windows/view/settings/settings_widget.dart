@@ -49,7 +49,6 @@ class WinSettingsWidget extends GetView<WinSettingsController> {
                     Builder(builder: (context) {
                       return WindowUserButton(
                         onPressed: () {
-                          Get.find<WinHomeController>().closeTab("settings");
                         },
                         icon: const Icon(Icons.arrow_back),
                       );

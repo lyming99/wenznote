@@ -201,6 +201,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "3.1.1"
+  crop_image:
+    dependency: "direct main"
+    description:
+      name: crop_image
+      sha256: "12aada0b838365f9be08077814b75fe3113384987ad46119d56b042c1c613045"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.11"
   cross_file:
     dependency: transitive
     description:
@@ -814,6 +822,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "5.0.0"
+  image_cropping:
+    dependency: "direct main"
+    description:
+      name: image_cropping
+      sha256: d76746d6e6eb46071de7457fec4679d66b106c88b5a21a5b16ebf94901d96f29
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.0.13"
   image_picker:
     dependency: "direct main"
     description:
@@ -854,6 +870,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.9.2"
+  image_picker_windows:
+    dependency: "direct main"
+    description:
+      name: image_picker_windows
+      sha256: "6ad07afc4eb1bc25f3a01084d28520496c4a3bb0cb13685435838167c9dcedeb"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.2.1+1"
   image_size_getter:
     dependency: "direct main"
     description:

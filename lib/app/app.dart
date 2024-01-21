@@ -38,6 +38,12 @@ import 'package:oktoast/oktoast.dart';
 import 'mobile/controller/user/mobile_user_forget_password_controller.dart';
 import 'mobile/view/today/mobile_today_page.dart';
 import 'mobile/view/user/mobile_user_login_page.dart';
+import 'windows/controller/home/win_home_controller.dart';
+import 'windows/view/export/export_controller.dart';
+import 'windows/view/export/export_widget.dart';
+import 'windows/view/home/win_home_page.dart';
+import 'windows/view/import/import_controller.dart';
+import 'windows/view/import/import_widget.dart';
 
 class AppController extends MvcController {}
 
@@ -47,11 +53,96 @@ final GlobalKey<NavigatorState> _appNavigatorKey =
 class AppWidget extends MvcView<AppController> {
   AppWidget({super.key, required super.controller});
 
+  static StatefulShellRoute buildHomeRoute() {
+    return StatefulShellRoute.indexedStack(
+      builder: (BuildContext context, GoRouterState state,
+          StatefulNavigationShell navigationShell) {
+        return MobileHomePage(navigationShell: navigationShell);
+      },
+      branches: [
+        // today
+        StatefulShellBranch(
+          routes: <RouteBase>[
+            GoRoute(
+              path: 'today',
+              onExit: (context) async {
+                return ServiceManager.of(context).canPop();
+              },
+              builder: (BuildContext context, GoRouterState state) {
+                return MobileTodayPageWidget(
+                    controller: MobileTodayController());
+              },
+            ),
+          ],
+        ),
+        // note
+        StatefulShellBranch(
+          routes: <RouteBase>[
+            GoRoute(
+              path: 'doc',
+              onExit: (context) async {
+                return ServiceManager.of(context).canPop();
+              },
+              pageBuilder: (context, state) {
+                return CustomTransitionPage(
+                  transitionDuration: Duration.zero,
+                  reverseTransitionDuration: Duration.zero,
+                  child: MobileDocPage(controller: MobileDocPageController()),
+                  transitionsBuilder: (BuildContext context,
+                      Animation<double> animation,
+                      Animation<double> secondaryAnimation,
+                      Widget child) {
+                    return child;
+                  },
+                );
+              },
+              routes: [
+                GoRoute(
+                  path: "dir/:pid",
+                  pageBuilder: (context, state) {
+                    return CustomTransitionPage(
+                      transitionDuration: Duration.zero,
+                      reverseTransitionDuration: Duration.zero,
+                      child: MobileDocPage(
+                        controller: MobileDocPageController(
+                          pid: state.pathParameters['pid'],
+                        ),
+                      ),
+                      transitionsBuilder: (BuildContext context,
+                          Animation<double> animation,
+                          Animation<double> secondaryAnimation,
+                          Widget child) {
+                        return child;
+                      },
+                    );
+                  },
+                )
+              ],
+            ),
+          ],
+        ),
+        // card
+        StatefulShellBranch(
+          routes: <RouteBase>[
+            GoRoute(
+              path: 'card',
+              onExit: (context) async {
+                return ServiceManager.of(context).canPop();
+              },
+              builder: (BuildContext context, GoRouterState state) {
+                return MobileCardPage(controller: MobileCardPageController());
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   final GoRouter _router = GoRouter(
     navigatorKey: _appNavigatorKey,
-    initialLocation: (Platform.isIOS || Platform.isAndroid)
-        ? "/mobile/today"
-        : "/mobile/today",
+    initialLocation:
+        (Platform.isIOS || Platform.isAndroid) ? "/mobile/today" : "/windows",
     routes: [
       GoRoute(
         path: "/mobile",
@@ -146,105 +237,43 @@ class AppWidget extends MvcView<AppController> {
           ),
         ],
       ),
+      GoRoute(
+        path: "/windows",
+        builder: (context, state) {
+          return WinHomePage(
+            controller: WinHomeController(),
+          );
+        },
+      ),
+      GoRoute(
+        path: "/windows/export",
+        builder: (context, state) {
+          return ExportWidget(
+            controller: ExportController(),
+          );
+        },
+      ),
+      GoRoute(
+        path: "/windows/import",
+        builder: (context, state) {
+          return ImportWidget(
+            controller: ImportController(),
+          );
+        },
+      ),
     ],
   );
-
-  static StatefulShellRoute buildHomeRoute() {
-    return StatefulShellRoute.indexedStack(
-      builder: (BuildContext context, GoRouterState state,
-          StatefulNavigationShell navigationShell) {
-        return MobileHomePage(navigationShell: navigationShell);
-      },
-      branches: [
-        // today
-        StatefulShellBranch(
-          routes: <RouteBase>[
-            GoRoute(
-              path: 'today',
-              onExit: (context) async {
-                return ServiceManager.of(context).canPop();
-              },
-              builder: (BuildContext context, GoRouterState state) {
-                return MobileTodayPageWidget(
-                    controller: MobileTodayController());
-              },
-            ),
-          ],
-        ),
-        // note
-        StatefulShellBranch(
-          routes: <RouteBase>[
-            GoRoute(
-              path: 'doc',
-              onExit: (context) async {
-                return ServiceManager.of(context).canPop();
-              },
-              pageBuilder: (context, state) {
-                return CustomTransitionPage(
-                  transitionDuration: Duration.zero,
-                  reverseTransitionDuration: Duration.zero,
-                  child: MobileDocPage(controller: MobileDocPageController()),
-                  transitionsBuilder: (BuildContext context,
-                      Animation<double> animation,
-                      Animation<double> secondaryAnimation,
-                      Widget child) {
-                    return child;
-                  },
-                );
-              },
-              routes: [
-                GoRoute(
-                  path: "dir/:pid",
-                  pageBuilder: (context, state) {
-                    return CustomTransitionPage(
-                      transitionDuration: Duration.zero,
-                      reverseTransitionDuration: Duration.zero,
-                      child: MobileDocPage(
-                        controller: MobileDocPageController(
-                          pid: state.pathParameters['pid'],
-                        ),
-                      ),
-                      transitionsBuilder: (BuildContext context,
-                          Animation<double> animation,
-                          Animation<double> secondaryAnimation,
-                          Widget child) {
-                        return child;
-                      },
-                    );
-                  },
-                )
-              ],
-            ),
-          ],
-        ),
-        // card
-        StatefulShellBranch(
-          routes: <RouteBase>[
-            GoRoute(
-              path: 'card',
-              onExit: (context) async {
-                return ServiceManager.of(context).canPop();
-              },
-              builder: (BuildContext context, GoRouterState state) {
-                return MobileCardPage(controller: MobileCardPageController());
-              },
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     return ServiceManagerWidget(builder: (context) {
-      var sm = ServiceManager.of(context);
-
+      var serviceManager = ServiceManager.of(context);
       return OKToast(
         child: IgnoreParentMousePointerContainer(
           child: Obx(() {
-            var brightness = sm.themeManager.getBrightness();
-            if (sm.themeManager.themeMode.value == ThemeMode.system) {
+            var brightness = serviceManager.themeManager.getBrightness();
+            if (serviceManager.themeManager.themeMode.value ==
+                ThemeMode.system) {
               brightness = MediaQuery.of(context).platformBrightness;
             }
             return MaterialApp.router(

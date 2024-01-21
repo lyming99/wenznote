@@ -1,3 +1,4 @@
+import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:note/app/windows/theme/colors.dart';
 import 'package:note/commons/widget/ignore_parent_pointer.dart';
@@ -30,10 +31,11 @@ class EditState extends State<EditWidget> {
   @override
   Widget build(BuildContext context) {
     var editTheme = EditTheme.of(context);
+    var theme = fluent.FluentTheme.of(context);
     return ModalContainer(
       controller: widget.controller.modalController,
       child: Material(
-        color:  EditTheme.of(context).mobileNavBgColor,
+        color: theme.resources.solidBackgroundFillColorQuarternary,
         textStyle: TextStyle(
           fontSize: editTheme.fontSize,
           color: editTheme.fontColor,
@@ -100,7 +102,7 @@ class EditState extends State<EditWidget> {
                         child: Text(
                           "字数统计: ${widget.controller.textLength}",
                           style: TextStyle(
-                            color: systemColor(context,"textLengthColor"),
+                            color: systemColor(context, "textLengthColor"),
                             fontSize: 10,
                           ),
                         ),

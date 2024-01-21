@@ -90,6 +90,9 @@ class _OutlineTreeState extends State<OutlineTree> {
           color: isSelect
               ? EditTheme.of(context).treeItemSelectColor
               : (isHover ? EditTheme.of(context).treeItemHoverColor : null),
+          padding: EdgeInsets.symmetric(
+            horizontal: 10,
+          ),
           child: Row(
             children: [
               SizedBox(
@@ -120,11 +123,12 @@ class _OutlineTreeState extends State<OutlineTree> {
                         ),
                       ),
                     ),
-                    Text(
-                      node.label ?? "",
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      style: const TextStyle(fontFamily: "MiSans"),
+                    Expanded(
+                      child: Text(
+                        node.label ?? "",
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
                     ),
                   ],
                 ),

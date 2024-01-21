@@ -1,25 +1,30 @@
 import 'dart:io';
-import 'dart:math';
-import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/view/doc_list/win_note_edit_tab.dart';
-import 'package:note/app/windows/view/settings/settings_controller.dart';
-import 'package:note/app/windows/view/settings/settings_widget.dart';
+import 'package:note/app/mobile/controller/settings/mobile_settings_controller.dart';
+import 'package:note/app/mobile/view/settings/mobile_settings_page.dart';
+import 'package:note/app/windows/controller/card/win_card_set_controller.dart';
+import 'package:note/app/windows/controller/doc/win_doc_page_controller.dart';
+import 'package:note/app/windows/controller/today/win_today_controller.dart';
+import 'package:note/app/windows/view/doc/win_note_edit_tab.dart';
 import 'package:note/app/windows/view/tabs/help_tab.dart';
 import 'package:note/app/windows/widgets/win_edit_tab.dart';
-import 'package:note/service/file/file_manager.dart';
+import 'package:note/app/windows/widgets/win_tab_view.dart';
+import 'package:note/commons/mvc/controller.dart';
 import 'package:note/commons/util/markdown/markdown.dart';
 import 'package:note/editor/crdt/doc_utils.dart';
 import 'package:note/model/note/enum/note_type.dart';
 import 'package:note/model/note/po/doc_po.dart';
+import 'package:note/service/file/file_manager.dart';
 import 'package:note/service/service_manager.dart';
-import 'package:note/service/user/user_service.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:uuid/uuid.dart';
 import 'package:window_manager/window_manager.dart';
 
-class WinHomeController extends GetxController {
+import '../../widgets/doc_title_widget.dart';
+
+class WinHomeController extends ServiceManagerController {
   var navIndex = 0.obs;
   var showEditPane = true.obs;
   var currentNoteEditor = Rx<WinNoteEditTab?>(null);
@@ -29,19 +34,22 @@ class WinHomeController extends GetxController {
   var maxOpenTab = 20;
   var showNavPage = true.obs;
   var showSettings = false.obs;
-  late UserService userService;
-  ServiceManager serviceManager;
-
   var isDropOver = false.obs;
+  late WinCardSetController cardController;
+  late WinDocPageController docController;
+  late WinTodayController todayController;
 
-  bool get isLogin => userService.hasLogin;
+  late WinTabController tabController;
 
-  WinHomeController(this.serviceManager);
+  bool get isLogin => serviceManager.userService.hasLogin;
 
   @override
-  void onInit() {
-    super.onInit();
-    userService = serviceManager.userService;
+  void onInitState(BuildContext context) {
+    super.onInitState(context);
+    docController = WinDocPageController(this);
+    todayController = WinTodayController(this);
+    cardController = WinCardSetController(this);
+    tabController = WinTabController(this);
     showNavPage.listen((val) async {
       if (val) {
         await windowManager.setMinimumSize(const Size(720, 480));
@@ -55,40 +63,53 @@ class WinHomeController extends GetxController {
     });
   }
 
-  void onOpenPage(int index) {
-    if (index < editTabList.length) {
-      var tab = editTabList[index];
-      if (tab is WinNoteEditTab) {
-        currentNoteEditor.value = tab;
-      } else {
-        currentNoteEditor.value = null;
-      }
-    } else {
-      currentNoteEditor.value = null;
-      return;
-    }
-    var currentItem = editTabList[index];
-    recentOpenTabList.remove(currentItem);
-    recentOpenTabList.add(currentItem);
-    if (recentOpenTabList.length > maxOpenTab) {
-      var removeItem = recentOpenTabList.removeAt(0);
-      editTabIndex = recentOpenTabList.length - 1;
-      editTabList.remove(removeItem);
-      removeItem.onClosePage();
-    }
-    currentItem.onOpenPage();
+  @override
+  void onDidUpdateWidget(BuildContext context, MvcController oldController) {
+    super.onDidUpdateWidget(context, oldController);
+    var old = oldController as WinHomeController;
+    navIndex = old.navIndex;
+    showEditPane = old.showEditPane;
+    currentNoteEditor = old.currentNoteEditor;
+    editTabList = old.editTabList;
+    editTabIndex = old.editTabIndex;
+    recentOpenTabList = old.recentOpenTabList;
+    maxOpenTab = old.maxOpenTab;
+    showNavPage = old.showNavPage;
+    showSettings = old.showSettings;
+    isDropOver = old.isDropOver;
+    cardController = old.cardController;
+    docController = old.docController;
+    todayController = old.todayController;
+    tabController = old.tabController;
+  }
+
+  void openTab({
+    required String id,
+    required Widget text,
+    required Widget body,
+    Widget? icon,
+    String? semanticLabel,
+  }) {
+    tabController.openTab(
+      id: id,
+      text: text,
+      body: body,
+      icon: icon,
+      semanticLabel: semanticLabel,
+    );
   }
 
   void openDoc(DocPO doc, [bool isCreateMode = false]) {
     openTab(
-      "doc-${doc.uuid}",
-      () => WinNoteEditTab(
+      id: "doc-${doc.uuid}",
+      text: DocTitleWidget(controller: DocTitleController(doc),),
+      body: WinNoteEditTab(
         controller: WinNoteEditTabController(
-            serviceManager: serviceManager,
+            homeController: this,
             doc: doc,
             isCreateMode: isCreateMode,
             onUpdate: () {
-              getDocTab(doc.uuid)?.notifyListeners();
+              getDocTab(doc.uuid)?.controller.notifyListeners();
             }),
       ),
     );
@@ -99,51 +120,17 @@ class WinHomeController extends GetxController {
   }
 
   void closeTab(String id) {
-    var editIndex = editTabList.indexWhere((element) => element.tabId == id);
-    if (editIndex != -1) {
-      recentOpenTabList.removeLast();
-      editTabList.removeAt(editIndex).onClosePage();
-      if (recentOpenTabList.isNotEmpty) {
-        var nextOpen = recentOpenTabList.last;
-        var nextIndex = editTabList
-            .indexWhere((element) => element.tabId == nextOpen.tabId);
-        if (nextIndex == -1) {
-          editTabIndex = max(0, editTabList.length - 1);
-          return;
-        }
-        editTabIndex = nextIndex;
-        onOpenPage(nextIndex);
-      }
-    }
-  }
-
-  void openTab(String tabId, WinEditTabMixin Function() tabBuild) {
-    var tabIndex = editTabList.indexWhere((element) => element.tabId == tabId);
-    if (tabIndex != -1) {
-      editTabIndex = tabIndex;
-      onOpenPage(tabIndex);
-      editTabList.refresh();
-    } else {
-      editTabIndex = editTabList.length;
-      editTabList.add(tabBuild.call());
-      onOpenPage(editTabIndex);
-    }
+    tabController.closeTab(id);
   }
 
   void openSettings() {
-    showNavPage.value = false;
-    showSettings.value = true;
-    openTab("settings", () {
-      Get.put(WinSettingsController());
-      return WinTabWidget(
-        tabId: "settings",
-        child: const WinSettingsWidget(),
-        onTabClose: () {
-          showNavPage.value = true;
-          showSettings.value = false;
-        },
-      );
-    });
+    showDialog(
+        context: context,
+        builder: (context) {
+          return MobileSettingsPage(
+            controller: MobileSettingsController(),
+          );
+        });
   }
 
   void closeWhere(bool Function(WinEditTabMixin element) test) {
@@ -191,26 +178,20 @@ class WinHomeController extends GetxController {
   }
 
   WinNoteEditTab? getDocTab(String? uuid) {
-    var tab =
-        editTabList.firstWhere((element) => element.tabId == "doc-${uuid}");
-    if (tab is WinNoteEditTab) {
-      return tab;
+    var tab = tabController.tabs
+        .firstWhere((element) => element.key == ValueKey("doc-${uuid}"));
+    var body = tab.body;
+    if (body is WinNoteEditTab) {
+      return body;
     }
     return null;
   }
 
   void openHelpTab() {
-    openTab("help_windows", () {
-      return WinEditTab(
-        id: "help_windows",
-        builder: (context, controller) {
-          return const WindowsHelpTab();
-        },
-      );
-    });
+    openTab(id: "help_windows", text: Text("帮助文档"), body: WindowsHelpTab());
   }
 
   Future<void> readUserInfo() async {
-    await userService.readUserInfo();
+    await serviceManager.userService.readUserInfo();
   }
 }

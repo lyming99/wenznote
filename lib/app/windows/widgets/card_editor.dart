@@ -83,7 +83,7 @@ class _CardEditorState extends State<CardEditor>
     if (tree == null) {
       return Container();
     }
-    return EditWidget(controller: tree!.editController);
+    return EditWidget(controller: tree!.editController,);
   }
 
   @override

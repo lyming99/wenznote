@@ -6,7 +6,7 @@ import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:note/app/windows/view/doc_list/win_select_doc_dir_dialog.dart';
+import 'package:note/app/windows/view/doc/win_select_doc_dir_dialog.dart';
 import 'package:note/commons/mvc/controller.dart';
 import 'package:note/model/note/enum/note_order_type.dart';
 import 'package:note/model/note/enum/note_type.dart';

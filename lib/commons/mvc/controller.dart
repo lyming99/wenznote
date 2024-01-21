@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 class MvcController with ChangeNotifier {
   late BuildContext context;
 
-
-
   @mustCallSuper
   void onInitState(BuildContext context) {
     this.context = context;

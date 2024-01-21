@@ -52,11 +52,6 @@ class EditContentWidgetState extends State<EditContentWidget> {
       oldWidget.controller.onWidgetDispose();
       widget.controller.onWidgetInitState(this);
     }
-    if (!widget.controller.isMobile) {
-      scheduleMicrotask(() {
-        widget.controller.showCursorOnOpen();
-      });
-    }
   }
 
   @override
@@ -112,7 +107,6 @@ class EditContentWidgetState extends State<EditContentWidget> {
                 width: blockConstrains.maxWidth,
                 height: blockConstrains.maxHeight,
                 child: Focus(
-                  includeSemantics: false,
                   focusNode: widget.controller.focusNode,
                   autofocus: widget.controller.initFocus,
                   onFocusChange: (focus) {

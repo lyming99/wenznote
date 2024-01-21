@@ -22,7 +22,7 @@ import 'package:note/service/card/card_study_service.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
 
-class WinCardSetDetailPageController extends GetxController {
+class WinCardSetDetailPageController extends ServiceManagerController {
   late CardStudyService studyService;
   late CardService cardService;
   var allCardList = RxList<WinCardSearchResultVO>();
@@ -34,6 +34,7 @@ class WinCardSetDetailPageController extends GetxController {
   WinCardSetItemVO cardSet;
   StreamSubscription? cardListener;
   BaseTask? searchTask;
+  WinHomeController homeController;
 
   var searchController = TextEditingController();
 
@@ -48,6 +49,7 @@ class WinCardSetDetailPageController extends GetxController {
   var studyTimeGraphx = RxList<XYItem<String, int>>();
 
   WinCardSetDetailPageController({
+    required this.homeController,
     required this.cardSet,
   });
 
@@ -63,11 +65,10 @@ class WinCardSetDetailPageController extends GetxController {
   }
 
   @override
-  void onInit() {
-    super.onInit();
-    var sm = ServiceManager.of(Get.context!);
-    cardService = sm.cardService;
-    studyService = sm.cardStudyService;
+  void onInitState(BuildContext context) {
+    super.onInitState(context);
+    cardService = serviceManager.cardService;
+    studyService = serviceManager.cardStudyService;
     fetchData();
     cardListener = cardService.documentIsar.cardPOs.watchLazy().listen((event) {
       fetchData();
@@ -159,26 +160,26 @@ class WinCardSetDetailPageController extends GetxController {
       createTime: DateTime.now().millisecondsSinceEpoch,
       updateTime: DateTime.now().millisecondsSinceEpoch,
     );
-    cardService.createCard(card);
+    await cardService.createCard(card);
     openCard(card, true);
   }
 
   @override
-  void onClose() {
-    super.onClose();
+  void onDispose() {
+    super.onDispose();
     searchTask?.stopTask();
     cardListener?.cancel();
   }
 
   void openCard(CardPO card, [bool isCreateMode = false]) {
-    WinHomeController home = Get.find();
-    home.closeWhere((element) => element is WinCardEditTab);
-    home.openTab("card-${card.uuid}", () {
-      return WinCardEditTab(
-        card: card,
-        isCreateMode: isCreateMode,
-      );
-    });
+    homeController.closeWhere((element) => element is WinCardEditTab);
+    var body = WinCardEditTab(
+      card: card,
+      isCreateMode: isCreateMode,
+      controller: WinCardEditController(homeController),
+    );
+    homeController.openTab(
+        id: "card-${card.uuid}", text: Text("编辑卡片"), body: body);
   }
 
   void deleteCard(CardPO card) {
@@ -186,31 +187,27 @@ class WinCardSetDetailPageController extends GetxController {
   }
 
   void openCardConfig() {
-    WinHomeController home = Get.find();
-    home.openTab("cardSetConfig-${cardSet.cardSet.uuid}", () {
-      return WinEditTab(
-        controller: WinCardSetConfigTabController(cardSet: cardSet.cardSet),
-        builder: (context, controller) {
-          return WinCardSetConfigTab(
-            controller: controller as WinCardSetConfigTabController,
-          );
-        },
-      );
-    });
+    homeController.openTab(
+        id: "cardSetConfig-${cardSet.cardSet.uuid}",
+        text: Text("学习设置"),
+        body: WinCardSetConfigTab(
+          controller: WinCardSetConfigTabController(
+            cardSet: cardSet.cardSet,
+            homeController: homeController,
+          ),
+        ));
   }
 
   void openCardStudy() {
-    WinHomeController home = Get.find();
-    home.openTab("cardSetStudy-${cardSet.cardSet.uuid}", () {
-      return WinEditTab(
-        controller: WinCardStudyController(cardSet: cardSet.cardSet),
-        builder: (context, controller) {
-          return WinCardStudyTab(
-            controller: controller as WinCardStudyController,
-          );
-        },
-      );
-    });
+    homeController.openTab(
+        id: "cardSetStudy-${cardSet.cardSet.uuid}",
+        text: Text("学习"),
+        body: WinCardStudyTab(
+          controller: WinCardStudyController(
+            cardSet: cardSet.cardSet,
+            homeController: homeController,
+          ),
+        ));
   }
 }
 

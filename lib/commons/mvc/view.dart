@@ -21,7 +21,7 @@ class MvcView<T extends MvcController> extends StatefulWidget {
   State<MvcView> createState() => _MvcViewState();
 }
 
-class _MvcViewState extends State<MvcView> {
+class _MvcViewState extends State<MvcView> with AutomaticKeepAliveClientMixin{
   @override
   void initState() {
     super.initState();
@@ -58,4 +58,7 @@ class _MvcViewState extends State<MvcView> {
   void didChangeDependencies() {
     super.didChangeDependencies();
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

@@ -20,5 +20,6 @@ class WinUserInfoController extends MvcController {
 
   void logout(BuildContext context) async {
     await userService.logout();
+    ServiceManager.of(context).restartService();
   }
 }

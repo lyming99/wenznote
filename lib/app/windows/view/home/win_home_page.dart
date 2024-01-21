@@ -1,35 +1,36 @@
-import 'dart:math';
-
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
+import 'package:note/app/mobile/controller/user/mobile_user_info_controller.dart';
+import 'package:note/app/mobile/controller/user/mobile_user_login_controller.dart';
+import 'package:note/app/mobile/view/user/mobile_user_icon.dart';
+import 'package:note/app/mobile/view/user/mobile_user_info_page.dart';
+import 'package:note/app/mobile/view/user/mobile_user_login_page.dart';
 import 'package:note/app/windows/controller/home/win_home_controller.dart';
-import 'package:note/app/windows/controller/user/info.dart';
-import 'package:note/app/windows/controller/user/login.dart';
-import 'package:note/app/windows/theme/colors.dart';
 import 'package:note/app/windows/view/card/win_card_set_page.dart';
-import 'package:note/app/windows/view/doc_list/win_doc_page.dart';
+import 'package:note/app/windows/view/doc/win_doc_page.dart';
 import 'package:note/app/windows/view/today/win_today_page.dart';
-import 'package:note/app/windows/view/user/info.dart';
-import 'package:note/app/windows/view/user/login.dart';
+import 'package:note/app/windows/widgets/win_tab_view.dart';
+import 'package:note/commons/mvc/view.dart';
 import 'package:note/commons/service/device_utils.dart';
 import 'package:note/commons/widget/split_pane.dart';
 import 'package:note/commons/widget/window_buttons.dart';
-import 'package:note/editor/theme/theme.dart';
 import 'package:note/editor/widget/drop_menu.dart';
 import 'package:note/editor/widget/toggle_item.dart';
-import 'package:note/editor/widget/window_button.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:window_manager/window_manager.dart';
 
-class WinHomePage extends GetView<WinHomeController> {
-  const WinHomePage({Key? key}) : super(key: key);
+class WinHomePage extends MvcView<WinHomeController> {
+  const WinHomePage({super.key, required super.controller});
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        buildAppContent(context),
+        Container(
+          child: buildAppContent(context),
+        ),
         buildAppBar(context),
       ],
     );
@@ -37,36 +38,20 @@ class WinHomePage extends GetView<WinHomeController> {
 
   Widget buildAppBar(BuildContext context) {
     return SizedBox(
-      height: 30,
-      child: Obx(() {
-        return Row(
-          children: [
-            Expanded(
-                child: controller.showNavPage.isTrue ||
-                        controller.showSettings.isFalse
-                    ? DragToMoveArea(child: Container())
-                    : Container()),
-            if (controller.showSettings.isFalse)
-              SizedBox(
-                width: 50,
-                height: 30,
-                child: WindowUserButton(
-                  onPressed: () {
-                    controller.showNavPage.value =
-                        !controller.showNavPage.value;
-                  },
-                  icon: const RotatedBox(
-                      quarterTurns: 0,
-                      child: fluent.Icon(
-                        fluent.FluentIcons.column_right_two_thirds,
-                        size: 16,
-                      )),
-                ),
-              ),
-            const WindowButtons(),
-          ],
-        );
-      }),
+      height: 32,
+      child: Container(
+        child: Obx(() {
+          return Row(
+            children: [
+              Expanded(
+                  child: controller.showNavPage.isTrue
+                      ? DragToMoveArea(child: Container())
+                      : Container()),
+              const WindowButtons(),
+            ],
+          );
+        }),
+      ),
     );
   }
 
@@ -84,12 +69,14 @@ class WinHomePage extends GetView<WinHomeController> {
   }
 
   Widget buildNavBar(BuildContext context) {
+    var theme = fluent.FluentTheme.of(context);
+
     return Container(
-      padding: const EdgeInsets.only(top: 30),
+      padding: const EdgeInsets.only(top: 32),
       width: 60,
       color: isWin11()
-          ? systemColor(context, "winNavColor").withOpacity(0.6)
-          : systemColor(context, "winNavColor"),
+          ? theme.resources.solidBackgroundFillColorBase
+          : theme.resources.systemFillColorSolidNeutralBackground,
       child: Column(
         children: [
           buildAccountLogo(context),
@@ -125,13 +112,7 @@ class WinHomePage extends GetView<WinHomeController> {
               Container(
                 width: 40,
                 height: 40,
-                padding: const EdgeInsets.all(2.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Image.asset("assets/images/app_logo.png"),
+                child: MobileUserIcon(),
               ),
               if (controller.isLogin)
                 Align(
@@ -154,6 +135,7 @@ class WinHomePage extends GetView<WinHomeController> {
   }
 
   Widget buildTodayNavButton(BuildContext context) {
+    var theme = fluent.FluentTheme.of(context);
     return Obx(
       () {
         controller.navIndex.value;
@@ -189,7 +171,7 @@ class WinHomePage extends GetView<WinHomeController> {
                     Icons.today,
                     size: 24,
                     color: controller.navIndex.value != 0
-                        ? Colors.black
+                        ? theme.resources.textFillColorSecondary
                         : Colors.blueAccent,
                   ),
                 );
@@ -202,6 +184,7 @@ class WinHomePage extends GetView<WinHomeController> {
   }
 
   Widget buildNoteNavButton(BuildContext context) {
+    var theme = fluent.FluentTheme.of(context);
     return Obx(
       () {
         controller.navIndex.value;
@@ -234,10 +217,10 @@ class WinHomePage extends GetView<WinHomeController> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                   child: Icon(
-                    Icons.sticky_note_2_outlined,
+                    Icons.edit_document,
                     size: 24,
                     color: controller.navIndex.value != 1
-                        ? Colors.black
+                        ? theme.resources.textFillColorSecondary
                         : Colors.blueAccent,
                   ),
                 );
@@ -250,6 +233,7 @@ class WinHomePage extends GetView<WinHomeController> {
   }
 
   Widget buildCardNavButton(BuildContext context) {
+    var theme = fluent.FluentTheme.of(context);
     return Obx(
       () {
         controller.navIndex.value;
@@ -282,10 +266,10 @@ class WinHomePage extends GetView<WinHomeController> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                   child: Icon(
-                    Icons.drafts_outlined,
+                    Icons.card_giftcard,
                     size: 24,
                     color: controller.navIndex.value != 2
-                        ? Colors.black87
+                        ? theme.resources.textFillColorSecondary
                         : Colors.blueAccent,
                   ),
                 );
@@ -328,6 +312,7 @@ class WinHomePage extends GetView<WinHomeController> {
   }
 
   Widget buildTodayPage(BuildContext context) {
+    var theme = fluent.FluentTheme.of(context);
     return DropRegion(
       formats: Formats.standardFormats,
       onDropOver: (DropOverEvent event) {
@@ -357,13 +342,19 @@ class WinHomePage extends GetView<WinHomeController> {
           children: [
             Container(
                 decoration: BoxDecoration(
-                  color: EditTheme.of(context).bgColor2,
+                  color: theme.resources.solidBackgroundFillColorTertiary,
                   border: Border(
-                      right: BorderSide(
-                    color: Colors.grey.shade100,
-                  )),
+                    left: BorderSide(
+                      color: theme.resources.cardStrokeColorDefaultSolid,
+                    ),
+                    right: BorderSide(
+                      color: theme.resources.cardStrokeColorDefaultSolid,
+                    ),
+                  ),
                 ),
-                child: WinTodayPage()),
+                child: WinTodayPage(
+                  controller: controller.todayController,
+                )),
             if (controller.isDropOver.value)
               Container(
                 width: double.infinity,
@@ -377,52 +368,59 @@ class WinHomePage extends GetView<WinHomeController> {
   }
 
   Widget buildNotePage(BuildContext context) {
-    print('build note page...');
+    var theme = fluent.FluentTheme.of(context);
     return Container(
         decoration: BoxDecoration(
-          color: EditTheme.of(context).bgColor2,
+          color: theme.resources.solidBackgroundFillColorTertiary,
           border: Border(
-              right: BorderSide(
-            color: Colors.grey.shade100,
-          )),
+            left: BorderSide(
+              color: theme.resources.cardStrokeColorDefaultSolid,
+            ),
+            right: BorderSide(
+              color: theme.resources.cardStrokeColorDefaultSolid,
+            ),
+          ),
         ),
-        child: WinDocPage());
+        child: WinDocPage(
+          controller: controller.docController,
+        ));
   }
 
   Widget buildCardPage(BuildContext context) {
-    print('build card page...');
+    var theme = fluent.FluentTheme.of(context);
     return Container(
         decoration: BoxDecoration(
-          color: EditTheme.of(context).bgColor2,
+          color: theme.resources.solidBackgroundFillColorTertiary,
           border: Border(
-              right: BorderSide(
-            color: Colors.grey.shade100,
-          )),
+            left: BorderSide(
+              color: theme.resources.cardStrokeColorDefaultSolid,
+            ),
+            right: BorderSide(
+              color: theme.resources.cardStrokeColorDefaultSolid,
+            ),
+          ),
         ),
-        child: WinCardSetPage());
+        child: WinCardSetPage(
+          controller: controller.cardController,
+        ));
   }
 
   Widget buildEditPane(BuildContext context) {
-    return Container(
-      color: EditTheme.of(context).bgColor3,
-      padding: controller.showSettings.isTrue
-          ? null
-          : const EdgeInsets.only(top: 30),
-      child: Obx(() {
-        if (controller.editTabList.isEmpty) {
-          return DragToMoveArea(child: Container());
-        }
-        return IndexedStack(
-          index: min(controller.editTabList.length, controller.editTabIndex),
-          children: [
-            for (var item in controller.editTabList) item.buildWidget(context),
-          ],
-        );
-      }),
+    var theme = fluent.FluentTheme.of(context);
+    return Material(
+      color: theme.resources.solidBackgroundFillColorSecondary,
+      child: Container(
+        padding:
+            controller.showNavPage.isTrue ? EdgeInsets.only(top: 32) : null,
+        child: WinTabView(
+          controller: controller.tabController,
+        ),
+      ),
     );
   }
 
   Widget buildNavMenu(BuildContext context) {
+    var theme = fluent.FluentTheme.of(context);
     return fluent.Tooltip(
       message: "菜单",
       triggerMode: TooltipTriggerMode.manual,
@@ -456,7 +454,7 @@ class WinHomePage extends GetView<WinHomeController> {
               child: Icon(
                 Icons.menu_rounded,
                 size: 24,
-                color: Colors.black87,
+                color: theme.resources.textFillColorSecondary,
               ),
             );
           },
@@ -480,14 +478,14 @@ class WinHomePage extends GetView<WinHomeController> {
               text: Text("导入笔记"),
               onPress: (ctx) {
                 hideDropMenu(ctx);
-                Get.toNamed("/import");
+                context.push("/windows/import");
               },
             ),
             DropMenu(
               text: Text("导出笔记"),
               onPress: (ctx) {
                 hideDropMenu(ctx);
-                Get.toNamed("/export");
+                context.push("/windows/export");
               },
             ),
           ],
@@ -513,7 +511,7 @@ class WinHomePage extends GetView<WinHomeController> {
             showAboutDialog(
               context: context,
               applicationName: "温知笔记",
-              applicationVersion: "1.1.beta(2023.09.24)",
+              applicationVersion: "1.0.beta(预览版)",
               applicationIcon: SizedBox(
                   width: 60,
                   height: 60,
@@ -533,27 +531,26 @@ class WinHomePage extends GetView<WinHomeController> {
   }
 
   void showUserInfo(BuildContext context) {
+    var shadowColor =
+        fluent.FluentTheme.of(context).resources.cardStrokeColorDefault;
     showCustomDropMenu(
       context: context,
-      width: 300,
-      height: 400,
+      width: 360,
+      height: 500,
       builder: (context) {
         return Container(
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: EditTheme.of(context).fontColor.withOpacity(0.1),
+                color: shadowColor,
                 blurRadius: 10,
                 spreadRadius: 2,
               ),
             ],
-            color: Colors.white,
             borderRadius: BorderRadius.circular(10),
           ),
           clipBehavior: Clip.antiAlias,
-          child: WinUserInfoDialog(
-            controller: WinUserInfoController(),
-          ),
+          child: MobileUserInfoPage(controller: MobileUserInfoController()),
         );
       },
       alignment: Alignment.centerRight,
@@ -563,13 +560,31 @@ class WinHomePage extends GetView<WinHomeController> {
   }
 
   void showLoginDialog(BuildContext context) {
-    showDialog(
+    var shadowColor =
+        fluent.FluentTheme.of(context).resources.cardStrokeColorDefault;
+    showCustomDropMenu(
       context: context,
+      width: 360,
+      height: 500,
       builder: (context) {
-        return WinLoginDialog(
-          controller: WinLoginController(),
+        return Container(
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: shadowColor,
+                blurRadius: 10,
+                spreadRadius: 2,
+              ),
+            ],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: MobileUserLoginPage(controller: MobileUserLoginController()),
         );
       },
+      alignment: Alignment.centerRight,
+      offset: Offset(10, 0),
+      modal: true,
     );
   }
 }

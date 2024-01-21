@@ -4,25 +4,19 @@ import 'package:archive/archive_io.dart';
 import 'package:flutter/material.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:get/get.dart';
+import 'package:note/commons/mvc/controller.dart';
 import 'package:note/commons/service/document_manager.dart';
 import 'package:note/commons/util/string.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:path/path.dart';
 
-class ImportController extends GetxController {
+class ImportController extends ServiceManagerController {
   var processNodeIndex = 0.obs;
   var importPaths = <String>[].obs;
 
   // 拖拽进入状态
   var isDropEnter = false.obs;
-  late ServiceManager serviceManager;
-
-  @override
-  void onInit() {
-    super.onInit();
-    serviceManager = ServiceManager.of(Get.context!);
-  }
 
   // 判断是否是支持的导入路径
   bool canImportFile(String path) {

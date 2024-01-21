@@ -1,10 +1,12 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
-import 'package:note/app/windows/service/doc_list/win_doc_list_service.dart';
+import 'package:note/app/windows/service/doc/win_doc_list_service.dart';
 import 'package:note/app/windows/service/today/win_today_service.dart';
 import 'package:note/commons/mvc/controller.dart';
 import 'package:note/commons/service/copy_service.dart';
+import 'package:note/commons/service/device_utils.dart';
 import 'package:note/commons/service/document_manager.dart';
 import 'package:note/commons/service/settings_manager.dart';
 import 'package:note/service/card/card_service.dart';
@@ -22,6 +24,7 @@ import 'package:note/service/sync/record_sync_service.dart';
 import 'package:note/service/sync/upload_task_service.dart';
 import 'package:note/service/user/user_service.dart';
 import 'package:note/widgets/root_widget.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'config/config_manager.dart';
 import 'theme/theme_manager.dart';
@@ -77,6 +80,8 @@ class ServiceManager with ChangeNotifier {
   int time = DateTime.now().millisecondsSinceEpoch;
   late BuildContext context;
 
+  ServiceManager();
+
   void onInitState(BuildContext context) {
     isarService = IsarService(this);
     userService = UserService(this);
@@ -102,11 +107,18 @@ class ServiceManager with ChangeNotifier {
     startService();
   }
 
+
+
   Future<void> startService() async {
     Hive.init("${await fileManager.getRootDir()}/hive");
     await Hive.openBox("settings");
     await isarService.open();
     await themeManager.readConfig();
+    try {
+      await userService.startUserService();
+    } catch (e) {
+      print(e);
+    }
     p2pService.connect();
     recordSyncService.startPullTimer();
     uploadTaskService.startUploadTimer();

@@ -28,7 +28,7 @@ class YsEditController extends EditController {
     super.reader,
     super.onContentChanged,
     super.writer,
-    super.initFocus = true,
+    super.initFocus = false,
     super.editable = true,
     super.hideTextModes,
     super.padding = EdgeInsets.zero,

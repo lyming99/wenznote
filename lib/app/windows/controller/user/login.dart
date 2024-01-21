@@ -5,7 +5,7 @@ import 'package:note/service/user/user_service.dart';
 
 class WinLoginController extends MvcController {
   var usernameController = TextEditingController(text: "44185539@qq.com");
-  var passwordController = TextEditingController(text: "12345678");
+  var passwordController = TextEditingController(text: "999888777");
   late UserService userService;
 
   Future<bool> doLogin() async {

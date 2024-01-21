@@ -6,6 +6,7 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:note/commons/util/platform_util.dart';
 import 'package:note/commons/util/string.dart';
 import 'package:note/commons/util/wdoc/wdoc.dart';
@@ -22,8 +23,7 @@ import 'package:oktoast/oktoast.dart';
 /// 流程1：选择导出文件
 /// 流程2：选择导出类型(wdoc、markdown)、导出路径、导出文件名称
 /// 流程3：导出完成
-class ExportController extends GetxController {
-  late ServiceManager serviceManager;
+class ExportController extends ServiceManagerController {
   var processNodeIndex = 0.obs;
   var treeController = SelectTreeController(rootNode: SelectTreeNode()).obs;
 
@@ -50,9 +50,8 @@ class ExportController extends GetxController {
   }
 
   @override
-  void onInit() {
-    super.onInit();
-    serviceManager = ServiceManager.of(Get.context!);
+  void onInitState(BuildContext context) {
+    super.onInitState(context);
     fetchNote();
   }
 
@@ -129,16 +128,17 @@ class ExportController extends GetxController {
         }
       }
     }
-
+    var future = () async {
+      await doExport();
+    }();
     await showDialog(
-        useSafeArea: true,
-        context: context,
-        builder: (context) => FutureProgressDialog(
-              message: const Text("正在导出..."),
-              () async {
-                await doExport();
-              }(),
-            ));
+      useSafeArea: true,
+      context: context,
+      builder: (context) => FutureProgressDialog(
+        message: const Text("正在导出..."),
+        future,
+      ),
+    );
   }
 
   /// 1.解析出附件列表(图片、视频、附件)
@@ -202,7 +202,7 @@ class ExportController extends GetxController {
         return;
       }
     }
-    Get.back();
+    context.pop();
     showToast(
       "导出完成！",
       position: ToastPosition.bottom,

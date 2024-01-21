@@ -88,6 +88,10 @@ dependencies:
     sdk: flutter
   go_router: ^13.0.1
   image_cropper: ^5.0.1
+  image_picker_windows: ^0.2.1+1
+  crop_image: ^1.0.11
+  image_cropping: ^0.0.13
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

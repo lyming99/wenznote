@@ -15,7 +15,7 @@ class WinCardSetConfigTabController extends WinEditTabController {
   late CardStudyService cardService;
 
   WinCardSetConfigTabController({
-    required this.cardSet,
+    required this.cardSet, required super.homeController,
   });
 
   @override

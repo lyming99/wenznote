@@ -1,6 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:get/get.dart';
 import 'package:note/app/windows/controller/home/win_home_controller.dart';
+import 'package:note/commons/mvc/controller.dart';
+import 'package:note/commons/mvc/view.dart';
+import 'package:window_manager/window_manager.dart';
 
 mixin WinEditTabMixin {
   String get tabId;
@@ -10,10 +12,6 @@ mixin WinEditTabMixin {
   void onOpenPage() {}
 
   void onClosePage() {}
-
-  void closeTab() {
-    Get.find<WinHomeController>().closeTab(tabId);
-  }
 }
 
 class WinTabWidget with WinEditTabMixin {
@@ -51,7 +49,7 @@ class WinTabWidget with WinEditTabMixin {
 typedef WinEditTabBuilder = Widget Function(
     BuildContext context, WinEditTabController? controller);
 
-class WinEditTab<T extends WinEditTabController> with WinEditTabMixin {
+class WinEditTab<T extends WinEditTabController> extends MvcController {
   String? id;
   T? controller;
   WinEditTabBuilder? builder;
@@ -65,21 +63,8 @@ class WinEditTab<T extends WinEditTabController> with WinEditTabMixin {
     this.id,
   });
 
-  @override
   Widget buildWidget(BuildContext context) {
     return _EditTabWidget(editTab: this);
-  }
-
-  @override
-  void onOpenPage() {
-    super.onOpenPage();
-    controller?.onOpenTab();
-  }
-
-  @override
-  void onClosePage() {
-    super.onClosePage();
-    controller?.onCloseTab();
   }
 
   Widget build(BuildContext context) {
@@ -87,7 +72,7 @@ class WinEditTab<T extends WinEditTabController> with WinEditTabMixin {
   }
 }
 
-class _EditTabWidget extends StatefulWidget {
+class _EditTabWidget extends StatelessWidget {
   final WinEditTab editTab;
 
   const _EditTabWidget({
@@ -96,43 +81,32 @@ class _EditTabWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<_EditTabWidget> createState() => _EditTabWidgetState();
-}
-
-class _EditTabWidgetState extends State<_EditTabWidget> {
-  @override
-  void initState() {
-    super.initState();
-    widget.editTab.controller?.onInitState(context);
-  }
-
-  @override
-  void dispose() {
-    widget.editTab.controller?.onStateDispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return widget.editTab.builder?.call(context, widget.editTab.controller) ??
-        widget.editTab.build(context);
+    return MvcView(
+      controller: editTab.controller!,
+      builder: (controller) {
+        return editTab.builder?.call(context, editTab.controller) ??
+            editTab.build(context);
+      },
+    );
   }
 }
 
-abstract class WinEditTabController {
+abstract class WinEditTabController extends MvcController {
+  WinHomeController homeController;
+
+  WinEditTabController({required this.homeController});
+
   String get tabId;
 
-  void onInitState(BuildContext context) {}
-
-  void onOpenTab() {}
+  void onOpenTab() {
+  }
 
   void onTabHide() {}
 
   void onCloseTab() {}
 
-  void onStateDispose() {}
-
   void closeTab() {
-    Get.find<WinHomeController>().closeTab(tabId);
+    homeController.closeTab(tabId);
   }
 }

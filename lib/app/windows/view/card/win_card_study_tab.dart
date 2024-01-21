@@ -3,24 +3,19 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:note/app/windows/controller/card/win_card_study_controller.dart';
 import 'package:note/app/windows/widgets/card_editor.dart';
+import 'package:note/commons/mvc/view.dart';
 import 'package:note/editor/crdt/YsEditController.dart';
 import 'package:note/editor/widget/toggle_item.dart';
 import 'package:note/service/service_manager.dart';
 import 'package:window_manager/window_manager.dart';
 
-class WinCardStudyTab extends StatelessWidget {
-  WinCardStudyController controller;
-
-  WinCardStudyTab({
-    super.key,
-    required this.controller,
-  });
+class WinCardStudyTab extends MvcView<WinCardStudyController> {
+  const WinCardStudyTab({super.key, required super.controller});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        buildNav(context),
         Expanded(
           child: GestureDetector(
             onTapDown: (e) {

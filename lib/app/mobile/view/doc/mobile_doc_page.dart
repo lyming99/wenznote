@@ -8,7 +8,7 @@ import 'package:note/app/mobile/view/doc/mobile_doc_page_model.dart';
 import 'package:note/app/mobile/view/user/mobile_user_icon.dart';
 import 'package:note/app/mobile/widgets/sticky_delegate.dart';
 import 'package:note/app/windows/view/card/win_create_card_dialog.dart';
-import 'package:note/app/windows/view/doc_list/win_select_doc_dir_dialog.dart';
+import 'package:note/app/windows/view/doc/win_select_doc_dir_dialog.dart';
 import 'package:note/commons/mvc/view.dart';
 import 'package:note/editor/widget/drop_menu.dart';
 import 'package:note/editor/widget/toggle_item.dart';

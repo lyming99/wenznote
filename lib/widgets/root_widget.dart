@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:note/service/service_manager.dart';
+import 'package:fluent_ui/fluent_ui.dart' as fluent;
 
 class ServiceManagerWidget extends StatefulWidget {
   final WidgetBuilder builder;
@@ -39,7 +40,9 @@ class ServiceManagerWidgetState extends State<ServiceManagerWidget> {
   Widget build(BuildContext context) {
     serviceManager.context=context;
     if (!serviceManager.isStart) {
-      return Container();
+      return const  Center(
+        child: RefreshProgressIndicator(),
+      );
     }
     return Builder(builder: (context) {
       return widget.builder.call(context);

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:note/commons/widget/popup_stack.dart';
 import 'package:note/editor/widget/toggle_item.dart';
+import 'package:fluent_ui/fluent_ui.dart' as fluent;
 
 import '../theme/theme.dart';
 
@@ -14,10 +15,15 @@ class DropSplit extends DropMenu {
     Color? color,
   }) {
     super.height = 10;
-    super.text = Container(
-      color: color ?? Colors.grey.shade100,
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      height: 1,
+    super.text = Builder(
+      builder: (context) {
+        var lineColor = fluent.FluentTheme.of(context).resources.cardStrokeColorDefaultSolid;
+        return Container(
+          color: color ?? lineColor,
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          height: 1,
+        );
+      }
     );
     super.enable = false;
   }

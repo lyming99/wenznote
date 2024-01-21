@@ -35,6 +35,7 @@ class WinCardStudyController extends WinEditTabController {
 
   WinCardStudyController({
     required this.cardSet,
+    required super.homeController,
   });
 
   List<HideTextMode>? get hideTextModes => cardStudyConfig.value.hideTextMode
@@ -97,15 +98,13 @@ class WinCardStudyController extends WinEditTabController {
     }
     var mode = config?.studyQueueMode ?? StudyMode.mixin.name;
     var cardIds = <String>[];
-    if (mode == StudyMode.mixin.name ||
-        mode == StudyMode.study.name) {
+    if (mode == StudyMode.mixin.name || mode == StudyMode.study.name) {
       var studyQueue = await studyService.queryNeedStudyQueue(cardSet.uuid);
       if (studyQueue.isNotEmpty) {
         cardIds.add(studyQueue.first);
       }
     }
-    if (mode == StudyMode.mixin.name ||
-        mode == StudyMode.review.name) {
+    if (mode == StudyMode.mixin.name || mode == StudyMode.review.name) {
       var reviewQueue = await studyService.queryReviewQueue(cardSet.uuid);
       if (reviewQueue.isNotEmpty) {
         cardIds.add(reviewQueue.first);

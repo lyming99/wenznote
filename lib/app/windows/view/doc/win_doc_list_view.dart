@@ -1,30 +1,28 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note/app/windows/controller/doc_list/win_doc_list_controller.dart';
-import 'package:note/app/windows/controller/home/win_home_controller.dart';
-import 'package:note/app/windows/model/doc_list/win_doc_list_item_vo.dart';
+import 'package:note/app/windows/controller/doc/win_doc_list_controller.dart';
+import 'package:note/app/windows/model/doc/win_doc_list_item_vo.dart';
 import 'package:note/app/windows/model/today/search_result_vo.dart';
 import 'package:note/app/windows/view/card/win_create_card_dialog.dart';
-import 'package:note/app/windows/view/doc_list/win_select_doc_dir_dialog.dart';
+import 'package:note/app/windows/view/doc/win_select_doc_dir_dialog.dart';
+import 'package:note/commons/mvc/view.dart';
 import 'package:note/editor/theme/theme.dart';
 import 'package:note/editor/widget/drop_menu.dart';
 import 'package:note/editor/widget/toggle_item.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 
-class WinDocListView extends GetView<WinDocListController> {
-  @override
-  final WinDocListController controller;
-
+class WinDocListView extends MvcView<WinDocListController> {
   const WinDocListView({
     super.key,
-    required this.controller,
+    required super.controller,
   });
 
   @override
   Widget build(BuildContext context) {
+    var theme = fluent.FluentTheme.of(context);
     return Material(
-      color: EditTheme.of(context).bgColor2,
+      color: theme.resources.solidBackgroundFillColorTertiary,
       child: Column(
         children: [
           Padding(
@@ -158,12 +156,15 @@ class WinDocListView extends GetView<WinDocListController> {
         },
         itemBuilder:
             (BuildContext context, bool checked, bool hover, bool pressed) {
+          var theme = fluent.FluentTheme.of(context);
           return Container(
             padding: EdgeInsets.symmetric(
               vertical: 10,
               horizontal: 10,
             ),
-            color: hover || selected ? Colors.grey.shade100 : null,
+            color: hover || selected
+                ? theme.resources.solidBackgroundFillColorBase.withOpacity(0.8)
+                : null,
             child: Row(
               children: [
                 Icon(
@@ -174,7 +175,7 @@ class WinDocListView extends GetView<WinDocListController> {
                 SizedBox(
                   width: 10,
                 ),
-                Text("${docItem.name}"),
+                Expanded(child: Text("${docItem.name}",overflow: TextOverflow.ellipsis,)),
               ],
             ),
           );
@@ -307,17 +308,6 @@ class WinDocListView extends GetView<WinDocListController> {
   void showExportDialog(BuildContext context, List<WinDocListItemVO> list) {}
 
   Widget buildSearchResultList(BuildContext context) {
-    // return GridView.builder(
-    //   itemCount: controller.searchResultList.length,
-    //   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-    //     maxCrossAxisExtent: 500,
-    //     mainAxisExtent: 200,
-    //   ),
-    //   itemBuilder: (context, index) {
-    //     // return controller.searchResultList[index].buildEditWidget(context);
-    //     return buildSearchItem(context, index);
-    //   },
-    // );
     return ListView.builder(
       itemBuilder: (context, index) {
         return buildSearchItem(context, index);
@@ -328,13 +318,14 @@ class WinDocListView extends GetView<WinDocListController> {
 
   Widget buildSearchItem(BuildContext context, int index) {
     var searchItem = controller.searchResultList[index];
-    var currentEditor = Get.find<WinHomeController>().currentNoteEditor;
+    var currentEditor =
+        controller.docPageController.homeController.currentNoteEditor;
     return Obx(() {
       var editor = currentEditor.value;
       var isCurrentEditor = editor?.doc.uuid == searchItem.doc.uuid;
       if (isCurrentEditor && editor != null) {
         return ListenableBuilder(
-          listenable: editor,
+          listenable: editor.controller,
           builder: (context, widget) {
             if (editor.docContent != null) {
               searchItem.updateContent(editor.docContent);

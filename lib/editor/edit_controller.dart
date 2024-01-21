@@ -400,7 +400,7 @@ class EditController with ChangeNotifier {
   EditWriter? writer;
   EdgeInsets padding;
   State? state;
-  bool initFocus = true;
+  bool initFocus = false;
   bool editable = true;
   bool showTextLength = false;
   bool rightMenuShowing = false;
@@ -439,7 +439,7 @@ class EditController with ChangeNotifier {
     this.reader,
     this.onContentChanged,
     this.writer,
-    this.initFocus = true,
+    this.initFocus = false,
     this.editable = true,
     this.hideTextModes,
     this.padding = EdgeInsets.zero,

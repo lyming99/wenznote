@@ -49,7 +49,7 @@ class MobileDocEditController extends ServiceManagerController {
     editController = YsEditController(
       copyService: serviceManager.copyService,
       fileManager: serviceManager.fileManager,
-      initFocus: true,
+      initFocus: false,
       padding: const EdgeInsets.only(
         top: 20,
         left: 20,

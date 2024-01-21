@@ -1,7 +1,7 @@
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:note/app/windows/controller/home/win_home_controller.dart';
-import 'package:note/app/windows/model/doc_list/win_doc_list_item_vo.dart';
+import 'package:note/app/windows/model/doc/win_doc_list_item_vo.dart';
 import 'package:note/editor/crdt/YsText.dart';
 import 'package:note/model/note/po/doc_dir_po.dart';
 import 'package:note/model/note/po/doc_po.dart';
@@ -55,7 +55,6 @@ class WinDocListService {
   }
 
   Future<void> deleteDoc(WinDocListItemVO docItem) async {
-    Get.find<WinHomeController>().closeDoc(docItem.doc!);
     await serviceManager.docService.deleteDoc(docItem.doc!);
     await serviceManager.editService.deleteDocFile(docItem.uuid!);
   }

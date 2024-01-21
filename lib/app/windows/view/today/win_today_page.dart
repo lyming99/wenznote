@@ -4,7 +4,8 @@ import 'package:get/get.dart';
 import 'package:note/app/windows/controller/home/win_home_controller.dart';
 import 'package:note/app/windows/model/today/search_result_vo.dart';
 import 'package:note/app/windows/view/card/win_create_card_dialog.dart';
-import 'package:note/app/windows/view/doc_list/win_select_doc_dir_dialog.dart';
+import 'package:note/app/windows/view/doc/win_select_doc_dir_dialog.dart';
+import 'package:note/commons/mvc/view.dart';
 import 'package:note/editor/theme/theme.dart';
 import 'package:note/editor/widget/drop_menu.dart';
 import 'package:note/editor/widget/toggle_item.dart';
@@ -13,7 +14,9 @@ import 'package:note/widgets/ticker_widget.dart';
 
 import '../../controller/today/win_today_controller.dart';
 
-class WinTodayPage extends GetView<WinTodayController> {
+class WinTodayPage extends MvcView<WinTodayController> {
+  const WinTodayPage({super.key, required super.controller});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -45,38 +48,32 @@ class WinTodayPage extends GetView<WinTodayController> {
   }
 
   Widget buildSearchEdit(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Obx(
-        () => fluent.TextBox(
-          placeholder: "搜索",
-          controller: controller.searchController,
-          onChanged: (v) {
-            controller.searchContent.value = v;
-          },
-          prefix: Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Icon(Icons.search),
-          ),
-          suffix: controller.searchContent.value.isEmpty
-              ? null
-              : ToggleItem(
-                  onTap: (ctx) {
-                    controller.searchController.clear();
-                    controller.searchContent.value = "";
-                  },
-                  itemBuilder: (BuildContext context, bool checked, bool hover,
-                      bool pressed) {
-                    return Container(
-                      color: hover ? Colors.grey.withOpacity(0.1) : null,
-                      child: Icon(Icons.close),
-                    );
-                  },
-                ),
+    return Obx(
+      () => fluent.TextBox(
+        placeholder: "搜索",
+        controller: controller.searchController,
+        onChanged: (v) {
+          controller.searchContent.value = v;
+        },
+        prefix: Padding(
+          padding: const EdgeInsets.only(left: 8.0),
+          child: Icon(Icons.search),
         ),
+        suffix: controller.searchContent.value.isEmpty
+            ? null
+            : ToggleItem(
+                onTap: (ctx) {
+                  controller.searchController.clear();
+                  controller.searchContent.value = "";
+                },
+                itemBuilder: (BuildContext context, bool checked, bool hover,
+                    bool pressed) {
+                  return Container(
+                    color: hover ? Colors.grey.withOpacity(0.1) : null,
+                    child: Icon(Icons.close),
+                  );
+                },
+              ),
       ),
     );
   }
@@ -191,9 +188,10 @@ class WinTodayPage extends GetView<WinTodayController> {
 
   Widget buildFilterBar(BuildContext context) {
     return Container(
-      height: 24,
+      height: 32,
       padding: EdgeInsets.symmetric(horizontal: 10),
       child: SingleTickerWidget(builder: (context) {
+        var theme = fluent.FluentTheme.of(context);
         var tabController = controller.createTabController(context);
         controller.tabBarController = tabController;
         return Material(
@@ -202,8 +200,8 @@ class WinTodayPage extends GetView<WinTodayController> {
             alignment: Alignment.topLeft,
             child: TabBar(
               controller: controller.tabBarController,
-              labelColor: Colors.black87,
-              labelPadding: EdgeInsets.symmetric(horizontal: 10),
+              labelColor: theme.resources.textFillColorPrimary,
+              labelPadding: EdgeInsets.symmetric(horizontal: 16,),
               isScrollable: true,
               onTap: (index) {
                 switch (index) {
@@ -224,11 +222,6 @@ class WinTodayPage extends GetView<WinTodayController> {
                       NoteType.doc,
                     ];
                     break;
-                  case 3:
-                    controller.noteType.value = [
-                      NoteType.open,
-                    ];
-                    break;
                 }
               },
               tabs: [
@@ -241,9 +234,7 @@ class WinTodayPage extends GetView<WinTodayController> {
                 Tab(
                   text: "笔记",
                 ),
-                Tab(
-                  text: "已打开",
-                ),
+
               ],
             ),
           ),
@@ -269,13 +260,13 @@ class WinTodayPage extends GetView<WinTodayController> {
 
   buildNoteItem(BuildContext context, int index) {
     var searchItem = controller.searchResultList[index];
-    var currentEditor = Get.find<WinHomeController>().currentNoteEditor;
+    var currentEditor =  controller.homeController.currentNoteEditor;
     return Obx(() {
       var editor = currentEditor.value;
       var isCurrentEditor = editor?.doc.uuid == searchItem.doc.uuid;
       if (isCurrentEditor && editor != null) {
         return ListenableBuilder(
-          listenable: editor,
+          listenable: editor.controller,
           builder: (context, widget) {
             if (editor.docContent != null) {
               searchItem.updateContent(editor.docContent);
