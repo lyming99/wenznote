@@ -89,6 +89,7 @@ class EditContentWidgetState extends State<EditContentWidget> {
         }
         var floatWidgetXOffset =
             (constraints.maxWidth - blockConstrains.maxWidth) / 2;
+        widget.controller.floatWidgetXOffset = floatWidgetXOffset;
         List<PopupPositionWidget> floatWidgets =
             EditController.translatePopupPositionWidget(
                 widget.controller.buildFloatWidgets(), floatWidgetXOffset, 0.0);

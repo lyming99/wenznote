@@ -424,6 +424,8 @@ class EditController with ChangeNotifier {
   //挖空
   List<HideTextMode>? hideTextModes;
 
+  double floatWidgetXOffset = 0;
+
   int get textLength => blockManager.textLength;
   double maxEditWidth = double.infinity;
 

@@ -112,13 +112,13 @@ class ServiceManager with ChangeNotifier {
   Future<void> startService() async {
     Hive.init("${await fileManager.getRootDir()}/hive");
     await Hive.openBox("settings");
-    await isarService.open();
-    await themeManager.readConfig();
     try {
       await userService.startUserService();
     } catch (e) {
       print(e);
     }
+    await isarService.open();
+    await themeManager.readConfig();
     p2pService.connect();
     recordSyncService.startPullTimer();
     uploadTaskService.startUploadTimer();

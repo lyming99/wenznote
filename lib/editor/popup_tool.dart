@@ -220,6 +220,7 @@ class WenPopupTool {
     if (rect == null) {
       return null;
     }
+    rect = rect.translate(controller.floatWidgetXOffset, 0);
     return IndexSelection(
       start: startOffset,
       end: endOffset,
