@@ -1,12 +1,16 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
 import 'package:wenznote/app/windows/widgets/custom_tab_view.dart';
 import 'package:wenznote/commons/mvc/controller.dart';
 import 'package:wenznote/commons/mvc/view.dart';
+import 'package:wenznote/widgets/mac_window_button.dart';
+import 'package:wenznote/widgets/window_button/decorated_button.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WinTabController extends MvcController {
@@ -57,6 +61,9 @@ class WinTabController extends MvcController {
         break;
       }
     }
+    if(tabs.isEmpty){
+      homeController.showNavPage.value=true;
+    }
   }
 
   void selectTab(int x) {
@@ -96,12 +103,26 @@ class WinTabView extends MvcView<WinTabController> {
               onReorder: (oldIndex, newIndex) {
                 controller.reorder(oldIndex, newIndex);
               },
-              header: fluent.IconButton(
-                onPressed: () {
-                  controller.homeController.showNavPage.value =
-                      !controller.homeController.showNavPage.value;
-                },
-                icon: Icon(Icons.menu_outlined),
+              header: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (Platform.isMacOS && !isShowNav)
+                    buildMacWindowButton(context),
+                  if (Platform.isMacOS && !isShowNav)
+                    SizedBox(
+                      width: 10,
+                    ),
+                  fluent.IconButton(
+                    onPressed: () {
+                      controller.homeController.showNavPage.value =
+                          !controller.homeController.showNavPage.value;
+                    },
+                    icon: Icon(
+                      CupertinoIcons.sidebar_left,
+                      size: 16,
+                    ),
+                  ),
+                ],
               ),
               onChanged: (x) {
                 controller.selectTab(x);
@@ -114,7 +135,7 @@ class WinTabView extends MvcView<WinTabController> {
               footer: isShowNav
                   ? null
                   : SizedBox(
-                      width: 54 * 3,
+                      width: Platform.isWindows ? 54 * 3 : 32,
                       child: DragToMoveArea(
                         child: Container(),
                       ),

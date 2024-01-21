@@ -112,6 +112,7 @@ flutter:
     - assets/images/outline.svg
     - assets/images/app_logo.png
     - assets/doc/help_windows.md
+    - assets/osx-arc/
   fonts:
     - family: MiSans
       fonts:

@@ -1,0 +1,15 @@
+enum ThemeType {
+  adwaita,
+  auto,
+  arc,
+  breeze,
+  elementary,
+  flatRemix,
+  materia,
+  nordic,
+  osxArc,
+  pop,
+  unity,
+  vimix,
+  yaru,
+}

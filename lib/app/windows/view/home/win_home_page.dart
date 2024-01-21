@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -19,6 +21,8 @@ import 'package:wenznote/commons/widget/window_buttons.dart';
 import 'package:wenznote/editor/widget/drop_menu.dart';
 import 'package:wenznote/editor/widget/toggle_item.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import 'package:wenznote/widgets/mac_window_button.dart';
+import 'package:wenznote/widgets/window_button/decorated_button.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WinHomePage extends MvcView<WinHomeController> {
@@ -43,11 +47,12 @@ class WinHomePage extends MvcView<WinHomeController> {
         child: Obx(() {
           return Row(
             children: [
+              if (Platform.isMacOS) Container(),
               Expanded(
                   child: controller.showNavPage.isTrue
                       ? DragToMoveArea(child: Container())
                       : Container()),
-              const WindowButtons(),
+              if (Platform.isWindows) const WindowButtons(),
             ],
           );
         }),
@@ -59,7 +64,10 @@ class WinHomePage extends MvcView<WinHomeController> {
     return Obx(() {
       return Row(
         children: [
-          if (controller.showNavPage.value) buildNavBar(context),
+          if (!Platform.isMacOS && controller.showNavPage.value)
+            buildWindowsNavBar(context),
+          if (Platform.isMacOS && controller.showNavPage.value)
+            buildWindowsNavBar(context),
           Expanded(
             child: buildPage(context),
           ),
@@ -68,17 +76,16 @@ class WinHomePage extends MvcView<WinHomeController> {
     });
   }
 
-  Widget buildNavBar(BuildContext context) {
+  Widget buildWindowsNavBar(BuildContext context) {
     var theme = fluent.FluentTheme.of(context);
-
     return Container(
-      padding: const EdgeInsets.only(top: 32),
       width: 60,
       color: isWin11()
           ? theme.resources.solidBackgroundFillColorBase
           : theme.resources.systemFillColorSolidNeutralBackground,
       child: Column(
         children: [
+          buildMacWindowButton(context),
           buildAccountLogo(context),
           buildTodayNavButton(context),
           buildNoteNavButton(context),
@@ -587,6 +594,8 @@ class WinHomePage extends MvcView<WinHomeController> {
       modal: true,
     );
   }
+
+
 }
 
 class Keep extends StatefulWidget {
