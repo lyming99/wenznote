@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:wenznote/commons/widget/ignore_parent_pointer.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'window_button/decorated_button.dart';
