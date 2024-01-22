@@ -66,7 +66,7 @@ class ImportWidget extends MvcView<ImportController> {
                               : "导入笔记",
                           style: TextStyle(
                             color: EditTheme.of(context).fontColor,
-                            fontFamily: "MiSans",
+                            // fontFamily: "MiSans",
                             fontSize: 16,
                           ),
                         ),

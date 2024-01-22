@@ -15,7 +15,7 @@ import image_compression_flutter
 import irondash_engine_context
 import isar_flutter_libs
 import pasteboard
-import path_provider_macos
+import path_provider_foundation
 import rich_clipboard_macos
 import screen_retriever
 import shared_preferences_foundation

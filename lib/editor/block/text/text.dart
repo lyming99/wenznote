@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1066,21 +1067,21 @@ class TextBlock extends WenBlock {
           fontWeight: textElement.level == 0 ? null : FontWeight.bold,
           fontSize: fontSize,
           color: fontColor,
-          fontFamilyFallback: const [
-            "MiSans",
-            "微软雅黑",
-            "-apple-system",
-            "BlinkMacSystemFont",
-            "Segoe UI",
-            "Noto Sans",
-            "Helvetica",
-            "Arial",
-            "sans-serif",
-            "Apple Color Emoji",
-            "Segoe UI Emoji",
-          ],
+          // fontFamilyFallback: const [
+          //   "MiSans",
+          //   "微软雅黑",
+          //   "-apple-system",
+          //   "BlinkMacSystemFont",
+          //   "Segoe UI",
+          //   "Noto Sans",
+          //   "Helvetica",
+          //   "Arial",
+          //   "sans-serif",
+          //   "Apple Color Emoji",
+          //   "Segoe UI Emoji",
+          // ],
           height: textElement.level == 0 ? 1.5 : 1.25,
-        ));
+        ).useSystemChineseFont());
   }
 
   @override

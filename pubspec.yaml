@@ -91,6 +91,7 @@ dependencies:
   image_picker_windows: ^0.2.1+1
   crop_image: ^1.0.11
   image_cropping: ^0.0.13
+  chinese_font_library: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -113,7 +114,7 @@ flutter:
     - assets/images/app_logo.png
     - assets/doc/help_windows.md
     - assets/osx-arc/
-  fonts:
-    - family: MiSans
-      fonts:
-        - asset: assets/fonts/MiSans-Normal.ttf
+#  fonts:
+#    - family: MiSans
+#      fonts:
+#        - asset: assets/fonts/MiSans-Normal.ttf

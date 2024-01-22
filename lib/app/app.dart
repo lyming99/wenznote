@@ -34,6 +34,7 @@ import 'package:wenznote/commons/widget/ignore_parent_pointer.dart';
 import 'package:wenznote/service/service_manager.dart';
 import 'package:wenznote/widgets/root_widget.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:chinese_font_library/chinese_font_library.dart';
 
 import 'mobile/controller/user/mobile_user_forget_password_controller.dart';
 import 'mobile/view/today/mobile_today_page.dart';
@@ -281,12 +282,15 @@ class AppWidget extends MvcView<AppController> {
               routerConfig: _router,
               debugShowCheckedModeBanner: false,
               theme: ThemeData(
-                fontFamily: "MiSans",
+                // fontFamily: "MiSans",
                 brightness: brightness,
+                textTheme: const TextTheme().useSystemChineseFont(brightness),
               ),
               locale: const Locale('zh', 'CN'),
               supportedLocales: const [
-                Locale('zh', 'CN'), // English, no country code
+                Locale('zh', 'CN'),
+                Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+                Locale('en', ''),
               ],
               localizationsDelegates: const [
                 GlobalMaterialLocalizations.delegate,
@@ -295,7 +299,7 @@ class AppWidget extends MvcView<AppController> {
               builder: (context, child) {
                 return fluent.FluentTheme(
                   data: fluent.FluentThemeData(
-                    fontFamily: "MiSans",
+                    // fontFamily: "MiSans",
                     brightness: brightness,
                     acrylicBackgroundColor: Colors.grey.withAlpha(10),
                   ),

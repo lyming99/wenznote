@@ -66,7 +66,7 @@ class ExportWidget extends MvcView<ExportController> {
                               : "导出笔记",
                           style: TextStyle(
                             color: EditTheme.of(context).fontColor,
-                            fontFamily: "MiSans",
+                            // fontFamily: "MiSans",
                             fontSize: 16,
                           ),
                         ),

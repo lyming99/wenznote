@@ -62,7 +62,7 @@ class MoveWidget extends MvcView<MoveController> {
                 "请选择文件夹",
                 style: TextStyle(
                   color: EditTheme.of(context).fontColor,
-                  fontFamily: "MiSans",
+                  // fontFamily: "MiSans",
                   fontSize: 16,
                 ),
               ),

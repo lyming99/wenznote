@@ -59,7 +59,6 @@ class SettingsWidget extends GetView<SettingsController> {
                         "设置",
                         style: TextStyle(
                           color: EditTheme.of(context).fontColor,
-                          fontFamily: "MiSans",
                           fontSize: 16,
                         ),
                       ),
@@ -104,8 +103,8 @@ class SettingsWidget extends GetView<SettingsController> {
           vertical: 0,
           horizontal: 0,
         ),
-        style: const TextStyle(fontFamily: "MiSans", fontSize: 14),
-        placeholderStyle: const TextStyle(fontSize: 14, fontFamily: "MiSans"),
+        style: const TextStyle( fontSize: 14),
+        placeholderStyle: const TextStyle(fontSize: 14),
         suffix: Obx(
           () => Row(mainAxisSize: MainAxisSize.min, children: [
             if (controller.searchText.isNotEmpty)
