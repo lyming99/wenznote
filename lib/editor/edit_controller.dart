@@ -462,6 +462,9 @@ class EditController with ChangeNotifier {
       inputCallback: onInputText,
       inputComposingCallback: onInputComposing,
       actionCallback: onInputAction,
+      onDelete: (){
+        delete(true);
+      }
     );
     selectState = SelectState(
       editController: this,

@@ -13,6 +13,7 @@ class InputManager with TextInputClient, DeltaTextInputClient {
     this.inputCallback,
     this.inputComposingCallback,
     this.actionCallback,
+    this.onDelete,
   });
 
   TextEditingValue? composing;
@@ -22,6 +23,7 @@ class InputManager with TextInputClient, DeltaTextInputClient {
   TextInputConnection? connection;
   TextEditingValue? textEditingValue;
   ActionCallback? actionCallback;
+  Function? onDelete;
 
   bool get isOpen {
     return connection?.attached == true;
@@ -33,17 +35,19 @@ class InputManager with TextInputClient, DeltaTextInputClient {
     var conn = connection;
     if (conn != null && conn.attached) {
       conn.show();
+      fillIosContent();
       return;
     }
     connection?.close();
     connection = TextInput.attach(
       this,
-        TextInputConfiguration(
+      TextInputConfiguration(
         inputAction: TextInputAction.newline,
-        enableDeltaModel: Platform.isAndroid?true:false,
+        enableDeltaModel: Platform.isAndroid || Platform.isIOS ? true : false,
       ),
     )..setEditingState(const TextEditingValue());
     connection!.show();
+    fillIosContent();
   }
 
   void closeInputMethod() {
@@ -81,7 +85,6 @@ class InputManager with TextInputClient, DeltaTextInputClient {
 
   @override
   void updateEditingValue(TextEditingValue value) {
-    textEditingValue = value;
     if (!value.composing.isValid) {
       if (value.text.isNotEmpty) {
         inputCallback?.call(value);
@@ -159,7 +162,25 @@ class InputManager with TextInputClient, DeltaTextInputClient {
           composing: delta.composing,
           selection: delta.selection,
         ));
+        if(Platform.isIOS){
+          if(delta.composing.isValid){
+            return;
+          }
+        }
       }
+      if (delta is TextEditingDeltaDeletion) {
+        if (Platform.isIOS) {
+          onDelete?.call();
+        }
+      }
+    }
+    fillIosContent();
+  }
+
+  void fillIosContent() {
+    if (Platform.isIOS) {
+      connection?.setEditingState(TextEditingValue(
+          text: "-", selection: TextSelection.collapsed(offset: 1)));
     }
   }
 }

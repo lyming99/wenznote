@@ -108,7 +108,12 @@ Future<List<WenElement>> parseHtmlToBlockElement(
   var result = <WenElement>[];
   WenElementStyle blockElementStyle = WenElementStyle();
   var dom = HtmlParser.parseHTML(html);
-  var tree = HtmlParser.lexDomTree(dom, [], Html.tags, null, context);
+  var tree = StyledElement(
+    name: '[Tree Root]',
+    children: [],
+    node: dom,
+    style: Style.fromTextStyle(DefaultTextStyle.of(context).style),
+  );
   _applyInlineStyles(tree, null);
   var body = _getBodyElement(tree);
 
@@ -121,7 +126,12 @@ Future<List<WenElement>> parseHtmlToBlockElement(
 Future<List<WenElement>?> parseCopyIdElement(
     CopyService copyService, BuildContext context, String html) async {
   var dom = HtmlParser.parseHTML(html);
-  var tree = HtmlParser.lexDomTree(dom, [], Html.tags, null, context);
+  var tree = StyledElement(
+    name: '[Tree Root]',
+    children: [],
+    node: dom,
+    style: Style.fromTextStyle(DefaultTextStyle.of(context).style),
+  );
   _applyInlineStyles(tree, null);
   var body = _getBodyElement(tree);
   if (body != null) {
@@ -207,13 +217,13 @@ Future<void> _parseHtmlToBlockElement(
     if (result.isNotEmpty) {
       result.last.newLine = false;
     }
-  } else if (element is ImageContentElement) {
+  } else if (element.name == 'img') {
     var id = element.elementId;
     var src = element.attributes["src"];
     var imageFile =
         await ServiceManager.of(context).fileManager.getImageFile(id);
     if (imageFile != null && File(imageFile).existsSync()) {
-      var size =  await readImageFileSize(imageFile);
+      var size = await readImageFileSize(imageFile);
       result.add(WenImageElement(
         id: id,
         file: imageFile,
@@ -230,7 +240,7 @@ Future<void> _parseHtmlToBlockElement(
             .fileManager
             .getImageFile(fileItem.uuid);
         if (imageFile != null) {
-          var size =  await readImageFileSize(imageFile);
+          var size = await readImageFileSize(imageFile);
           result.add(WenImageElement(
             id: fileItem.uuid!,
             file: imageFile,
@@ -240,11 +250,11 @@ Future<void> _parseHtmlToBlockElement(
         }
       }
     }
-  } else if (element is VideoContentElement) {
+  } else if (element.name == 'video') {
     //todo 视频支持
-  } else if (element is AudioContentElement) {
+  } else if (element.name == 'video') {
     //todo 音频支持
-  } else if (element is SvgContentElement) {
+  } else if (element.name == 'svg') {
     //todo svg支持
   } else {
     if (element.name == "h1") {

@@ -29,7 +29,8 @@ class MultiSourceFileImage extends ImageProvider<MultiSourceFileImage> {
   }
 
   @override
-  ImageStreamCompleter load(MultiSourceFileImage key, DecoderCallback decode) {
+  ImageStreamCompleter loadImage(
+      MultiSourceFileImage key, ImageDecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, null, decode),
       scale: key.scale,
@@ -53,8 +54,10 @@ class MultiSourceFileImage extends ImageProvider<MultiSourceFileImage> {
     );
   }
 
-  Future<ui.Codec> _loadAsync(MultiSourceFileImage key,
-      DecoderBufferCallback? decode, DecoderCallback? decodeDeprecated) async {
+  Future<ui.Codec> _loadAsync(
+      MultiSourceFileImage key,
+      DecoderBufferCallback? decode,
+      ImageDecoderCallback? decodeDeprecated) async {
     assert(key == this);
 
     final Uint8List bytes = await reader.call(key.imageId);
@@ -68,7 +71,7 @@ class MultiSourceFileImage extends ImageProvider<MultiSourceFileImage> {
     if (decode != null) {
       return decode(await ui.ImmutableBuffer.fromUint8List(bytes));
     }
-    return decodeDeprecated!(bytes);
+    return decodeDeprecated!(await ui.ImmutableBuffer.fromUint8List(bytes));
   }
 
   @override

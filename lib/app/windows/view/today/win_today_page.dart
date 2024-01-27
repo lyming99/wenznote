@@ -189,7 +189,7 @@ class WinTodayPage extends MvcView<WinTodayController> {
   Widget buildFilterBar(BuildContext context) {
     return Container(
       height: 32,
-      padding: EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       child: SingleTickerWidget(builder: (context) {
         var theme = fluent.FluentTheme.of(context);
         var tabController = controller.createTabController(context);
@@ -199,10 +199,12 @@ class WinTodayPage extends MvcView<WinTodayController> {
           child: Align(
             alignment: Alignment.topLeft,
             child: TabBar(
+              padding: EdgeInsets.zero,
               controller: controller.tabBarController,
               labelColor: theme.resources.textFillColorPrimary,
-              labelPadding: EdgeInsets.symmetric(horizontal: 16,),
+              labelPadding: const EdgeInsets.symmetric(horizontal: 16,),
               isScrollable: true,
+              tabAlignment: TabAlignment.start,
               onTap: (index) {
                 switch (index) {
                   case 0:

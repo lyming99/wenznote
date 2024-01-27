@@ -591,6 +591,7 @@ class _CustomTabBarState extends State<CustomTabBar>
       controller: tabController,
       labelColor: EditTheme.of(context).fontColor,
       tabs: widget.tabs,
+      tabAlignment: TabAlignment.start,
       isScrollable: true,
       labelPadding: EdgeInsets.symmetric(
         vertical: 4,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -823,6 +825,9 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
             ),
             onPressed: () {
               controller.editController.addTextBlock();
+              if(Platform.isIOS){
+                return;
+              }
               Navigator.of(context).pop();
             },
           ),
@@ -840,6 +845,9 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
             ),
             onPressed: () {
               controller.editController.copy();
+              if(Platform.isIOS){
+                return;
+              }
               Navigator.of(context).pop();
             },
           ),
@@ -856,6 +864,9 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
             ),
             onPressed: () {
               controller.editController.cut();
+              if(Platform.isIOS){
+                return;
+              }
               Navigator.of(context).pop();
             },
           ),
@@ -872,6 +883,9 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
             ),
             onPressed: () {
               controller.editController.paste();
+              if(Platform.isIOS){
+                return;
+              }
               Navigator.of(context).pop();
             },
           ),
@@ -888,6 +902,9 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
             ),
             onPressed: () {
               controller.editController.selectAll();
+              if(Platform.isIOS){
+                return;
+              }
               Navigator.of(context).pop();
             },
           ),

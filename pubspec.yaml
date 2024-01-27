@@ -40,13 +40,13 @@ dependencies:
   sqflite: ^2.2.2
   path: ^1.8.2
   desktop_window: ^0.4.0
-  octo_image: ^1.0.2
+  octo_image: ^2.0.0
   archive: ^3.3.6
-  super_drag_and_drop: ^0.3.0+2
-  super_clipboard: ^0.3.0+2
+  super_drag_and_drop: ^0.6.0
+  super_clipboard: ^0.6.0
   protobuf: ^2.1.0
-  sqflite_common_ffi: ^2.2.3
-  sqlite3_flutter_libs: ^0.5.13
+#  sqflite_common_ffi: ^2.2.3
+#  sqlite3_flutter_libs: ^0.5.13
   get: ^4.6.5
   fluent_ui: ^4.7.3
   flutter_fancy_tree_view: ^0.5.3+2
@@ -61,13 +61,13 @@ dependencies:
   fluttertoast: ^8.2.2
   vibration: ^1.7.7
   file_picker: ^5.2.10
-  permission_handler: ^10.2.0
+  permission_handler: ^11.2.0
   flutter_tts: ^3.7.0
   external_path: ^1.0.3
   isar: ^3.1.0+1
   isar_flutter_libs: ^3.1.0+1
-  flutter_html: ^2.2.1
-  flutter_math_fork: ^0.5.0
+  flutter_html: ^3.0.0-beta.2
+  flutter_math_fork: ^0.7.2
   flutter_crdt:
     git: https://gitee.com/gdccj/flutter_crdt.git
 
@@ -75,7 +75,7 @@ dependencies:
   flutter_breadcrumb: ^1.0.1
   fl_chart: ^0.63.0
   desktop_multi_window: ^0.2.0
-  device_info_plus: ^8.2.2
+  device_info_plus: ^9.1.1
   easy_image_viewer: ^1.2.1
   photo_view: ^0.14.0
   shared_preferences: ^2.2.1

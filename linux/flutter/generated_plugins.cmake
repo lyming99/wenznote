@@ -13,7 +13,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   pasteboard
   rich_clipboard_linux
   screen_retriever
-  sqlite3_flutter_libs
   super_native_extensions
   url_launcher_linux
   window_manager

@@ -57,7 +57,7 @@ class IsarService {
         ],
         directory: databases.path,
         name: "documents",
-        maxSizeMiB: 128000,
+        maxSizeMiB: 10000,
       );
       return _documentIsar!.isOpen;
     }finally{

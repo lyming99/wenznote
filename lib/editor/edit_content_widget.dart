@@ -123,9 +123,11 @@ class EditContentWidgetState extends State<EditContentWidget> {
                   child: GestureDetector(
                     onLongPress: () {
                       HapticFeedback.selectionClick();
-                      var eventQueue = widget.controller.mouseKeyboardState.mouseDownEvent1;
-                      if(eventQueue.isNotEmpty){
-                        widget.controller.selectWord(eventQueue.last.localPosition);
+                      var eventQueue = widget
+                          .controller.mouseKeyboardState.mouseDownEvent1;
+                      if (eventQueue.isNotEmpty) {
+                        widget.controller
+                            .selectWord(eventQueue.last.localPosition);
                       }
                     },
                     child: MouseEventListenerWidget(
@@ -164,5 +166,16 @@ class EditContentWidgetState extends State<EditContentWidget> {
         );
       },
     );
+  }
+}
+
+class DeleteAction extends Action<DeleteCharacterIntent> {
+  EditController controller;
+
+  DeleteAction(this.controller);
+
+  @override
+  Object? invoke(Intent intent) {
+    controller.delete(false);
   }
 }

@@ -44,6 +44,7 @@ class _MvcViewState extends State<MvcView> with AutomaticKeepAliveClientMixin{
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     widget.controller.context = context;
     return widget.build(context);
   }

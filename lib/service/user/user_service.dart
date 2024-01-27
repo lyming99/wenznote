@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get_utils/get_utils.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:wenznote/commons/util/file_utils.dart';
 import 'package:wenznote/config/app_constants.dart';
 import 'package:wenznote/editor/block/image/multi_source_file_image.dart';
@@ -50,22 +51,29 @@ class UserService with ChangeNotifier {
     required String email,
     required String password,
   }) async {
+    if(Platform.isIOS) {
+      await Permission.appTrackingTransparency.request();
+    }
     //1.调用接口登录
     //2.将token保存到本地
     //3.将用户信息保存到本地
     //4.如果是首次登录，则提示用户是否将本地离线数据导入
-    var result = await Dio().post(
-      "${AppConstants.apiUrl}/user/login",
-      data: {"email": email, "password": password, "loginType": 1},
-      options: Options(contentType: "application/json"),
-    );
-    var data = result.data;
-    if (data["msg"] == AppConstants.success) {
-      //登录成功，data就是token信息
-      token = data["data"];
-      await fetchUserInfo();
-      await startUserService();
-      return true;
+    try{
+      var result = await Dio().post(
+        "${AppConstants.apiUrl}/user/login",
+        data: {"email": email, "password": password, "loginType": 1},
+        options: Options(contentType: "application/json"),
+      );
+      var data = result.data;
+      if (data["msg"] == AppConstants.success) {
+        //登录成功，data就是token信息
+        token = data["data"];
+        await fetchUserInfo();
+        await startUserService();
+        return true;
+      }
+    }catch(e){
+      print(e);
     }
     return false;
   }
