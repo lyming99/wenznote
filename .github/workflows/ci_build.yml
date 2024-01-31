@@ -93,7 +93,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: linux-app
-          path: build/linux/*
+          path: build/linux/*/release/bundle
 
       - name: Upload Artifact for Windows
         if: matrix.platform == 'windows'
@@ -114,4 +114,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: macos-app
-          path: build/macos/Build/Products/Release/*
+          path: build/macos/Build/Products/Release/*.app
