@@ -133,45 +133,50 @@ class UploadTaskService {
 
   /// 上传笔记快照
   Future<bool> doUploadNote(UploadTaskPO task) async {
-    var token = serviceManager.userService.token;
-    if (token == null) {
-      return false;
+    try {
+      var token = serviceManager.userService.token;
+      if (token == null) {
+        return false;
+      }
+      var docId = task.dataId;
+      // 1.读取文件
+      // 2.读取state
+      // 3.上传文件
+      var data = await serviceManager.editService.readDocFile(docId);
+      if (data == null) {
+        return false;
+      }
+      var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;
+      var states =
+          await isar.docStatePOs.filter().docIdEqualTo(docId).findAll();
+      Map<String, int> state = getClientStates(states);
+      var result = await Dio().post(
+        "$noteServerUrl/snapshot/upload/$docId",
+        options: Options(
+          headers: {
+            "token": serviceManager.userService.token,
+            "Content-Type": "multipart/form-data;"
+          },
+          responseType: ResponseType.json,
+        ),
+        data: FormData.fromMap({
+          "state": jsonEncode(state),
+          "file": MultipartFile.fromBytes(
+              serviceManager.cryptService.encode(data),
+              filename: "doc.wnote"),
+        }),
+      );
+      if (result.statusCode != 200) {
+        return false;
+      }
+      if (result.data['msg'] == AppConstants.success) {
+        return true;
+      }
+      // 查询差异数据，或者先下载数据
+      serviceManager.docSnapshotService.downloadDocFile(docId!);
+    } catch (e) {
+      print(e);
     }
-    var docId = task.dataId;
-    // 1.读取文件
-    // 2.读取state
-    // 3.上传文件
-    var data = await serviceManager.editService.readDocFile(docId);
-    if (data == null) {
-      return false;
-    }
-    var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;
-    var states = await isar.docStatePOs.filter().docIdEqualTo(docId).findAll();
-    Map<String, int> state = getClientStates(states);
-    var result = await Dio().post(
-      "$noteServerUrl/snapshot/upload/$docId",
-      options: Options(
-        headers: {
-          "token": serviceManager.userService.token,
-          "Content-Type": "multipart/form-data;"
-        },
-        responseType: ResponseType.json,
-      ),
-      data: FormData.fromMap({
-        "state": jsonEncode(state),
-        "file": MultipartFile.fromBytes(
-            serviceManager.cryptService.encode(data),
-            filename: "doc.wnote"),
-      }),
-    );
-    if (result.statusCode != 200) {
-      return false;
-    }
-    if (result.data['msg'] == AppConstants.success) {
-      return true;
-    }
-    // 查询差异数据，或者先下载数据
-    serviceManager.docSnapshotService.downloadDocFile(docId!);
     return false;
   }
 

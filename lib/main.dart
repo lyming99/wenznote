@@ -11,16 +11,6 @@ Future<void> loadResources() async {
     await flutter_acrylic.Window.initialize();
     await flutter_acrylic.Window.hideWindowControls();
     await WindowManager.instance.ensureInitialized();
-    await windowManager.center();
-    await windowManager.waitUntilReadyToShow();
-    await windowManager.setTitle("温知笔记");
-    await windowManager.setTitleBarStyle(
-      TitleBarStyle.hidden,
-      windowButtonVisibility: false,
-    );
-    await windowManager.setMinimumSize(const Size(720, 480));
-    await windowManager.show();
-    await windowManager.setSkipTaskbar(false);
     if (isWin11()) {
       await flutter_acrylic.Window.setEffect(
         effect: flutter_acrylic.WindowEffect.acrylic,
@@ -28,11 +18,31 @@ Future<void> loadResources() async {
         dark: false,
       );
     }
+    windowManager.waitUntilReadyToShow(
+        const WindowOptions(
+          size: Size(800, 560),
+          center: true,
+          skipTaskbar: false,
+          minimumSize: Size(720, 480),
+          title: "温知笔记",
+          titleBarStyle: TitleBarStyle.hidden,
+          windowButtonVisibility: false,
+          backgroundColor: Colors.transparent,
+        ), () async {
+      if (isCustomWindowBorder()) {
+        await windowManager.setAsFrameless();
+      }
+      await windowManager.show();
+    });
   }
 }
 
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   await loadResources();
-  runApp(AppWidget(controller: AppController()));
+  runApp(
+    AppWidget(
+      controller: AppController(),
+    ),
+  );
 }

@@ -258,6 +258,10 @@ class DocSnapshotService {
         // 写入状态
         await isar.writeTxn(() => isar.docStatePOs.putAll(saveStates));
       }
+    }catch(e){
+      // 可能存在yjs合并失败的bug，需要处理yjs类型转换问题
+      // type 'ContentDeleted' is not a subtype of type 'ContentType' in type cast
+      print(e);
     } finally {
       _downloadLock.unlock();
     }
