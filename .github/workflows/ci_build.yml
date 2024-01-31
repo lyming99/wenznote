@@ -54,6 +54,9 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
+          key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
+          restore-keys: |
+            flutter-sdk-${{ runner.os }}-
 
       - run: flutter pub get
 
