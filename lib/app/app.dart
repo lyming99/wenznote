@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:wenznote/app/mobile/controller/settings/mobile_settings_controller.dart';
 import 'package:wenznote/app/mobile/controller/user/mobile_user_info_controller.dart';
 import 'package:wenznote/app/mobile/controller/user/mobile_user_login_controller.dart';
@@ -33,8 +35,7 @@ import 'package:wenznote/commons/mvc/view.dart';
 import 'package:wenznote/commons/widget/ignore_parent_pointer.dart';
 import 'package:wenznote/service/service_manager.dart';
 import 'package:wenznote/widgets/root_widget.dart';
-import 'package:oktoast/oktoast.dart';
-import 'package:chinese_font_library/chinese_font_library.dart';
+import 'package:wenznote/widgets/window_border_widget.dart';
 
 import 'mobile/controller/user/mobile_user_forget_password_controller.dart';
 import 'mobile/view/today/mobile_today_page.dart';
@@ -270,6 +271,7 @@ class AppWidget extends MvcView<AppController> {
     return ServiceManagerWidget(builder: (context) {
       var serviceManager = ServiceManager.of(context);
       return OKToast(
+        backgroundColor: Colors.transparent,
         child: IgnoreParentMousePointerContainer(
           child: Obx(() {
             var brightness = serviceManager.themeManager.getBrightness();
@@ -303,7 +305,10 @@ class AppWidget extends MvcView<AppController> {
                     brightness: brightness,
                     acrylicBackgroundColor: Colors.grey.withAlpha(10),
                   ),
-                  child: Container(child: child ?? Container()),
+                  child: WindowBorderWidget(
+                    brightness: brightness,
+                    child: Container(child: child ?? Container()),
+                  ),
                 );
               },
             );
