@@ -309,6 +309,10 @@ class RecordSyncService with IsarServiceMixin {
         // 8.将下载的数据存到本地数据库
         saveDbDelta(localList, value);
       }
+      var hasDirItem = updateList.any((element) => element.dataType == "dir");
+      if (hasDirItem) {
+        await calcDirPid();
+      }
     } catch (e) {
       print(e);
     } finally {
@@ -337,6 +341,73 @@ class RecordSyncService with IsarServiceMixin {
           await documentIsar.writeTxn(() => documentIsar.dbDeltas.put(delta));
         }
       }
+    }
+  }
+
+  /// 计算 pid，移除回环
+  Future<void> calcDirPid() async {
+    var dirDbDeltas =
+        await documentIsar.dbDeltas.filter().dataTypeEqualTo("dir").findAll();
+    // id,pid,time
+    List<PidItem> pidItemList = [];
+    for (var dirItem in dirDbDeltas) {
+      var content = dirItem.content;
+      if (content == null) {
+        continue;
+      }
+      var propArray = jsonDecode(content);
+      if (propArray is! List) {
+        continue;
+      }
+      for (var prop in propArray) {
+        if (prop is! Map) {
+          continue;
+        }
+        var pidProp = prop['pid'];
+        if (pidProp is! Map) {
+          continue;
+        }
+        pidItemList.add(PidItem(
+            id: dirItem.dataId, pid: pidProp["value"], time: pidProp["time"]));
+      }
+    }
+    pidItemList.sort((a, b) {
+      return (a.time ?? 0).compareTo(b.time ?? 0);
+    });
+    // 计算 pid
+    Map<String, String?> pidMap = {};
+    for (var pidItem in pidItemList) {
+      var pid = pidItem.pid;
+      var originId = pidItem.id;
+      if (originId == null) {
+        continue;
+      }
+      bool isCycle = false;
+      while (pid != null) {
+        if (pid == originId) {
+          isCycle = true;
+          break;
+        }
+        pid = pidMap[pid];
+      }
+      if (!isCycle) {
+        // 非死环，则更新，否则此次更新无效
+        pidMap[originId] = pid;
+      }
+    }
+    // 将pid更新到本地
+    var dirList = await documentIsar.docDirPOs.where().findAll();
+    List<DocDirPO> updateList = [];
+    for (var dir in dirList) {
+      if (dir.pid != pidMap[dir.uuid]) {
+        dir.pid = pidMap[dir.uuid];
+        updateList.add(dir);
+      }
+    }
+    if (updateList.isNotEmpty) {
+      documentIsar.writeTxn(() async {
+        await documentIsar.docDirPOs.putAll(updateList);
+      });
     }
   }
 
@@ -626,4 +697,16 @@ class PropertyInfo {
       value: map['value'] as Object?,
     );
   }
+}
+
+class PidItem {
+  String? id;
+  String? pid;
+  int? time;
+
+  PidItem({
+    required this.id,
+    required this.pid,
+    required this.time,
+  });
 }
