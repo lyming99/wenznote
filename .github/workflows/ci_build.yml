@@ -27,36 +27,14 @@ jobs:
             platform: 'macos'
     steps:
       - uses: actions/checkout@v4
-      - name: Install Flutter SDK (Windows)
-        if: matrix.platform == 'windows'
-        run: |
-          $FLUTTER = "$HOME\f\.flutter"
-          $FLUTTER_BIN = "$FLUTTER\bin"
-          echo "FLUTTER=$FLUTTER" | Out-File -Append -Encoding ASCII -FilePath $env:GITHUB_ENV
-          echo "$FLUTTER_BIN" | Out-File -Append -Encoding ASCII -FilePath $env:GITHUB_PATH
-          if (!(Test-Path "$FLUTTER_BIN\flutter")) {
-            if (Test-Path "$FLUTTER") {
-              Remove-Item "$FLUTTER" -Force -Recurse -ErrorAction SilentlyContinue
-            }
-            git clone --depth 1 -b $env:FLUTTER_VERSION https://github.com/flutter/flutter.git "$FLUTTER"
-          }
-          else {
-            Write-Host "Using cached Flutter SDK"
-          }
-        shell: powershell
-        env:
-          GIT_TRACE: 1
-          GIT_CURL_VERBOSE: 1
+
 
       - name: Install Flutter SDK 
-        if: matrix.platform != 'windows'
         uses: hughware/flutter-action@v1.0.0
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-          key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
-          restore-keys: |
-            flutter-sdk-${{ runner.os }}-
+          cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
 
       - run: flutter pub get
 
