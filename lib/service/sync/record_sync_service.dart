@@ -259,64 +259,102 @@ class RecordSyncService with IsarServiceMixin {
       if (token == null) {
         return;
       }
-      /**
-       * 2.查询 db 数据
-       */
-      var result = await Dio().post("$noteServerUrl/db/queryDbDeltaList",
-          options: Options(
-            headers: {
-              "token": token,
-            },
-          ),
-          data: {
-            "queryAll": pullAll,
-            "clientStates": clientStates,
-            "dataIdList": dataIdList,
-          });
-      if (result.statusCode != 200) {
-        return;
+      var dataTypeList = [
+        "note",
+        "dir",
+        "cardSet",
+        "cardSetConfig",
+        "cardStudy"
+      ];
+      for (var dataType in dataTypeList) {
+        await _pullDbData(
+          token: token,
+          pullAll: pullAll,
+          clientStates: clientStates,
+          dataIdList: dataIdList,
+          dataType: dataType,
+        );
       }
-      /**
-       * 3.将查询的数据解析，并且存入数据库
-       */
-      var data = result.data;
-      List<DbDelta> updateList = [];
-      if (data["msg"] == AppConstants.success) {
-        List list = data["data"];
-        for (var value in list) {
-          var item = DbDelta.fromMap(value);
-          updateList.add(item);
-        }
-      }
-      // 4.对记录进行分组
-      var groupMap = updateList.groupBy((item) {
-        return item.dataId ?? "";
-      });
-      // 5.对每个分组地记录进行分析，得到最终数据
-      for (var entry in groupMap.entries) {
-        var dataId = entry.key;
-        var value = entry.value;
-        // 6.从本地查询出dataId对应的数据
-        var localList = await documentIsar.dbDeltas
-            .filter()
-            .dataIdEqualTo(dataId)
-            .findAll();
-        var mergeList = <DbDelta>[];
-        mergeList.addAll(localList);
-        mergeList.addAll(value);
-        // 7.将所有的dbDelta数据合并起来计算出对应的数据
-        dbDeltaToLocalData(dataId, mergeList);
-        // 8.将下载的数据存到本地数据库
-        saveDbDelta(localList, value);
-      }
-      var hasDirItem = updateList.any((element) => element.dataType == "dir");
-      if (hasDirItem) {
-        await calcDirPid();
+      var cardSetList = await serviceManager.cardService.queryCardSetList();
+      for (var cardSet in cardSetList) {
+        var startTime = DateTime.now().millisecondsSinceEpoch;
+        await _pullDbData(
+          token: token,
+          pullAll: pullAll,
+          clientStates: clientStates,
+          dataIdList: dataIdList,
+          dataType: "card-${cardSet.uuid}",
+        );
+        var endTime = DateTime.now().millisecondsSinceEpoch;
+        var useTime = endTime-startTime;
+        print('pull card use time:${useTime}');
       }
     } catch (e) {
       print(e);
     } finally {
       pullLock.unlock();
+    }
+  }
+
+  Future<void> _pullDbData({
+    required String token,
+    required bool pullAll,
+    Object? clientStates,
+    List<String>? dataIdList,
+    String? dataType,
+  }) async {
+    /**
+     * 2.查询 db 数据
+     */
+    var result = await Dio().post("$noteServerUrl/db/queryDbDeltaList",
+        options: Options(
+          headers: {
+            "token": token,
+          },
+        ),
+        data: {
+          "queryAll": pullAll,
+          "clientStates": clientStates,
+          "dataIdList": dataIdList,
+          "dataType": dataType,
+        });
+    if (result.statusCode != 200) {
+      return;
+    }
+    /**
+     * 3.将查询的数据解析，并且存入数据库
+     */
+    var data = result.data;
+    List<DbDelta> updateList = [];
+    if (data["msg"] == AppConstants.success) {
+      List list = data["data"];
+      for (var value in list) {
+        var item = DbDelta.fromMap(value);
+        updateList.add(item);
+      }
+    }
+    // 4.对记录进行分组
+    var groupMap = updateList.groupBy((item) {
+      return item.dataId ?? "";
+    });
+    // 5.对每个分组地记录进行分析，得到最终数据
+    for (var entry in groupMap.entries) {
+      var dataId = entry.key;
+      var value = entry.value;
+      // 6.从本地查询出dataId对应的数据
+      var localList =
+          await documentIsar.dbDeltas.filter().dataIdEqualTo(dataId).findAll();
+      var mergeList = <DbDelta>[];
+      mergeList.addAll(localList);
+      mergeList.addAll(value);
+      // 7.将所有的dbDelta数据合并起来计算出对应的数据
+      dbDeltaToLocalData(dataId, mergeList);
+      // 8.将下载的数据存到本地数据库
+      saveDbDelta(localList, value);
+    }
+    var hasDirItem = updateList.any((element) => element.dataType == "dir");
+    if (hasDirItem) {
+      await calcDirPid();
     }
   }
 
@@ -348,7 +386,7 @@ class RecordSyncService with IsarServiceMixin {
   Future<void> calcDirPid() async {
     var dirDbDeltas =
         await documentIsar.dbDeltas.filter().dataTypeEqualTo("dir").findAll();
-    // id,pid,time
+// id,pid,time
     List<PidItem> pidItemList = [];
     for (var dirItem in dirDbDeltas) {
       var content = dirItem.content;
@@ -374,7 +412,7 @@ class RecordSyncService with IsarServiceMixin {
     pidItemList.sort((a, b) {
       return (a.time ?? 0).compareTo(b.time ?? 0);
     });
-    // 计算 pid
+// 计算 pid
     Map<String, String?> pidMap = {};
     for (var pidItem in pidItemList) {
       var pid = pidItem.pid;
@@ -391,11 +429,11 @@ class RecordSyncService with IsarServiceMixin {
         pid = pidMap[pid];
       }
       if (!isCycle) {
-        // 非死环，则更新，否则此次更新无效
+// 非死环，则更新，否则此次更新无效
         pidMap[originId] = pid;
       }
     }
-    // 将pid更新到本地
+// 将pid更新到本地
     var dirList = await documentIsar.docDirPOs.where().findAll();
     List<DocDirPO> updateList = [];
     for (var dir in dirList) {
@@ -434,9 +472,6 @@ class RecordSyncService with IsarServiceMixin {
       case 'cardSet':
         await dbDeltaToLocalCardSet(dataId, mergeList);
         break;
-      case 'card':
-        await dbDeltaToLocalCard(dataId, mergeList);
-        break;
       case 'dir':
         await dbDeltaToLocalDir(dataId, mergeList);
         break;
@@ -447,7 +482,9 @@ class RecordSyncService with IsarServiceMixin {
         await dbDeltaToLocalCardSetConfig(dataId, mergeList);
         break;
       default:
-        print("not suppert:$dataType");
+        if (dataType.startsWith("card-")) {
+          await dbDeltaToLocalCard(dataId, mergeList);
+        }
         break;
     }
   }
@@ -467,7 +504,6 @@ class RecordSyncService with IsarServiceMixin {
     if (properties == null) {
       await documentIsar.writeTxn(
           () => documentIsar.docPOs.filter().uuidEqualTo(dataId).deleteAll());
-      serviceManager.docService.notifyListeners();
       return;
     }
     //将属性转为笔记记录，存到笔记数据库中
@@ -482,7 +518,6 @@ class RecordSyncService with IsarServiceMixin {
       item.id = doc.id;
       item.uuid = dataId;
       await documentIsar.writeTxn(() => documentIsar.docPOs.put(item));
-      serviceManager.docService.notifyListeners();
     } catch (e) {
       e.printError();
     }

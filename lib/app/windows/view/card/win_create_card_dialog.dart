@@ -156,7 +156,7 @@ Future<void> _generateCard(
     }
     await createCard(serviceManager.cardService, cardSet, saveList, current);
     if (saveList.isNotEmpty) {
-      await serviceManager.cardService.insertCards(saveList);
+      await serviceManager.cardService.insertCards(cardSet.uuid,saveList);
       saveList.clear();
     }
   }
@@ -177,7 +177,7 @@ Future<void> createCard(CardService cardService, CardSetPO set,
     updateTime: DateTime.now().millisecondsSinceEpoch,
   ));
   if (saveList.length > 1000) {
-    await cardService.insertCards(saveList);
+    await cardService.insertCards(set.uuid,saveList);
     saveList.clear();
   }
 }

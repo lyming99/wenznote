@@ -2,12 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
+import 'package:uuid/uuid.dart';
 import 'package:wenznote/model/card/po/card_po.dart';
 import 'package:wenznote/model/card/po/card_set_po.dart';
 import 'package:wenznote/model/card/po/card_study_config_po.dart';
 import 'package:wenznote/service/isar/isar_service_mixin.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:uuid/uuid.dart';
 
 class CardService with IsarServiceMixin {
   @override
@@ -101,17 +101,18 @@ class CardService with IsarServiceMixin {
     card.createTime = DateTime.now().millisecondsSinceEpoch;
     card.updateTime = DateTime.now().millisecondsSinceEpoch;
     await upsertDbDelta(
-        dataId: card.uuid!, dataType: "card", properties: card.toMap());
+        dataId: card.uuid!, dataType: "card-${card.cardSetId}", properties: card.toMap());
     await documentIsar.writeTxn(() async {
       documentIsar.cardPOs.put(card);
     });
   }
 
-  Future<void> insertCards(List<CardPO> cardList) async {
+  Future<void> insertCards(String? cardSetId, List<CardPO> cardList) async {
     await upsertDbDeltas(
-        dataType: "card", objList: cardList.map((e) => e.toMap()).toList());
+        dataType: "card-$cardSetId",
+        objList: cardList.map((e) => e.toMap()).toList());
     await documentIsar.writeTxn(() async {
-      documentIsar.cardPOs.putAll(cardList);
+      await documentIsar.cardPOs.putAll(cardList);
     });
   }
 
@@ -149,7 +150,7 @@ class CardService with IsarServiceMixin {
     var oldItem = await documentIsar.cardPOs.get(card.id);
     await upsertDbDelta(
         dataId: card.uuid!,
-        dataType: "card",
+        dataType: "card-${card.cardSetId}",
         properties: diffMap(oldItem?.toMap() ?? {}, card.toMap()));
     await documentIsar.writeTxn(() => documentIsar.cardPOs.put(card));
   }
