@@ -21,39 +21,20 @@ jobs:
             platform: 'linux'
           - os: windows-latest
             platform: 'windows'
-          - os: macos-latest
+          - os: macos-14
             platform: 'ios'
-          - os: macos-latest
+          - os: macos-14
             platform: 'macos'
     steps:
-      - uses: actions/checkout@v3
-      - name: Install Flutter SDK (Windows)
-        if: matrix.platform == 'windows'
-        run: |
-          $FLUTTER = "$HOME\f\.flutter"
-          $FLUTTER_BIN = "$FLUTTER\bin"
-          echo "FLUTTER=$FLUTTER" | Out-File -Append -Encoding ASCII -FilePath $env:GITHUB_ENV
-          echo "$FLUTTER_BIN" | Out-File -Append -Encoding ASCII -FilePath $env:GITHUB_PATH
-          if (!(Test-Path "$FLUTTER_BIN\flutter")) {
-            if (Test-Path "$FLUTTER") {
-              Remove-Item "$FLUTTER" -Force -Recurse -ErrorAction SilentlyContinue
-            }
-            git clone --depth 1 -b $env:FLUTTER_VERSION https://github.com/flutter/flutter.git "$FLUTTER"
-          }
-          else {
-            Write-Host "Using cached Flutter SDK"
-          }
-        shell: powershell
-        env:
-          GIT_TRACE: 1
-          GIT_CURL_VERBOSE: 1
+      - uses: actions/checkout@v4
+
 
       - name: Install Flutter SDK 
-        if: matrix.platform != 'windows'
-        uses: subosito/flutter-action@v2
+        uses: hughware/flutter-action@v1.0.0
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
+          cache-key: flutter-sdk-${{ runner.os }}-${{ env.FLUTTER_VERSION }}
 
       - run: flutter pub get
 
@@ -83,35 +64,35 @@ jobs:
 
       - name: Upload Artifact for Android
         if: matrix.platform == 'android'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: android-app
           path: build/app/outputs/flutter-apk/app-release.apk
           
       - name: Upload Artifact for Linux 
         if: matrix.platform == 'linux'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-app
           path: build/linux/*/release/bundle
 
       - name: Upload Artifact for Windows
         if: matrix.platform == 'windows'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-app
           path: build/windows/x64/runner/Release/*
 
       - name: Upload Artifact for iOS
         if: matrix.platform == 'ios'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ios-app
-          path: /Users/runner/work/wenznote/wenznote/build/ios/iphoneos/*.app
+          path: build/ios/iphoneos/*.app
 
       - name: Upload Artifact for macOS
         if: matrix.platform == 'macos'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: macos-app
           path: build/macos/Build/Products/Release/*.app
