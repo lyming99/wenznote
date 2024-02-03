@@ -24,10 +24,15 @@ class MobileCardSettingsController extends ServiceManagerController {
   void onInitState(BuildContext context) {
     super.onInitState(context);
     cardService = serviceManager.cardStudyService;
+    cardSetConfig.listen((p0) {
+      saveConfig();
+    });
     fetchData();
   }
 
-  Future<void> fetchData() async {}
+  Future<void> fetchData() async {
+    await readConfig();
+  }
 
   Future<void> readConfig() async {
     var config = await cardService.queryStudyConfig(cardSet.uuid);

@@ -30,7 +30,6 @@ class MobileStudyController extends ServiceManagerController {
   var nextTimes = RxList<int>();
   var hasFocus = true;
   FlutterTts? flutterTts;
-
   var focusNode = FocusNode();
 
   List<HideTextMode>? get hideTextModes => cardStudyConfig.value.hideTextMode

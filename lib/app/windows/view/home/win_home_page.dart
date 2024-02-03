@@ -15,7 +15,7 @@ import 'package:wenznote/app/windows/view/doc/win_doc_page.dart';
 import 'package:wenznote/app/windows/view/today/win_today_page.dart';
 import 'package:wenznote/app/windows/widgets/win_tab_view.dart';
 import 'package:wenznote/commons/mvc/view.dart';
-import 'package:wenznote/commons/service/device_utils.dart';
+import 'package:wenznote/commons/util/device_utils.dart';
 import 'package:wenznote/commons/widget/split_pane.dart';
 import 'package:wenznote/commons/widget/window_buttons.dart';
 import 'package:wenznote/editor/widget/drop_menu.dart';

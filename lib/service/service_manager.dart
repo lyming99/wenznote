@@ -6,7 +6,7 @@ import 'package:wenznote/app/windows/service/doc/win_doc_list_service.dart';
 import 'package:wenznote/app/windows/service/today/win_today_service.dart';
 import 'package:wenznote/commons/mvc/controller.dart';
 import 'package:wenznote/commons/service/copy_service.dart';
-import 'package:wenznote/commons/service/device_utils.dart';
+import 'package:wenznote/commons/util/device_utils.dart';
 import 'package:wenznote/commons/service/document_manager.dart';
 import 'package:wenznote/commons/service/settings_manager.dart';
 import 'package:wenznote/service/card/card_service.dart';

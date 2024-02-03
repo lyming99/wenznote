@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
-import '../commons/service/device_utils.dart';
+import '../commons/util/device_utils.dart';
 
 class WindowBorderWidget extends StatefulWidget {
   final Widget child;

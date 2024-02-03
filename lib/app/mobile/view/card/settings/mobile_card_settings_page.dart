@@ -241,6 +241,7 @@ class MobileCardSettingsPage extends MvcView<MobileCardSettingsController> {
 
   List<Widget> buildConfigGroupItem(
       BuildContext context, String title, List<Widget> items) {
+    var theme = fluent.FluentTheme.of(context);
     return [
       buildConfigTitleItem(context, "${title}"),
       Container(
@@ -248,9 +249,9 @@ class MobileCardSettingsPage extends MvcView<MobileCardSettingsController> {
           horizontal: 10,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.resources.dividerStrokeColorDefault,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey.shade100),
+          border: Border.all(color: theme.resources.dividerStrokeColorDefault),
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(
@@ -271,7 +272,7 @@ class MobileCardSettingsPage extends MvcView<MobileCardSettingsController> {
         return Container(
           height: 50,
           padding: EdgeInsets.symmetric(horizontal: 10),
-          color: hover ? MobileTheme.of(context).fontColor.withAlpha(10) : null,
+          color: hover ? MobileTheme.of(context).bgColor3 : null,
           child: Row(
             children: [
               Expanded(child: Text("$title")),

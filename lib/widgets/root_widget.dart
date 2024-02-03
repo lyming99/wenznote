@@ -40,8 +40,10 @@ class ServiceManagerWidgetState extends State<ServiceManagerWidget> {
   Widget build(BuildContext context) {
     serviceManager.context=context;
     if (!serviceManager.isStart) {
-      return const  Center(
-        child: RefreshProgressIndicator(),
+      return Material(
+        child: const  Center(
+          child: RefreshProgressIndicator(),
+        ),
       );
     }
     return Builder(builder: (context) {
