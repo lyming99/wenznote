@@ -477,7 +477,7 @@ class MobileTodayPageWidget extends MvcView<MobileTodayController> {
                 ),
                 Builder(builder: (context) {
                   return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                    margin: const EdgeInsets.only(left: 8.0),
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(

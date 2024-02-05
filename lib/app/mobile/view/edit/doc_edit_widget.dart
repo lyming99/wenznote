@@ -154,10 +154,13 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
                     EditWidget(controller: controller.editController),
                     Align(
                       alignment: Alignment.topRight,
-                      child: Obx(() => fluent.Padding(
+                      child: ListenableBuilder(
+                        listenable: controller.editController,
+                        builder: (BuildContext context, Widget? child) {
+                          return Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              "字数: ${controller.textLength}",
+                              "字数: ${controller.editController.textLength}",
                               style: TextStyle(
                                 color: MobileTheme.of(context)
                                     .fontColor
@@ -165,7 +168,9 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
                                 fontSize: 10,
                               ),
                             ),
-                          )),
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -809,7 +814,6 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
                 ? null
                 : () {
                     controller.editController.addTextBlockBefore();
-                    Navigator.of(context).pop();
                   },
           ),
           fluent.MenuFlyoutItem(
@@ -828,7 +832,6 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
               if(Platform.isIOS){
                 return;
               }
-              Navigator.of(context).pop();
             },
           ),
           fluent.MenuFlyoutSeparator(),
@@ -845,10 +848,6 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
             ),
             onPressed: () {
               controller.editController.copy();
-              if(Platform.isIOS){
-                return;
-              }
-              Navigator.of(context).pop();
             },
           ),
           fluent.MenuFlyoutItem(
@@ -864,10 +863,6 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
             ),
             onPressed: () {
               controller.editController.cut();
-              if(Platform.isIOS){
-                return;
-              }
-              Navigator.of(context).pop();
             },
           ),
           fluent.MenuFlyoutItem(
@@ -883,10 +878,6 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
             ),
             onPressed: () {
               controller.editController.paste();
-              if(Platform.isIOS){
-                return;
-              }
-              Navigator.of(context).pop();
             },
           ),
           fluent.MenuFlyoutItem(
@@ -902,10 +893,6 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
             ),
             onPressed: () {
               controller.editController.selectAll();
-              if(Platform.isIOS){
-                return;
-              }
-              Navigator.of(context).pop();
             },
           ),
         ],

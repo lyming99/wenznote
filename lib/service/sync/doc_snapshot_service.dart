@@ -6,6 +6,7 @@ import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:synchronized/extension.dart';
 import 'package:wenznote/config/app_constants.dart';
 import 'package:wenznote/model/note/po/doc_state_po.dart';
 import 'package:wenznote/service/service_manager.dart';
@@ -16,7 +17,8 @@ class DocSnapshotService {
   Map<String, int> queryDeltaTimeRecord = {};
   Map<String, int> downloadDocFileTimeRecord = {};
   Timer? _downloadTimer;
-  final Lock _downloadLock = Lock();
+
+  final _downloadLock = Object();
 
   DocSnapshotService(this.serviceManager);
 
@@ -175,8 +177,7 @@ class DocSnapshotService {
   }
 
   Future<void> downloadDocFile(String docId) async {
-    _downloadLock.lock();
-    try {
+    return _downloadLock.synchronized(() async {
       var lastQueryTime = downloadDocFileTimeRecord[docId];
       if (lastQueryTime != null &&
           lastQueryTime < DateTime.now().millisecondsSinceEpoch) {
@@ -250,21 +251,22 @@ class DocSnapshotService {
           saveStates.add(saveState);
         }
         // 写入文件,并且通知upload
-        await serviceManager.editService.updateDoc(
-          docId,
-          fileBytes,
-          needUpload: needUpload,
-        );
+        try {
+          // 此处可能会卡住界面
+          await serviceManager.editService.updateDoc(
+            docId,
+            fileBytes,
+            needUpload: needUpload,
+          );
+        } catch (e) {
+          // 可能存在yjs合并失败的bug，需要处理yjs类型转换问题
+          // type 'ContentDeleted' is not a subtype of type 'ContentType' in type cast
+          print(e);
+        }
         // 写入状态
         await isar.writeTxn(() => isar.docStatePOs.putAll(saveStates));
       }
-    }catch(e){
-      // 可能存在yjs合并失败的bug，需要处理yjs类型转换问题
-      // type 'ContentDeleted' is not a subtype of type 'ContentType' in type cast
-      print(e);
-    } finally {
-      _downloadLock.unlock();
-    }
+    });
   }
 
   Future<List<String>?> queryUpdateList() async {

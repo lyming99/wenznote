@@ -521,11 +521,9 @@ packages:
   flutter_crdt:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: f7e7d6971c40c809b6677f364c8287e7e957f298
-      url: "https://github.com/lyming99/flutter_crdt.git"
-    source: git
+      path: "D:/project/flutter_crdt"
+      relative: false
+    source: path
     version: "1.0.0+1"
   flutter_displaymode:
     dependency: "direct main"

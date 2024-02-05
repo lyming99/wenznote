@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:synchronized/extension.dart';
 import 'package:wenznote/editor/crdt/YsText.dart';
 import 'package:wenznote/editor/crdt/doc_utils.dart';
 import 'package:wenznote/model/note/po/doc_state_po.dart';
@@ -22,6 +24,7 @@ class DocEditService {
   final _fileCache = <String, Uint8List>{};
   final _docCache = <String, Doc>{};
   final _updateCache = <String, Uint8List>{};
+  final _updateLock = Lock();
 
   Future<String> getNoteDir() async {
     return serviceManager.fileManager.getDocDir();
@@ -97,24 +100,53 @@ class DocEditService {
       return;
     }
     useV2Encoding();
-    var bytes = encodeStateAsUpdate(doc, null);
-    _docCache[docId] = doc;
-    await writeDocFile(docId, bytes);
-    // 更新doc state
-    var isar = serviceManager.isarService.documentIsar;
-    var clientId = serviceManager.userService.clientId;
-    var state = await isar.docStatePOs
-        .filter()
-        .docIdEqualTo(docId)
-        .clientIdEqualTo(clientId)
-        .findFirst();
-    state ??= DocStatePO(docId: docId, clientId: clientId);
-    state.updateTime = DateTime.now().millisecondsSinceEpoch;
-    await isar.writeTxn(() => isar.docStatePOs.put(state!));
-    // 增加上传快照任务
-    if (needUpload) {
-      serviceManager.uploadTaskService.uploadDoc(docId);
-    }
+    _updateLock.synchronized(() async {
+      var bytes = encodeStateAsUpdate(doc, null);
+      _docCache[docId] = doc;
+      await writeDocFile(docId, bytes);
+      // 更新doc state
+      var isar = serviceManager.isarService.documentIsar;
+      var clientId = serviceManager.userService.clientId;
+      var state = await isar.docStatePOs
+          .filter()
+          .docIdEqualTo(docId)
+          .clientIdEqualTo(clientId)
+          .findFirst();
+      state ??= DocStatePO(docId: docId, clientId: clientId);
+      state.updateTime = DateTime.now().millisecondsSinceEpoch;
+      await isar.writeTxn(() => isar.docStatePOs.put(state!));
+      // 增加上传快照任务
+      if (needUpload) {
+        await serviceManager.uploadTaskService.uploadDoc(docId);
+      }
+    });
+  }
+
+  Future<bool> updateDoc(
+    String docId,
+    Uint8List delta, {
+    bool needUpload = true,
+  }) async {
+    return _updateLock.synchronized(() async {
+      try {
+        _updateCache[docId] = delta;
+        var doc = _docCache[docId];
+        if (doc != null) {
+          applyUpdateV2(doc, delta, null);
+        }
+        var docBytes = await readDocFile(docId);
+        var newBytes = mergeUpdatesV2([delta, if (docBytes != null) docBytes]);
+        await writeDocFile(docId, newBytes);
+        if (needUpload) {
+          await serviceManager.uploadTaskService.uploadDoc(docId);
+        }
+        return !_equalsSnapShot(docBytes ?? Uint8List(0), newBytes);
+      } catch (e) {
+        print(e);
+        e.printError();
+        return false;
+      }
+    });
   }
 
   Future<void> deleteDocFile(String docId) async {
@@ -126,21 +158,6 @@ class DocEditService {
     } catch (e) {
       e.printError();
     }
-  }
-
-  Future<bool> updateDoc(
-    String docId,
-    Uint8List delta, {
-    bool needUpload = true,
-  }) async {
-    _updateCache[docId] = delta;
-    var doc = await readDoc(docId);
-    doc ??= Doc()..clientID = serviceManager.userService.clientId;
-    var startSnap = encodeSnapshotV2(snapshot(doc), null);
-    applyUpdateV2(doc, delta, null);
-    writeDoc(docId, doc, needUpload: needUpload);
-    var endSnap = encodeSnapshotV2(snapshot(doc), null);
-    return !_equalsSnapShot(startSnap, endSnap);
   }
 
   String readDocToJson(Uint8List data) {

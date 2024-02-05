@@ -68,7 +68,7 @@ class AppWidget extends MvcView<AppController> {
             GoRoute(
               path: 'today',
               onExit: (context) async {
-                return ServiceManager.of(context).canPop();
+                return true;
               },
               builder: (BuildContext context, GoRouterState state) {
                 return MobileTodayPageWidget(
@@ -128,9 +128,6 @@ class AppWidget extends MvcView<AppController> {
           routes: <RouteBase>[
             GoRoute(
               path: 'card',
-              onExit: (context) async {
-                return ServiceManager.of(context).canPop();
-              },
               builder: (BuildContext context, GoRouterState state) {
                 return MobileCardPage(controller: MobileCardPageController());
               },

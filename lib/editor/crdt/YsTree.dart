@@ -172,6 +172,7 @@ class YsTree {
       buildItemMap[item] = ysBlock;
       buildBlocks.add(ysBlock);
     }
+    buildBlocks.removeWhere((element) => element.block==null);
     blocks = buildBlocks;
     itemMap = buildItemMap;
     editController.setBlocks(buildBlocks.map((e) => e.block!).toList());

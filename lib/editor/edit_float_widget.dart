@@ -98,7 +98,6 @@ extension EditFloatToolController on EditController {
               ),
               onPressed: () {
                 addTextBlockBefore();
-                Navigator.of(context).pop();
               },
             ),
           if (showInsert)
@@ -115,7 +114,6 @@ extension EditFloatToolController on EditController {
               ),
               onPressed: () {
                 addTextBlock();
-                Navigator.of(context).pop();
               },
             ),
           if (showInsert) const fluent.MenuFlyoutSeparator(),
@@ -132,7 +130,6 @@ extension EditFloatToolController on EditController {
             ),
             onPressed: () {
               copy();
-              Navigator.of(context).pop();
             },
           ),
           fluent.MenuFlyoutItem(
@@ -148,7 +145,6 @@ extension EditFloatToolController on EditController {
             ),
             onPressed: () {
               cut();
-              Navigator.of(context).pop();
             },
           ),
           fluent.MenuFlyoutItem(
@@ -164,7 +160,6 @@ extension EditFloatToolController on EditController {
             ),
             onPressed: () {
               paste();
-              Navigator.of(context).pop();
             },
           ),
           fluent.MenuFlyoutItem(
@@ -180,7 +175,6 @@ extension EditFloatToolController on EditController {
             ),
             onPressed: () {
               selectAll();
-              Navigator.of(context).pop();
             },
           ),
         ],

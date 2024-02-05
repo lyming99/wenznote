@@ -1,11 +1,11 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:wenznote/app/windows/theme/colors.dart';
 import 'package:wenznote/commons/widget/ignore_parent_pointer.dart';
 import 'package:wenznote/editor/edit_controller.dart';
 import 'package:wenznote/editor/theme/theme.dart';
 import 'package:wenznote/editor/widget/modal_widget.dart';
-import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 import 'edit_content_widget.dart';
 
@@ -134,9 +134,7 @@ class EditState extends State<EditWidget> {
         return false;
       },
       child: Scrollable(
-          physics: widget.controller.isFloatWidgetDragging
-              ? const NeverScrollableScrollPhysics()
-              : const BouncingScrollPhysics(),
+          physics: EditScrollPhysics(editController: widget.controller),
           controller: widget.controller.scrollController,
           viewportBuilder: (context, viewportOffset) {
             return EditContentWidget(
@@ -150,4 +148,37 @@ class EditState extends State<EditWidget> {
   void updateState() {
     setState(() {});
   }
+}
+
+class EditScrollPhysics extends BouncingScrollPhysics {
+  final EditController editController;
+
+  const EditScrollPhysics({
+    required this.editController,
+    super.decelerationRate = ScrollDecelerationRate.normal,
+    super.parent,
+  });
+
+  @override
+  double applyPhysicsToUserOffset(
+      fluent.ScrollMetrics position, double offset) {
+    if (editController.isFloatWidgetDragging) {
+      return 0.0;
+    }
+    return super.applyPhysicsToUserOffset(position, offset);
+  }
+
+  @override
+  fluent.BouncingScrollPhysics applyTo(fluent.ScrollPhysics? ancestor) {
+    return EditScrollPhysics(
+        editController: editController,
+        parent: buildParent(ancestor),
+        decelerationRate: decelerationRate);
+  }
+
+  @override
+  bool get allowImplicitScrolling => !editController.isFloatWidgetDragging;
+
+  @override
+  bool get allowUserScrolling => !editController.isFloatWidgetDragging;
 }

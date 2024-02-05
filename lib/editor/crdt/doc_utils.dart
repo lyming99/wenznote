@@ -67,7 +67,7 @@ WenElement? createWenElementFromYMap(YMap map) {
   } else if (type == "code") {
     return WenCodeElement(
       code: (map.get("code") as YText).toString(),
-      language: map.get("language"),
+      language: map.get("language")??"text",
     );
   } else if (type == "table") {
     var element = WenTableElement();

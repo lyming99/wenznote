@@ -14,6 +14,10 @@ import 'package:flutter/services.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:image_size_getter/file_input.dart';
 import 'package:image_size_getter/image_size_getter.dart' as image_size;
+import 'package:pasteboard/pasteboard.dart';
+import 'package:rich_clipboard/rich_clipboard.dart';
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wenznote/commons/service/copy_service.dart';
 import 'package:wenznote/commons/util/file_utils.dart';
 import 'package:wenznote/commons/util/html/html.dart';
@@ -31,10 +35,6 @@ import 'package:wenznote/editor/theme/theme.dart';
 import 'package:wenznote/editor/widget/drop_menu.dart';
 import 'package:wenznote/editor/widget/formula_dialog.dart';
 import 'package:wenznote/editor/widget/modal_widget.dart';
-import 'package:pasteboard/pasteboard.dart';
-import 'package:rich_clipboard/rich_clipboard.dart';
-import 'package:super_drag_and_drop/super_drag_and_drop.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../service/file/file_manager.dart';
 import 'block/block.dart';
@@ -416,18 +416,15 @@ class EditController with ChangeNotifier {
 
   //居中后的offset
   Offset visionOffset = Offset.zero;
-
   ScrollController? scrollController;
-
   bool isFloatWidgetDragging = false;
 
   //挖空
   List<HideTextMode>? hideTextModes;
-
   double floatWidgetXOffset = 0;
+  double maxEditWidth = double.infinity;
 
   int get textLength => blockManager.textLength;
-  double maxEditWidth = double.infinity;
 
   static EditController of(BuildContext context) {
     var widget = context.widget;
@@ -459,13 +456,12 @@ class EditController with ChangeNotifier {
     blockManager = BlockManager();
     cursorState = CursorState();
     inputManager = InputManager(
-      inputCallback: onInputText,
-      inputComposingCallback: onInputComposing,
-      actionCallback: onInputAction,
-      onDelete: (){
-        delete(true);
-      }
-    );
+        inputCallback: onInputText,
+        inputComposingCallback: onInputComposing,
+        actionCallback: onInputAction,
+        onDelete: () {
+          delete(true);
+        });
     selectState = SelectState(
       editController: this,
     );
@@ -1074,7 +1070,7 @@ class EditController with ChangeNotifier {
               var newBlockIndex = newPosition.blockIndex!;
               var endBlockIndex = selectState.realEnd!.blockIndex!;
               if (newBlockIndex < endBlockIndex) {
-                if (selectState.start?.equalsCursorIndex(newPosition)!=true) {
+                if (selectState.start?.equalsCursorIndex(newPosition) != true) {
                   HapticFeedback.selectionClick();
                 }
                 selectState.start = newPosition;
@@ -1083,7 +1079,8 @@ class EditController with ChangeNotifier {
                 var newTextIndex = newPosition.textPosition!.offset;
                 var rightTextIndex = selectState.realEnd!.textPosition!.offset;
                 if (newTextIndex <= rightTextIndex) {
-                  if (selectState.start?.equalsCursorIndex(newPosition)!=true) {
+                  if (selectState.start?.equalsCursorIndex(newPosition) !=
+                      true) {
                     HapticFeedback.selectionClick();
                   }
                   selectState.start = newPosition;
@@ -1095,7 +1092,7 @@ class EditController with ChangeNotifier {
               var newBlockIndex = newPosition.blockIndex!;
               var startBlockIndex = selectState.realStart!.blockIndex!;
               if (newBlockIndex > startBlockIndex) {
-                if (selectState.end?.equalsCursorIndex(newPosition)!=true) {
+                if (selectState.end?.equalsCursorIndex(newPosition) != true) {
                   HapticFeedback.selectionClick();
                 }
                 selectState.end = newPosition;
@@ -1104,7 +1101,7 @@ class EditController with ChangeNotifier {
                 var newTextIndex = newPosition.textPosition!.offset;
                 var leftTextIndex = selectState.realStart!.textPosition!.offset;
                 if (newTextIndex >= leftTextIndex) {
-                  if (selectState.end?.equalsCursorIndex(newPosition)!=true) {
+                  if (selectState.end?.equalsCursorIndex(newPosition) != true) {
                     HapticFeedback.selectionClick();
                   }
                   selectState.end = newPosition;
@@ -2484,13 +2481,13 @@ class EditController with ChangeNotifier {
   ///对指定的index的block进行布局，并且在布局后改变的大小进行锚block定位
   void layoutBlock(WenBlock anchorBlock, int startBlockIndex, int endBlockIndex,
       {bool jump = false}) {
-    startBlockIndex = blockManager.getValidIndex(startBlockIndex);
-    endBlockIndex = blockManager.getValidIndex(endBlockIndex);
-    var anchor = scrollOffset - anchorBlock.top;
-    blockManager.layoutBlockRange(viewContext, startBlockIndex, endBlockIndex,
-        Size(blockMaxWidth, visionHeight));
-    var newScrollOffset = anchor + anchorBlock.top;
     try {
+      startBlockIndex = blockManager.getValidIndex(startBlockIndex);
+      endBlockIndex = blockManager.getValidIndex(endBlockIndex);
+      var anchor = scrollOffset - anchorBlock.top;
+      blockManager.layoutBlockRange(viewContext, startBlockIndex, endBlockIndex,
+          Size(blockMaxWidth, visionHeight));
+      var newScrollOffset = anchor + anchorBlock.top;
       if (jump) {
         scrollController?.jumpTo(newScrollOffset);
       }
@@ -3312,7 +3309,7 @@ class EditController with ChangeNotifier {
         if (filepath == null) {
           return;
         }
-        var size =  await readImageFileSize(filepath);
+        var size = await readImageFileSize(filepath);
         insertContent([
           ImageBlock(
               editController: this,

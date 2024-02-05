@@ -1,8 +1,7 @@
 import 'dart:io';
 
-import 'package:dio/dio.dart';
-import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:synchronized/extension.dart';
 import 'package:wenznote/model/card/po/card_po.dart';
 import 'package:wenznote/model/card/po/card_set_po.dart';
 import 'package:wenznote/model/card/po/card_study_config_po.dart';
@@ -22,7 +21,6 @@ import 'package:wenznote/service/service_manager.dart';
 class IsarService {
   ServiceManager serviceManager;
 
-  var lock = Lock();
   Isar? _documentIsar;
 
   Isar get documentIsar => _documentIsar!;
@@ -30,12 +28,11 @@ class IsarService {
   IsarService(this.serviceManager);
 
   Future<bool> open() async {
-    lock.lock();
-    try{
+    return synchronized(() async {
       var dir = await serviceManager.fileManager.getRootDir();
-      var databases = Directory(
-          "$dir/${serviceManager.userService.userPath}databases");
-      if(!databases.existsSync()) {
+      var databases =
+          Directory("$dir/${serviceManager.userService.userPath}databases");
+      if (!databases.existsSync()) {
         databases.createSync(recursive: true);
       }
       _documentIsar = await Isar.open(
@@ -60,19 +57,13 @@ class IsarService {
         maxSizeMiB: 10000,
       );
       return _documentIsar!.isOpen;
-    }finally{
-      lock.unlock();
-    }
-
+    });
   }
 
   Future<void> close() async {
-    lock.lock();
-    try{
+    return synchronized(() async {
       await _documentIsar?.close();
       _documentIsar = null;
-    }finally{
-      lock.unlock();
-    }
+    });
   }
 }

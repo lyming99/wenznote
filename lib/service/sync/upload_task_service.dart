@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:isar/isar.dart';
+import 'package:synchronized/extension.dart';
 import 'package:wenznote/config/app_constants.dart';
 import 'package:wenznote/model/file/file_po.dart';
 import 'package:wenznote/model/note/po/doc_state_po.dart';
@@ -13,8 +14,8 @@ import 'package:wenznote/service/service_manager.dart';
 
 class UploadTaskService {
   ServiceManager serviceManager;
-  final Lock _uploadLock = Lock();
   Timer? _uploadTimer;
+  final _uploadLock = Object();
 
   UploadTaskService(this.serviceManager);
 
@@ -60,8 +61,7 @@ class UploadTaskService {
   Isar get isar => serviceManager.isarService.documentIsar;
 
   Future<void> doUpload() async {
-    _uploadLock.lock();
-    try {
+    return _uploadLock.synchronized(() async {
       // 查询
       var tasks = await isar.uploadTaskPOs
           .filter()
@@ -79,9 +79,7 @@ class UploadTaskService {
           print(e);
         }
       }
-    } finally {
-      _uploadLock.unlock();
-    }
+    });
   }
 
   Future<bool> doUploadTask(UploadTaskPO task) async {
@@ -114,6 +112,9 @@ class UploadTaskService {
     var filepath =
         await serviceManager.fileManager.getFilePath(dataId, filePO.name);
     if (File(filepath).existsSync()) {
+      if (File(filepath).lengthSync() > 10 * 1000 * 1000) {
+        return false;
+      }
       var resp = await Dio().post(
         "$noteServer/file/upload/$dataId",
         options: Options(
@@ -144,6 +145,9 @@ class UploadTaskService {
       // 3.上传文件
       var data = await serviceManager.editService.readDocFile(docId);
       if (data == null) {
+        return false;
+      }
+      if (data.length > 10 * 1000 * 1000) {
         return false;
       }
       var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;

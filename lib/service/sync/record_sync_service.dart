@@ -3,8 +3,10 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:synchronized/extension.dart';
 import 'package:wenznote/model/card/po/card_po.dart';
 import 'package:wenznote/model/card/po/card_set_po.dart';
 import 'package:wenznote/model/card/po/card_study_config_po.dart';
@@ -168,47 +170,46 @@ class RecordSyncService with IsarServiceMixin {
   }
 
   Future<bool> _pushDbDelta() async {
-    pushLock.lock();
-    try {
-      var clientId = serviceManager.userService.client?.id;
-      var dbDeltas = await documentIsar.dbDeltas
-          .filter()
-          .hasUploadEqualTo(false)
-          .clientIdEqualTo(clientId)
-          .findAll();
-      if (dbDeltas.isEmpty) {
-        return true;
-      }
-      for (var dbDelta in dbDeltas) {
-        dbDelta.updateTime ??= DateTime.now().millisecondsSinceEpoch;
-      }
-      var result = await Dio().post("$noteServerUrl/db/uploadDbDelta",
-          options: Options(
-            headers: {
-              "token": serviceManager.userService.token,
-            },
-          ),
-          data: {
-            "clientId": clientId,
-            "items": dbDeltas.map((e) => e.toMap()).toList(),
-          });
-      if (result.data['msg'] == AppConstants.success) {
-        for (var value in dbDeltas) {
-          value.hasUpload = true;
+    return pushLock.synchronized(() async {
+      try {
+        var clientId = serviceManager.userService.client?.id;
+        var dbDeltas = await documentIsar.dbDeltas
+            .filter()
+            .hasUploadEqualTo(false)
+            .clientIdEqualTo(clientId)
+            .findAll();
+        if (dbDeltas.isEmpty) {
+          return true;
         }
-        await documentIsar
-            .writeTxn(() => documentIsar.dbDeltas.putAll(dbDeltas));
-        serviceManager.p2pService
-            .sendUpdateRecordMessage(dbDeltas.map((e) => e.dataId!).toList());
-        return true;
+        for (var dbDelta in dbDeltas) {
+          dbDelta.updateTime ??= DateTime.now().millisecondsSinceEpoch;
+        }
+        var result = await Dio().post("$noteServerUrl/db/uploadDbDelta",
+            options: Options(
+              headers: {
+                "token": serviceManager.userService.token,
+              },
+            ),
+            data: {
+              "clientId": clientId,
+              "items": dbDeltas.map((e) => e.toMap()).toList(),
+            });
+        if (result.data['msg'] == AppConstants.success) {
+          for (var value in dbDeltas) {
+            value.hasUpload = true;
+          }
+          await documentIsar
+              .writeTxn(() => documentIsar.dbDeltas.putAll(dbDeltas));
+          serviceManager.p2pService
+              .sendUpdateRecordMessage(dbDeltas.map((e) => e.dataId!).toList());
+          return true;
+        }
+        return false;
+      } catch (e) {
+        e.printError();
+        return false;
       }
-      return false;
-    } catch (e) {
-      e.printError();
-      return false;
-    } finally {
-      pushLock.unlock();
-    }
+    });
   }
 
   String get noteServerUrl {
@@ -227,73 +228,84 @@ class RecordSyncService with IsarServiceMixin {
     if (!hasNoteServer) {
       return;
     }
-    pullLock.lock();
-    try {
-      /**
-       * 1.获取 client states 数据
-       */
-      var dataList = await documentIsar.dbDeltas.where().findAll();
-      if (dataIdList != null) {
-        dataList.removeWhere((element) => !dataIdList.contains(element.dataId));
-      }
-      var clientMap = HashMap<int, int>();
-      for (var value in dataList) {
-        var clientId = value.clientId;
-        if (clientId == null) {
-          continue;
+    return pullLock.synchronized(() async {
+      try {
+        /**
+         * 1.获取 client states 数据
+         */
+        var dataList = await documentIsar.dbDeltas.where().findAll();
+        if (dataIdList != null) {
+          dataList
+              .removeWhere((element) => !dataIdList.contains(element.dataId));
         }
-        var old = clientMap[clientId];
-        var newValue = value.updateTime;
-        if (newValue == null) {
-          continue;
+        var clientMap = HashMap<int, int>();
+        for (var value in dataList) {
+          var clientId = value.clientId;
+          if (clientId == null) {
+            continue;
+          }
+          var old = clientMap[clientId];
+          var newValue = value.updateTime;
+          if (newValue == null) {
+            continue;
+          }
+          if (old == null || newValue > old) {
+            clientMap[clientId] = newValue;
+          }
         }
-        if (old == null || newValue > old) {
-          clientMap[clientId] = newValue;
+        var clientStates = [];
+        clientMap.forEach((key, value) {
+          clientStates.add({'clientId': key, 'clientTime': value});
+        });
+        var token = serviceManager.userService.token;
+        if (token == null) {
+          return;
         }
+        var dataTypeList = [
+          "note",
+          "dir",
+          "cardSet",
+          "cardSetConfig",
+          "cardStudy"
+        ];
+        for (var dataType in dataTypeList) {
+          try {
+            await _pullDbData(
+              token: token,
+              pullAll: pullAll,
+              clientStates: clientStates,
+              dataIdList: dataIdList,
+              dataType: dataType,
+            );
+          } catch (e) {
+            print(e);
+          }
+        }
+        var cardSetList = await serviceManager.cardService.queryCardSetList();
+        for (var cardSet in cardSetList) {
+          try {
+            var startTime = DateTime.now().millisecondsSinceEpoch;
+            await _pullDbData(
+              token: token,
+              pullAll: pullAll,
+              clientStates: clientStates,
+              dataIdList: dataIdList,
+              dataType: "card-${cardSet.uuid}",
+            );
+            var endTime = DateTime.now().millisecondsSinceEpoch;
+            var useTime = endTime - startTime;
+            print('pull card use time:${useTime}');
+          } catch (e) {
+            print(e);
+          }
+        }
+        SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+          serviceManager.docService.notifyListeners();
+        });
+      } catch (e) {
+        print(e);
       }
-      var clientStates = [];
-      clientMap.forEach((key, value) {
-        clientStates.add({'clientId': key, 'clientTime': value});
-      });
-      var token = serviceManager.userService.token;
-      if (token == null) {
-        return;
-      }
-      var dataTypeList = [
-        "note",
-        "dir",
-        "cardSet",
-        "cardSetConfig",
-        "cardStudy"
-      ];
-      for (var dataType in dataTypeList) {
-        await _pullDbData(
-          token: token,
-          pullAll: pullAll,
-          clientStates: clientStates,
-          dataIdList: dataIdList,
-          dataType: dataType,
-        );
-      }
-      var cardSetList = await serviceManager.cardService.queryCardSetList();
-      for (var cardSet in cardSetList) {
-        var startTime = DateTime.now().millisecondsSinceEpoch;
-        await _pullDbData(
-          token: token,
-          pullAll: pullAll,
-          clientStates: clientStates,
-          dataIdList: dataIdList,
-          dataType: "card-${cardSet.uuid}",
-        );
-        var endTime = DateTime.now().millisecondsSinceEpoch;
-        var useTime = endTime-startTime;
-        print('pull card use time:${useTime}');
-      }
-    } catch (e) {
-      print(e);
-    } finally {
-      pullLock.unlock();
-    }
+    });
   }
 
   Future<void> _pullDbData({
