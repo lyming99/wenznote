@@ -831,7 +831,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
           ),
           icon: Icon(Icons.select_all),
           onPress: (ctx) {
-            // hideDropMenu(ctx);
+            hideDropMenu(ctx);
             controller.editController.selectAll();
           },
         ),
