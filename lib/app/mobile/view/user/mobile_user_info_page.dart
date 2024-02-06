@@ -216,7 +216,7 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
         context: context,
         builder: (context) {
           return Container(
-            margin: EdgeInsets.only(bottom: 150),
+            padding: MediaQuery.of(context).viewInsets,
             child: fluent.ContentDialog(
               constraints: BoxConstraints(
                 minWidth: 320,
@@ -260,7 +260,7 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
         context: context,
         builder: (context) {
           return Container(
-            margin: EdgeInsets.only(bottom: 150),
+            padding: MediaQuery.of(context).viewInsets,
             child: fluent.ContentDialog(
               constraints: BoxConstraints(
                 minWidth: 320,

@@ -103,40 +103,43 @@ class WinCardSetPage extends MvcView<WinCardSetController> {
         useSafeArea: true,
         context: context,
         builder: (context) {
-          return fluent.ContentDialog(
-            title: fluent.Text(title),
-            content: fluent.Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                fluent.Container(
-                  margin: const EdgeInsets.only(bottom: 10, top: 10),
-                  child: fluent.TextBox(
-                    placeholder: placeHolder,
-                    controller: textController,
-                    autofocus: true,
-                    onSubmitted: (e) {
+          return fluent.Container(
+            padding: MediaQuery.of(context).viewInsets,
+            child: fluent.ContentDialog(
+              title: fluent.Text(title),
+              content: fluent.Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  fluent.Container(
+                    margin: const EdgeInsets.only(bottom: 10, top: 10),
+                    child: fluent.TextBox(
+                      placeholder: placeHolder,
+                      controller: textController,
+                      autofocus: true,
+                      onSubmitted: (e) {
+                        Navigator.pop(context, '确定');
+                        doCreate();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                fluent.Button(
+                  child: const Text('取消'),
+                  onPressed: () {
+                    Navigator.pop(context, '取消');
+                    // Delete file here
+                  },
+                ),
+                fluent.FilledButton(
+                    onPressed: () {
                       Navigator.pop(context, '确定');
                       doCreate();
                     },
-                  ),
-                ),
+                    child: const Text("确定")),
               ],
             ),
-            actions: [
-              fluent.Button(
-                child: const Text('取消'),
-                onPressed: () {
-                  Navigator.pop(context, '取消');
-                  // Delete file here
-                },
-              ),
-              fluent.FilledButton(
-                  onPressed: () {
-                    Navigator.pop(context, '确定');
-                    doCreate();
-                  },
-                  child: const Text("确定")),
-            ],
           );
         });
   }

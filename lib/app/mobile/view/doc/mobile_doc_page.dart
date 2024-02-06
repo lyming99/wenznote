@@ -616,41 +616,44 @@ class MobileDocPage extends MvcView<MobileDocPageController> {
         useSafeArea: true,
         context: context,
         builder: (context) {
-          return fluent.ContentDialog(
-            title: fluent.Text(title),
-            constraints: BoxConstraints(maxWidth: 300),
-            content: fluent.Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                fluent.Container(
-                  margin: const EdgeInsets.only(bottom: 10, top: 10),
-                  child: fluent.TextBox(
-                    placeholder: placeHolder,
-                    controller: textController,
-                    autofocus: true,
-                    onSubmitted: (e) {
+          return fluent.Padding(
+            padding: MediaQuery.of(context).viewInsets,
+            child: fluent.ContentDialog(
+              title: fluent.Text(title),
+              constraints: BoxConstraints(maxWidth: 300),
+              content: fluent.Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  fluent.Container(
+                    margin: const EdgeInsets.only(bottom: 10, top: 10),
+                    child: fluent.TextBox(
+                      placeholder: placeHolder,
+                      controller: textController,
+                      autofocus: true,
+                      onSubmitted: (e) {
+                        Navigator.pop(context, '确定');
+                        doCreate();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                fluent.Button(
+                  child: const Text('取消'),
+                  onPressed: () {
+                    Navigator.pop(context, '取消');
+                    // Delete file here
+                  },
+                ),
+                fluent.FilledButton(
+                    onPressed: () {
                       Navigator.pop(context, '确定');
                       doCreate();
                     },
-                  ),
-                ),
+                    child: const Text("确定")),
               ],
             ),
-            actions: [
-              fluent.Button(
-                child: const Text('取消'),
-                onPressed: () {
-                  Navigator.pop(context, '取消');
-                  // Delete file here
-                },
-              ),
-              fluent.FilledButton(
-                  onPressed: () {
-                    Navigator.pop(context, '确定');
-                    doCreate();
-                  },
-                  child: const Text("确定")),
-            ],
           );
         });
   }
@@ -667,43 +670,46 @@ class MobileDocPage extends MvcView<MobileDocPageController> {
         useSafeArea: true,
         context: context,
         builder: (context) {
-          return fluent.ContentDialog(
-            constraints: const BoxConstraints(
-              maxWidth: 300,
-            ),
-            title: fluent.Text(docItem.isFolder ? "重命名" : "重命名"),
-            content: fluent.Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                fluent.Container(
-                  margin: const EdgeInsets.only(bottom: 10, top: 10),
-                  child: fluent.TextBox(
-                    placeholder: "请输入名称",
-                    controller: textController,
-                    autofocus: true,
-                    onSubmitted: (e) {
+          return fluent.Padding(
+            padding: MediaQuery.of(context).viewInsets,
+            child: fluent.ContentDialog(
+              constraints: const BoxConstraints(
+                maxWidth: 300,
+              ),
+              title: fluent.Text(docItem.isFolder ? "重命名" : "重命名"),
+              content: fluent.Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  fluent.Container(
+                    margin: const EdgeInsets.only(bottom: 10, top: 10),
+                    child: fluent.TextBox(
+                      placeholder: "请输入名称",
+                      controller: textController,
+                      autofocus: true,
+                      onSubmitted: (e) {
+                        Navigator.pop(context, '确定');
+                        doUpdate();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                fluent.Button(
+                  child: const Text('取消'),
+                  onPressed: () {
+                    Navigator.pop(context, '取消');
+                    // Delete file here
+                  },
+                ),
+                fluent.FilledButton(
+                    onPressed: () {
                       Navigator.pop(context, '确定');
                       doUpdate();
                     },
-                  ),
-                ),
+                    child: const Text("确定")),
               ],
             ),
-            actions: [
-              fluent.Button(
-                child: const Text('取消'),
-                onPressed: () {
-                  Navigator.pop(context, '取消');
-                  // Delete file here
-                },
-              ),
-              fluent.FilledButton(
-                  onPressed: () {
-                    Navigator.pop(context, '确定');
-                    doUpdate();
-                  },
-                  child: const Text("确定")),
-            ],
           );
         });
   }

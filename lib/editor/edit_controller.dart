@@ -878,58 +878,61 @@ class EditController with ChangeNotifier {
                                 var textController =
                                     fluent.TextEditingController(
                                         text: link.textElement.text);
-                                return fluent.ContentDialog(
-                                  constraints: isMobile
-                                      ? const BoxConstraints(maxWidth: 300)
-                                      : fluent.kDefaultContentDialogConstraints,
-                                  content: fluent.Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      fluent.Container(
-                                        margin: const EdgeInsets.only(
-                                            bottom: 10, top: 10),
-                                        child: fluent.TextBox(
-                                          placeholder: link.textElement.text,
-                                          controller: textController,
+                                return fluent.Padding(
+                                  padding: MediaQuery.of(context).viewInsets,
+                                  child: fluent.ContentDialog(
+                                    constraints: isMobile
+                                        ? const BoxConstraints(maxWidth: 300)
+                                        : fluent.kDefaultContentDialogConstraints,
+                                    content: fluent.Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        fluent.Container(
+                                          margin: const EdgeInsets.only(
+                                              bottom: 10, top: 10),
+                                          child: fluent.TextBox(
+                                            placeholder: link.textElement.text,
+                                            controller: textController,
+                                          ),
                                         ),
-                                      ),
-                                      fluent.Container(
-                                        margin:
-                                            const EdgeInsets.only(bottom: 10),
-                                        child: fluent.TextBox(
-                                          placeholder: link.textElement.url,
-                                          controller: linkController,
+                                        fluent.Container(
+                                          margin:
+                                              const EdgeInsets.only(bottom: 10),
+                                          child: fluent.TextBox(
+                                            placeholder: link.textElement.url,
+                                            controller: linkController,
+                                          ),
                                         ),
+                                      ],
+                                    ),
+                                    title: const fluent.Text("编辑链接"),
+                                    actions: [
+                                      fluent.Button(
+                                        child: const Text('取消'),
+                                        onPressed: () {
+                                          Navigator.pop(context, '取消');
+                                          // Delete file here
+                                        },
                                       ),
+                                      fluent.FilledButton(
+                                          onPressed: () {
+                                            link.textElement.text =
+                                                textController.text;
+                                            link.textElement.url =
+                                                linkController.text;
+                                            if (block is TextBlock) {
+                                              block.textElement.calcLength();
+                                              block.relayoutFlag = true;
+                                            } else if (block is TableBlock) {
+                                              block.calcElementLength(position);
+                                              block.calcLength();
+                                              block.relayoutFlag = true;
+                                            }
+                                            Navigator.pop(context, '确定');
+                                          },
+                                          child: const Text("确定")),
                                     ],
                                   ),
-                                  title: const fluent.Text("编辑链接"),
-                                  actions: [
-                                    fluent.Button(
-                                      child: const Text('取消'),
-                                      onPressed: () {
-                                        Navigator.pop(context, '取消');
-                                        // Delete file here
-                                      },
-                                    ),
-                                    fluent.FilledButton(
-                                        onPressed: () {
-                                          link.textElement.text =
-                                              textController.text;
-                                          link.textElement.url =
-                                              linkController.text;
-                                          if (block is TextBlock) {
-                                            block.textElement.calcLength();
-                                            block.relayoutFlag = true;
-                                          } else if (block is TableBlock) {
-                                            block.calcElementLength(position);
-                                            block.calcLength();
-                                            block.relayoutFlag = true;
-                                          }
-                                          Navigator.pop(context, '确定');
-                                        },
-                                        child: const Text("确定")),
-                                  ],
                                 );
                               });
                         },
@@ -3010,75 +3013,78 @@ class EditController with ChangeNotifier {
     await showMobileDialog(
         context: viewContext,
         builder: (context) {
-          return fluent.ContentDialog(
-            constraints: isMobile
-                ? const BoxConstraints(maxWidth: 300)
-                : fluent.kDefaultContentDialogConstraints,
-            title: const Text("插入表格"),
-            content: fluent.Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  children: [
-                    const Text(" 列 "),
-                    Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 10, top: 10),
-                        child: fluent.TextBox(
-                          placeholder: "请输入列",
-                          keyboardType: fluent.TextInputType.number,
-                          inputFormatters: [
-                            // 完善的计数输入替代方案
-                            CounterTextInputFormatter(min: 1, max: 200),
-                          ],
-                          controller: colController,
-                          autofocus: true,
-                          onSubmitted: (e) {
-                            ok = true;
-                            Navigator.pop(context, '确定');
-                          },
+          return Padding(
+            padding: MediaQuery.of(context).viewInsets,
+            child: fluent.ContentDialog(
+              constraints: isMobile
+                  ? const BoxConstraints(maxWidth: 300)
+                  : fluent.kDefaultContentDialogConstraints,
+              title: const Text("插入表格"),
+              content: fluent.Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      const Text(" 列 "),
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 10, top: 10),
+                          child: fluent.TextBox(
+                            placeholder: "请输入列",
+                            keyboardType: fluent.TextInputType.number,
+                            inputFormatters: [
+                              // 完善的计数输入替代方案
+                              CounterTextInputFormatter(min: 1, max: 200),
+                            ],
+                            controller: colController,
+                            autofocus: true,
+                            onSubmitted: (e) {
+                              ok = true;
+                              Navigator.pop(context, '确定');
+                            },
+                          ),
                         ),
                       ),
-                    ),
-                    const Text(" 行 "),
-                    Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 10, top: 10),
-                        child: fluent.TextBox(
-                          placeholder: "请输入行",
-                          controller: rowController,
-                          autofocus: true,
-                          keyboardType: fluent.TextInputType.number,
-                          inputFormatters: [
-                            // 完善的计数输入替代方案
-                            CounterTextInputFormatter(min: 1, max: 1000),
-                          ],
-                          onSubmitted: (e) {
-                            ok = true;
-                            Navigator.pop(context, '确定');
-                          },
+                      const Text(" 行 "),
+                      Expanded(
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 10, top: 10),
+                          child: fluent.TextBox(
+                            placeholder: "请输入行",
+                            controller: rowController,
+                            autofocus: true,
+                            keyboardType: fluent.TextInputType.number,
+                            inputFormatters: [
+                              // 完善的计数输入替代方案
+                              CounterTextInputFormatter(min: 1, max: 1000),
+                            ],
+                            onSubmitted: (e) {
+                              ok = true;
+                              Navigator.pop(context, '确定');
+                            },
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                fluent.Button(
+                  child: const Text('取消'),
+                  onPressed: () {
+                    Navigator.pop(context, '取消');
+                    // Delete file here
+                  },
                 ),
+                fluent.FilledButton(
+                    onPressed: () {
+                      ok = true;
+                      Navigator.pop(context, '确定');
+                    },
+                    child: const Text("确定")),
               ],
             ),
-            actions: [
-              fluent.Button(
-                child: const Text('取消'),
-                onPressed: () {
-                  Navigator.pop(context, '取消');
-                  // Delete file here
-                },
-              ),
-              fluent.FilledButton(
-                  onPressed: () {
-                    ok = true;
-                    Navigator.pop(context, '确定');
-                  },
-                  child: const Text("确定")),
-            ],
           );
         });
     if (ok) {
@@ -4329,55 +4335,58 @@ class EditController with ChangeNotifier {
     showMobileDialog(
         context: viewContext,
         builder: (context) {
-          return fluent.ContentDialog(
-            title: const fluent.Text("添加链接"),
-            constraints: isMobile
-                ? const BoxConstraints(maxWidth: 300)
-                : fluent.kDefaultContentDialogConstraints,
-            content: fluent.Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                fluent.Container(
-                  margin: const EdgeInsets.only(
-                    bottom: 10,
+          return fluent.Container(
+            padding: MediaQuery.of(context).viewInsets,
+            child: fluent.ContentDialog(
+              title: const fluent.Text("添加链接"),
+              constraints: isMobile
+                  ? const BoxConstraints(maxWidth: 300)
+                  : fluent.kDefaultContentDialogConstraints,
+              content: fluent.Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  fluent.Container(
+                    margin: const EdgeInsets.only(
+                      bottom: 10,
+                    ),
+                    child: fluent.TextBox(
+                      placeholder: "请输入链接文字",
+                      autofocus: true,
+                      onSubmitted: (s) {
+                        ok = true;
+                        Navigator.pop(context, '取消');
+                      },
+                      controller: textController,
+                    ),
                   ),
-                  child: fluent.TextBox(
-                    placeholder: "请输入链接文字",
-                    autofocus: true,
-                    onSubmitted: (s) {
-                      ok = true;
-                      Navigator.pop(context, '取消');
-                    },
-                    controller: textController,
+                  fluent.Container(
+                    child: fluent.TextBox(
+                      placeholder: "http://",
+                      controller: linkController,
+                      onSubmitted: (s) {
+                        ok = true;
+                        Navigator.pop(context, '取消');
+                      },
+                    ),
                   ),
+                ],
+              ),
+              actions: [
+                fluent.Button(
+                  child: const Text('取消'),
+                  onPressed: () {
+                    Navigator.pop(context, '取消');
+                    // Delete file here
+                  },
                 ),
-                fluent.Container(
-                  child: fluent.TextBox(
-                    placeholder: "http://",
-                    controller: linkController,
-                    onSubmitted: (s) {
+                fluent.FilledButton(
+                    onPressed: () {
                       ok = true;
-                      Navigator.pop(context, '取消');
+                      Navigator.pop(context, '确定');
                     },
-                  ),
-                ),
+                    child: const Text("确定")),
               ],
             ),
-            actions: [
-              fluent.Button(
-                child: const Text('取消'),
-                onPressed: () {
-                  Navigator.pop(context, '取消');
-                  // Delete file here
-                },
-              ),
-              fluent.FilledButton(
-                  onPressed: () {
-                    ok = true;
-                    Navigator.pop(context, '确定');
-                  },
-                  child: const Text("确定")),
-            ],
           );
         }).then((value) {
       if (ok && linkController.text.isNotEmpty) {
@@ -4412,54 +4421,57 @@ class EditController with ChangeNotifier {
     showMobileDialog(
         context: viewContext,
         builder: (context) {
-          return fluent.ContentDialog(
-            constraints: isMobile
-                ? const BoxConstraints(maxWidth: 300, maxHeight: 300)
-                : fluent.kDefaultContentDialogConstraints,
-            title: const fluent.Text("添加链接"),
-            content: fluent.Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                fluent.Container(
-                  margin: const EdgeInsets.only(bottom: 10, top: 10),
-                  child: fluent.TextBox(
-                    placeholder: "请输入链接文字",
-                    onSubmitted: (inputText) {
-                      ok = true;
-                      Navigator.pop(context, '取消');
-                    },
-                    controller: textController,
+          return fluent.Container(
+            padding: MediaQuery.of(context).viewInsets,
+            child: fluent.ContentDialog(
+              constraints: isMobile
+                  ? const BoxConstraints(maxWidth: 300, maxHeight: 300)
+                  : fluent.kDefaultContentDialogConstraints,
+              title: const fluent.Text("添加链接"),
+              content: fluent.Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  fluent.Container(
+                    margin: const EdgeInsets.only(bottom: 10, top: 10),
+                    child: fluent.TextBox(
+                      placeholder: "请输入链接文字",
+                      onSubmitted: (inputText) {
+                        ok = true;
+                        Navigator.pop(context, '取消');
+                      },
+                      controller: textController,
+                    ),
                   ),
-                ),
-                fluent.Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: fluent.TextBox(
-                    autofocus: true,
-                    placeholder: "http://",
-                    controller: linkController,
-                    onSubmitted: (s) {
-                      ok = true;
-                      Navigator.pop(context, '取消');
-                    },
+                  fluent.Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: fluent.TextBox(
+                      autofocus: true,
+                      placeholder: "http://",
+                      controller: linkController,
+                      onSubmitted: (s) {
+                        ok = true;
+                        Navigator.pop(context, '取消');
+                      },
+                    ),
                   ),
+                ],
+              ),
+              actions: [
+                fluent.Button(
+                  child: const Text('取消'),
+                  onPressed: () {
+                    Navigator.pop(context, '取消');
+                    // Delete file here
+                  },
                 ),
+                fluent.FilledButton(
+                    onPressed: () {
+                      ok = true;
+                      Navigator.pop(context, '确定');
+                    },
+                    child: const Text("确定")),
               ],
             ),
-            actions: [
-              fluent.Button(
-                child: const Text('取消'),
-                onPressed: () {
-                  Navigator.pop(context, '取消');
-                  // Delete file here
-                },
-              ),
-              fluent.FilledButton(
-                  onPressed: () {
-                    ok = true;
-                    Navigator.pop(context, '确定');
-                  },
-                  child: const Text("确定")),
-            ],
           );
         }).then((value) {
       if (ok && linkController.text.isNotEmpty) {

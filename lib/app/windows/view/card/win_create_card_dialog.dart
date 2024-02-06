@@ -34,64 +34,67 @@ void showGenerateCardDialog(
   showDialog(
     context: context,
     builder: (context) {
-      return fluent.ContentDialog(
-        constraints: BoxConstraints(maxWidth: 400),
-        title: Text("制作卡片"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                Text("分割类型: "),
-                Expanded(child: box),
-              ],
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              children: [
-                Text("卡片名称: "),
-                Expanded(
-                  child: fluent.TextBox(
-                    controller: cardNameController,
-                    placeholder: "请输入卡片名称",
+      return Padding(
+        padding: MediaQuery.of(context).viewInsets,
+        child: fluent.ContentDialog(
+          constraints: BoxConstraints(maxWidth: 300),
+          title: Text("制作卡片"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                children: [
+                  Text("分割类型: "),
+                  Expanded(child: box),
+                ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                children: [
+                  Text("卡片名称: "),
+                  Expanded(
+                    child: fluent.TextBox(
+                      controller: cardNameController,
+                      placeholder: "请输入卡片名称",
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+            ],
+          ),
+          actions: [
+            fluent.Button(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("取消"),
             ),
-            SizedBox(
-              height: 10,
+            fluent.FilledButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await showDialog(
+                    useSafeArea: true,
+                    context: context,
+                    builder: (context) => FutureProgressDialog(
+                          message: const Text("正在生成中..."),
+                          () async {
+                            await _generateCard(context, cardNameController.text,
+                                docList, spliteTitle);
+                          }(),
+                        ));
+              },
+              child: Text("开始制作"),
             ),
           ],
         ),
-        actions: [
-          fluent.Button(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text("取消"),
-          ),
-          fluent.FilledButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await showDialog(
-                  useSafeArea: true,
-                  context: context,
-                  builder: (context) => FutureProgressDialog(
-                        message: const Text("正在生成中..."),
-                        () async {
-                          await _generateCard(context, cardNameController.text,
-                              docList, spliteTitle);
-                        }(),
-                      ));
-            },
-            child: Text("开始制作"),
-          ),
-        ],
       );
     },
   );

@@ -796,7 +796,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
   void showToolbarContextMenu(BuildContext context) {
     showDropMenu(
       context,
-      modal: false,
+      modal: true,
       childrenHeight: 40,
       popupAlignment: Alignment.topCenter,
       margin: 10,

@@ -304,30 +304,33 @@ class MobileCardSettingsPage extends MvcView<MobileCardSettingsController> {
         context: context,
         builder: (context) {
           var controller = TextEditingController(text: content);
-          return fluent.ContentDialog(
-            title: Text("${title}"),
-            content: fluent.TextBox(
-              placeholder: "请输入${title}",
-              controller: controller,
-              autofocus: true,
-              onChanged: (text) {
-                onChanged.call(text);
-              },
+          return fluent.Padding(
+            padding: MediaQuery.of(context).viewInsets,
+            child: fluent.ContentDialog(
+              title: Text("${title}"),
+              content: fluent.TextBox(
+                placeholder: "请输入${title}",
+                controller: controller,
+                autofocus: true,
+                onChanged: (text) {
+                  onChanged.call(text);
+                },
+              ),
+              actions: [
+                fluent.OutlinedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("取消"),
+                ),
+                fluent.FilledButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("确定"),
+                ),
+              ],
             ),
-            actions: [
-              fluent.OutlinedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text("取消"),
-              ),
-              fluent.FilledButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text("确定"),
-              ),
-            ],
           );
         },
       );
