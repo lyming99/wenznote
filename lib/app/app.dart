@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
+import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -47,7 +48,17 @@ import 'windows/view/home/win_home_page.dart';
 import 'windows/view/import/import_controller.dart';
 import 'windows/view/import/import_widget.dart';
 
-class AppController extends MvcController {}
+class AppController extends MvcController {
+  @override
+  void onInitState(fluent.BuildContext context) {
+    super.onInitState(context);
+    try {
+      FlutterDisplayMode.setHighRefreshRate();
+    } catch (e) {
+      print(e);
+    }
+  }
+}
 
 final GlobalKey<NavigatorState> _appNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'app');
@@ -283,6 +294,10 @@ class AppWidget extends MvcView<AppController> {
               theme: ThemeData(
                 // fontFamily: "MiSans",
                 brightness: brightness,
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: Colors.blue,
+                  brightness: brightness,
+                ),
                 textTheme: const TextTheme().useSystemChineseFont(brightness),
               ),
               locale: const Locale('zh', 'CN'),

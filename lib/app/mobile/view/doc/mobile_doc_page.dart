@@ -39,9 +39,10 @@ class MobileDocPage extends MvcView<MobileDocPageController> {
     const appbarHeight = 48.0;
     const searchBarHeight = 56.0;
     return SliverAppBar(
+      surfaceTintColor: Colors.transparent,
       title: Text(
         "笔记",
-        style: TextStyle(color: MobileTheme.of(context).fontColor),
+        style: TextStyle(color: MobileTheme.of(context).fontColor,fontSize: 18),
       ),
       leading: IconButton(
         onPressed: () {

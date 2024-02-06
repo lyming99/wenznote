@@ -521,9 +521,11 @@ packages:
   flutter_crdt:
     dependency: "direct main"
     description:
-      path: "D:/project/flutter_crdt"
-      relative: false
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "1789901ab43b8687e3fd9113d56e803994dea1e5"
+      url: "https://github.com/lyming99/flutter_crdt.git"
+    source: git
     version: "1.0.0+1"
   flutter_displaymode:
     dependency: "direct main"
@@ -549,14 +551,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.7.0"
-  flutter_html:
-    dependency: "direct main"
-    description:
-      name: flutter_html
-      sha256: "02ad69e813ecfc0728a455e4bf892b9379983e050722b1dce00192ee2e41d1ee"
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "3.0.0-beta.2"
   flutter_image_compress:
     dependency: transitive
     description:
@@ -980,14 +974,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.1"
-  list_counter:
-    dependency: transitive
-    description:
-      name: list_counter
-      sha256: c447ae3dfcd1c55f0152867090e67e219d42fe6d4f2807db4bbe8b8d69912237
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "1.0.2"
   logger:
     dependency: transitive
     description:
@@ -1060,6 +1046,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.0"
+  numerus:
+    dependency: transitive
+    description:
+      name: numerus
+      sha256: "0087ef729d63b96cb347a9c44b9c592f21cecb3605b415bbd18710aef80ce5cb"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.1.1"
   octo_image:
     dependency: "direct main"
     description:
@@ -1777,6 +1771,15 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.4.0"
+  wenz_flutter_html:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "66b211303ee8c8b16fd04739b643cb54ba99249e"
+      url: "https://github.com/lyming99/wenz_flutter_html.git"
+    source: git
+    version: "2.2.1"
   win32:
     dependency: transitive
     description:

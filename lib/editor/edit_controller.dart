@@ -456,7 +456,7 @@ class EditController with ChangeNotifier {
     blockManager = BlockManager();
     cursorState = CursorState();
     inputManager = InputManager(
-        inputCallback: onInputText,
+        inputCallback: onSystemInputText,
         inputComposingCallback: onInputComposing,
         actionCallback: onInputAction,
         onDelete: () {
@@ -4001,9 +4001,6 @@ class EditController with ChangeNotifier {
       }
       insertBlocks = parseTextToBlock(insertText);
     }
-    if (insertBlocks == null) {
-      return;
-    }
     deleteSelectRange();
     var cursor = cursorState.cursorPosition;
     if (cursor == null) {
@@ -4923,5 +4920,19 @@ class EditController with ChangeNotifier {
         element.color = defaultColors[index]?.value;
       }
     });
+  }
+
+  void onSystemInputText(TextEditingValue value) async {
+    if(!value.text.contains("\n")){
+      onInputText(value);
+      return;
+    }
+    var data = await RichClipboard.getData();
+    var text = data.text;
+    if (text == value.text) {
+      paste();
+    } else {
+      onInputText(value);
+    }
   }
 }

@@ -1,8 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:flutter_html/src/css_parser.dart';
+import 'package:wenz_flutter_html/wenz_flutter_html.dart';
 import 'package:wenznote/commons/service/copy_service.dart';
 import 'package:wenznote/commons/util/image.dart';
 import 'package:wenznote/editor/block/block.dart';
@@ -17,6 +16,13 @@ import 'package:wenznote/editor/block/text/title.dart';
 import 'package:wenznote/editor/block/video/video_element.dart';
 import 'package:wenznote/editor/edit_controller.dart';
 import 'package:wenznote/service/service_manager.dart';
+
+List<String> get _htmlTags => new List<String>.from(STYLED_ELEMENTS)
+  ..addAll(INTERACTABLE_ELEMENTS)
+  ..addAll(REPLACED_ELEMENTS)
+  ..addAll(LAYOUT_ELEMENTS)
+  ..addAll(TABLE_CELL_ELEMENTS)
+  ..addAll(TABLE_DEFINITION_ELEMENTS);
 
 Future<List<WenBlock>> parseHtmlBlock(EditController editController,
     CopyService copyService, BuildContext context, String html) async {
@@ -108,12 +114,7 @@ Future<List<WenElement>> parseHtmlToBlockElement(
   var result = <WenElement>[];
   WenElementStyle blockElementStyle = WenElementStyle();
   var dom = HtmlParser.parseHTML(html);
-  var tree = StyledElement(
-    name: '[Tree Root]',
-    children: [],
-    node: dom,
-    style: Style.fromTextStyle(DefaultTextStyle.of(context).style),
-  );
+  var tree = HtmlParser.lexDomTree(dom, [], _htmlTags, null, context);
   _applyInlineStyles(tree, null);
   var body = _getBodyElement(tree);
 
@@ -126,12 +127,7 @@ Future<List<WenElement>> parseHtmlToBlockElement(
 Future<List<WenElement>?> parseCopyIdElement(
     CopyService copyService, BuildContext context, String html) async {
   var dom = HtmlParser.parseHTML(html);
-  var tree = StyledElement(
-    name: '[Tree Root]',
-    children: [],
-    node: dom,
-    style: Style.fromTextStyle(DefaultTextStyle.of(context).style),
-  );
+  var tree = HtmlParser.lexDomTree(dom, [], _htmlTags, null, context);
   _applyInlineStyles(tree, null);
   var body = _getBodyElement(tree);
   if (body != null) {

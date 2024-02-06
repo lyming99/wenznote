@@ -1,7 +1,10 @@
+import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:wenznote/app/windows/outline/outline_controller.dart';
 import 'package:wenznote/commons/mvc/controller.dart';
 import 'package:wenznote/commons/widget/flayout.dart';
@@ -16,7 +19,6 @@ class MobileDocEditController extends ServiceManagerController {
   var title = "便签".obs;
   late YsEditController editController;
   YsTree? ysTree;
-  var toolbarMenuController = FlyoutController();
   var isShowBottomPane = false.obs;
   var keyboardHeight = 0.0.obs;
   var keyboardHeightRecord = 0.0.obs;
@@ -89,7 +91,6 @@ class MobileDocEditController extends ServiceManagerController {
     title = old.title;
     editController = old.editController;
     ysTree = old.ysTree;
-    toolbarMenuController = old.toolbarMenuController;
     isShowBottomPane = old.isShowBottomPane;
     keyboardHeight = old.keyboardHeight;
     keyboardHeightRecord = old.keyboardHeightRecord;
@@ -175,7 +176,12 @@ class MobileDocEditController extends ServiceManagerController {
     editController.undo();
   }
 
-  void copyContent(BuildContext ctx) {}
+  void copyContent(BuildContext ctx) {
+    serviceManager.copyService.copyDocContent(ctx, doc?.uuid??"");
+  }
 
-  void deleteNote(BuildContext ctx) {}
+  void deleteNote(BuildContext ctx) {
+    serviceManager.docService.deleteDoc(doc!);
+    ctx.pop();
+  }
 }

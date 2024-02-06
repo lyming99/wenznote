@@ -109,11 +109,14 @@ class DropMenuWidgetState extends State<DropMenuWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return PopupStack(
-      children: [
-        for (var i = 0; i < levelList.length; i++)
-          buildPopupWidgets(context, i),
-      ],
+    return Padding(
+      padding: MediaQuery.of(context).viewInsets,
+      child: PopupStack(
+        children: [
+          for (var i = 0; i < levelList.length; i++)
+            buildPopupWidgets(context, i),
+        ],
+      ),
     );
   }
 

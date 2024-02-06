@@ -217,9 +217,10 @@ class MobileTodayPageWidget extends MvcView<MobileTodayController> {
     const appbarHeight = 48.0;
     const searchBarHeight = 56.0;
     return SliverAppBar(
+      surfaceTintColor: Colors.transparent,
       title: Text(
         "今天",
-        style: TextStyle(color: MobileTheme.of(context).fontColor),
+        style: TextStyle(color: MobileTheme.of(context).fontColor,fontSize: 18),
       ),
       leading: IconButton(
         onPressed: () {

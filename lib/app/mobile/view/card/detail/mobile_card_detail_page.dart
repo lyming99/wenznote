@@ -47,7 +47,7 @@ class MobileCardDetailPage extends MvcView<MobileCardDetailController> {
                       // blurStyle: BlurStyle.outer,
                       color: Theme.of(context).brightness == Brightness.dark
                           ? Color.fromARGB(255, 80, 0, 0)
-                          : Color.fromARGB(255, 255, 0, 0),
+                          : Color.fromARGB(20, 255, 0, 0),
                     ),
                   ],
                 ),
@@ -70,7 +70,10 @@ class MobileCardDetailPage extends MvcView<MobileCardDetailController> {
                             height: 48,
                             color: color,
                             alignment: Alignment.center,
-                            child: Text("创建卡片"),
+                            child: Text(
+                              "创建卡片",
+                              style: TextStyle(color: Colors.white),
+                            ),
                           );
                         },
                       ),
@@ -90,7 +93,10 @@ class MobileCardDetailPage extends MvcView<MobileCardDetailController> {
                             height: 48,
                             color: color,
                             alignment: Alignment.center,
-                            child: Text("开始学习"),
+                            child: Text(
+                              "开始学习",
+                              style: TextStyle(color: Colors.white),
+                            ),
                           );
                         },
                       ),
@@ -108,7 +114,12 @@ class MobileCardDetailPage extends MvcView<MobileCardDetailController> {
     const appbarHeight = 48.0;
     const searchBarHeight = 56.0;
     return SliverAppBar(
-      title: Obx(() => Text(controller.title)),
+      title: Obx(() => Text(
+            controller.title,
+            style: TextStyle(
+              fontSize: 18
+            ),
+          )),
       leading: IconButton(
         onPressed: () {
           context.pop();
@@ -119,18 +130,16 @@ class MobileCardDetailPage extends MvcView<MobileCardDetailController> {
         ),
       ),
       actions: [
-        Builder(
-          builder: (context) {
-            return IconButton(
-                onPressed: () {
-                  showCardSetMenu(context);
-                },
-                icon: Icon(
-                  Icons.more_vert,
-                  size: 20,
-                ));
-          }
-        ),
+        Builder(builder: (context) {
+          return IconButton(
+              onPressed: () {
+                showCardSetMenu(context);
+              },
+              icon: Icon(
+                Icons.more_vert,
+                size: 20,
+              ));
+        }),
       ],
       titleSpacing: 0,
       toolbarHeight: appbarHeight,

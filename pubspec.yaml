@@ -66,7 +66,7 @@ dependencies:
   external_path: ^1.0.3
   isar: ^3.1.0+1
   isar_flutter_libs: ^3.1.0+1
-  flutter_html: ^3.0.0-beta.2
+#  flutter_html: ^3.0.0-beta.2
   flutter_math_fork: ^0.7.2
   flutter_crdt:
 #    path: D:/project/flutter_crdt
@@ -93,6 +93,8 @@ dependencies:
   crop_image: ^1.0.11
   image_cropping: ^0.0.13
   chinese_font_library: ^1.1.0
+  wenz_flutter_html:
+    git: https://github.com/lyming99/wenz_flutter_html.git
 
 dev_dependencies:
   flutter_test:

@@ -1,14 +1,12 @@
-import 'dart:io';
-
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:wenznote/app/mobile/theme/mobile_theme.dart';
 import 'package:wenznote/app/windows/outline/outline_tree.dart';
 import 'package:wenznote/app/windows/view/card/win_create_card_dialog.dart';
 import 'package:wenznote/commons/mvc/view.dart';
-import 'package:wenznote/commons/widget/flayout.dart';
 import 'package:wenznote/editor/edit_controller.dart';
 import 'package:wenznote/editor/edit_widget.dart';
 import 'package:wenznote/editor/widget/drop_menu.dart';
@@ -32,75 +30,78 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
         child: buildEditContentBody(context),
       );
     }
-    return Material(
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          title: Obx(() {
-            return Text(controller.title.value);
-          }),
-          titleSpacing: 0,
-          leading: IconButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              icon: Icon(
-                Icons.arrow_back,
-                size: 24,
-              )),
-          toolbarHeight: 56,
-          backgroundColor: MobileTheme.of(context).mobileNavBgColor,
-          shadowColor: Colors.transparent,
-          foregroundColor: MobileTheme.of(context).fontColor,
-          systemOverlayStyle: MobileTheme.overlayStyle(context),
-          actions: [
-            if (keyboardHeight > 10)
-              Obx(() {
-                return IconButton(
-                  enableFeedback: true,
-                  onPressed: controller.canUndo.isFalse
-                      ? null
-                      : () {
-                          controller.editController.undo();
-                        },
-                  icon: Icon(
-                    Icons.undo,
-                    size: 24,
-                  ),
-                );
-              }),
-            if (keyboardHeight > 10)
-              Obx(
-                () {
+    return OKToast(
+      child: Material(
+        child: Scaffold(
+          resizeToAvoidBottomInset: false,
+          appBar: AppBar(
+            surfaceTintColor: Colors.transparent,
+            title: Obx(() {
+              return Text(controller.title.value);
+            }),
+            titleSpacing: 0,
+            leading: IconButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                icon: Icon(
+                  Icons.arrow_back,
+                  size: 24,
+                )),
+            toolbarHeight: 56,
+            backgroundColor: MobileTheme.of(context).mobileNavBgColor,
+            shadowColor: Colors.transparent,
+            foregroundColor: MobileTheme.of(context).fontColor,
+            systemOverlayStyle: MobileTheme.overlayStyle(context),
+            actions: [
+              if (keyboardHeight > 10)
+                Obx(() {
                   return IconButton(
                     enableFeedback: true,
-                    onPressed: controller.canRedo.isFalse
+                    onPressed: controller.canUndo.isFalse
                         ? null
                         : () {
-                            controller.editController.redo();
+                            controller.editController.undo();
                           },
                     icon: Icon(
-                      Icons.redo,
+                      Icons.undo,
                       size: 24,
                     ),
                   );
-                },
-              ),
-            Builder(builder: (context) {
-              return IconButton(
-                enableFeedback: true,
-                onPressed: () {
-                  showMoreContextMenu(context);
-                },
-                icon: Icon(
-                  Icons.more_vert_outlined,
-                  size: 24,
+                }),
+              if (keyboardHeight > 10)
+                Obx(
+                  () {
+                    return IconButton(
+                      enableFeedback: true,
+                      onPressed: controller.canRedo.isFalse
+                          ? null
+                          : () {
+                              controller.editController.redo();
+                            },
+                      icon: Icon(
+                        Icons.redo,
+                        size: 24,
+                      ),
+                    );
+                  },
                 ),
-              );
-            })
-          ],
+              Builder(builder: (context) {
+                return IconButton(
+                  enableFeedback: true,
+                  onPressed: () {
+                    showMoreContextMenu(context);
+                  },
+                  icon: Icon(
+                    Icons.more_vert_outlined,
+                    size: 24,
+                  ),
+                );
+              })
+            ],
+          ),
+          body: buildEditContentBody(context),
         ),
-        body: buildEditContentBody(context),
       ),
     );
   }
@@ -321,20 +322,17 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
           Expanded(
             child: Container(
               height: 40,
-              child: FlyoutTarget(
-                controller: controller.toolbarMenuController,
-                child: Builder(builder: (context) {
-                  return fluent.IconButton(
-                    icon: Icon(
-                      fluent.FluentIcons.more_vertical,
-                      size: 20,
-                    ),
-                    onPressed: () {
-                      showToolbarContextMenu(context);
-                    },
-                  );
-                }),
-              ),
+              child: Builder(builder: (context) {
+                return fluent.IconButton(
+                  icon: Icon(
+                    fluent.FluentIcons.more,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    showToolbarContextMenu(context);
+                  },
+                );
+              }),
             ),
           ),
           Expanded(
@@ -796,108 +794,82 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
   }
 
   void showToolbarContextMenu(BuildContext context) {
-    controller.toolbarMenuController.showFlyout(builder: (context) {
-      return fluent.MenuFlyout(
-        items: [
-          fluent.MenuFlyoutItem(
-            text: fluent.Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                fluent.Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(fluent.FluentIcons.padding_bottom),
-                ),
-                Text("上方插入"),
-              ],
-            ),
-            onPressed: controller.editController.canUndo == false
-                ? null
-                : () {
-                    controller.editController.addTextBlockBefore();
-                  },
+    showDropMenu(
+      context,
+      modal: false,
+      childrenHeight: 40,
+      popupAlignment: Alignment.topCenter,
+      margin: 10,
+      menus: [
+        DropMenu(
+          text: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text("上方插入"),
           ),
-          fluent.MenuFlyoutItem(
-            text: fluent.Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                fluent.Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(fluent.FluentIcons.padding_top),
-                ),
-                Text("下方添加"),
-              ],
-            ),
-            onPressed: () {
-              controller.editController.addTextBlock();
-              if(Platform.isIOS){
-                return;
-              }
-            },
+          icon: Icon(fluent.FluentIcons.padding_bottom),
+          onPress: (ctx) {
+            hideDropMenu(ctx);
+            controller.editController.addTextBlockBefore();
+          },
+        ),
+        DropMenu(
+          text: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text("下方添加"),
           ),
-          fluent.MenuFlyoutSeparator(),
-          fluent.MenuFlyoutItem(
-            text: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(Icons.copy),
-                ),
-                Text("复制"),
-              ],
-            ),
-            onPressed: () {
-              controller.editController.copy();
-            },
+          icon: Icon(fluent.FluentIcons.padding_top),
+          onPress: (ctx) {
+            hideDropMenu(ctx);
+            controller.editController.addTextBlock();
+          },
+        ),
+        DropSplit(),
+        DropMenu(
+          text: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text("全选"),
           ),
-          fluent.MenuFlyoutItem(
-            text: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(Icons.cut),
-                ),
-                Text("剪切"),
-              ],
-            ),
-            onPressed: () {
-              controller.editController.cut();
-            },
+          icon: Icon(Icons.select_all),
+          onPress: (ctx) {
+            // hideDropMenu(ctx);
+            controller.editController.selectAll();
+          },
+        ),
+        DropMenu(
+          text: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text("粘贴"),
           ),
-          fluent.MenuFlyoutItem(
-            text: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(Icons.paste),
-                ),
-                Text("粘贴"),
-              ],
-            ),
-            onPressed: () {
-              controller.editController.paste();
-            },
+          icon: Icon(Icons.paste),
+          onPress: (ctx) {
+            hideDropMenu(ctx);
+            controller.editController.paste();
+          },
+        ),
+        DropMenu(
+          text: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text("复制"),
           ),
-          fluent.MenuFlyoutItem(
-            text: fluent.Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                fluent.Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Icon(Icons.select_all),
-                ),
-                Text("全选"),
-              ],
-            ),
-            onPressed: () {
-              controller.editController.selectAll();
-            },
+          icon: Icon(Icons.copy),
+          onPress: (ctx) {
+            hideDropMenu(ctx);
+            controller.editController.copy();
+          },
+        ),
+        DropMenu(
+          text: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text("剪切"),
           ),
-        ],
-      );
-    });
+          icon: Icon(Icons.cut),
+          onPress: (ctx) {
+            hideDropMenu(ctx);
+            controller.editController.cut();
+          },
+        ),
+      ],
+    );
   }
 
   void showMoreContextMenu(BuildContext context) {
@@ -907,6 +879,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
       childrenWidth: 180,
       childrenHeight: 48,
       offset: Offset(-10, 0),
+      modal: true,
       menus: [
         DropMenu(
           text: Row(
@@ -922,6 +895,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
           onPress: (ctx) {
             hideDropMenu(ctx);
             controller.copyContent(ctx);
+            showToast("复制成功！", context: context);
           },
         ),
         if (controller.doc?.type != 'doc')

@@ -284,13 +284,10 @@ class WenPopupTool {
       rootScrollController: ScrollController(initialScrollOffset: initOffset),
     );
     entry = OverlayEntry(builder: (context) {
-      return Padding(
-        padding: MediaQuery.of(context).viewInsets,
-        child: PopupWindowWidget(
-          entry: entry!,
-          focus: false,
-          child: widget,
-        ),
+      return PopupWindowWidget(
+        entry: entry!,
+        focus: false,
+        child: widget,
       );
     });
     Overlay.of(controller.viewContext, rootOverlay: true).insert(entry!);
