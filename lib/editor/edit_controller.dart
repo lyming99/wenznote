@@ -3010,7 +3010,7 @@ class EditController with ChangeNotifier {
     var ok = false;
     var rowController = fluent.TextEditingController(text: "4");
     var colController = fluent.TextEditingController(text: "3");
-    await showMobileDialog(
+    await showDialog(
         context: viewContext,
         builder: (context) {
           return Padding(
