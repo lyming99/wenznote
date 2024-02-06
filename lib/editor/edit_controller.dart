@@ -1447,9 +1447,6 @@ class EditController with ChangeNotifier {
       position.blockVisionTop = block.top - scrollOffset;
     }
     cursorRecord.updateCursorPosition(position);
-    if (!focusNode.hasFocus && editable && viewContext.mounted) {
-      FocusScope.of(viewContext).requestFocus(focusNode);
-    }
     var old = cursorState.cursorPosition;
     if (old != null) {
       var oldBlock = old.block;

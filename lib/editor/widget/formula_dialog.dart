@@ -53,7 +53,7 @@ class _FormulaState extends State<FormulaWidget> {
               placeholder: "请输入公式",
               controller: controller,
               maxLines: null,
-              autofocus: false,
+              autofocus: true,
               onSubmitted: (s) {},
               onChanged: (text) {
                 setState(() {

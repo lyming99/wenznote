@@ -307,6 +307,7 @@ class MobileCardSettingsPage extends MvcView<MobileCardSettingsController> {
           return fluent.Padding(
             padding: MediaQuery.of(context).viewInsets,
             child: fluent.ContentDialog(
+              constraints: BoxConstraints(maxHeight: 200,maxWidth: 300),
               title: Text("${title}"),
               content: fluent.TextBox(
                 placeholder: "请输入${title}",
