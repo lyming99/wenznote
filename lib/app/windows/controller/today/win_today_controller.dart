@@ -77,7 +77,7 @@ class WinTodayController extends ServiceManagerController {
     var orderProperty = this.orderProperty.value;
     var searchContent = this.searchContent.value;
     var noteType = this.noteType;
-    searchTask = BaseTask.start((BaseTask task) async {
+    searchTask = BaseTask(task: (BaseTask task) async {
       var docList = await serviceManager.todayService.queryDocList(
         noteType,
         orderProperty,
@@ -103,6 +103,7 @@ class WinTodayController extends ServiceManagerController {
         }
       }
     });
+    searchTask!.doTask();
   }
 
   Future<void> createNote() async {

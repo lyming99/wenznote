@@ -9,11 +9,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_size_getter/image_size_getter.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 import 'package:wenznote/commons/util/file_utils.dart';
 import 'package:wenznote/model/file/file_po.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../commons/util/image.dart';
 
@@ -105,7 +105,7 @@ class FileManager {
     );
   }
 
-  Future<String?> getImageFile(String? id) async {
+  Future<String?> getImageFile(String? id, [bool fetch = true]) async {
     String imageFile = await getOldImageFile(id);
     if (File(imageFile).existsSync()) {
       var fileItem = await writeImageFile(imageFile);
@@ -113,6 +113,9 @@ class FileManager {
         return null;
       }
       return getFilePath(fileItem.uuid, fileItem.name);
+    }
+    if (!fetch) {
+      return null;
     }
     var file = await serviceManager.fileSyncService.getFile(id);
     if (file == null) {

@@ -7,12 +7,12 @@ import 'package:flutter_code_editor/src/code_field/span_builder.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:flutter_highlight/theme_map.dart';
 import 'package:highlight/highlight.dart' as hl;
+import 'package:oktoast/oktoast.dart';
 import 'package:wenznote/app/windows/theme/colors.dart';
 import 'package:wenznote/commons/util/html.dart';
 import 'package:wenznote/commons/widget/ignore_parent_pointer.dart';
 import 'package:wenznote/commons/widget/popup_stack.dart';
 import 'package:wenznote/editor/widget/toggle_item.dart';
-import 'package:oktoast/oktoast.dart';
 
 import '../../edit_controller.dart';
 import '../../proto/note.pb.dart';
@@ -215,9 +215,7 @@ class CodeBlock extends WenBlock implements Key {
       items: items,
       onChanged: (item, reason) {
         if (codeLanguages.containsKey(item)) {
-          element.language = item;
-          relayoutFlag = true;
-          editController.updateWidgetState();
+          editController.updateCodeLanguage(this, item);
           if (reason != fluent.TextChangedReason.userInput) {
             langTypeController.text = "";
           }
@@ -260,14 +258,15 @@ class CodeBlock extends WenBlock implements Key {
                         return Container(
                           padding: EdgeInsets.all(4),
                           color: hover
-                              ? systemColor(context,"buttonIconColor").withOpacity(0.2)
+                              ? systemColor(context, "buttonIconColor")
+                                  .withOpacity(0.2)
                               : null,
                           child: Icon(
                             fluent.FluentIcons.copy,
                             size: 14,
                             color: hover
-                                ? systemColor(context,"buttonIconColor")
-                                : systemColor(context,"buttonIconColor")
+                                ? systemColor(context, "buttonIconColor")
+                                : systemColor(context, "buttonIconColor")
                                     .withOpacity(0.8),
                           ),
                         );
@@ -288,14 +287,15 @@ class CodeBlock extends WenBlock implements Key {
                         return Container(
                           padding: EdgeInsets.all(4),
                           color: hover
-                              ? systemColor(context,"buttonIconColor").withOpacity(0.2)
+                              ? systemColor(context, "buttonIconColor")
+                                  .withOpacity(0.2)
                               : null,
                           child: Icon(
                             fluent.FluentIcons.delete,
                             size: 14,
                             color: hover
-                                ? systemColor(context,"buttonIconColor")
-                                : systemColor(context,"buttonIconColor")
+                                ? systemColor(context, "buttonIconColor")
+                                : systemColor(context, "buttonIconColor")
                                     .withOpacity(0.8),
                           ),
                         );
@@ -328,8 +328,10 @@ class CodeBlock extends WenBlock implements Key {
     var theme = EditTheme.of(context);
     var span = SpanBuilder(
       code: code,
-      theme:
-          CodeThemeData(styles: theme.isDark ? themeMap['atom-one-dark'] : themeMap['atom-one-light']),
+      theme: CodeThemeData(
+          styles: theme.isDark
+              ? themeMap['atom-one-dark']
+              : themeMap['atom-one-light']),
       rootStyle: TextStyle(
           color: theme.fontColor,
           fontSize: theme.fontSize,

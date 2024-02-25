@@ -18,7 +18,6 @@ class FileSyncService with IsarServiceMixin {
     if (file != null) {
       return file;
     }
-    await 1.seconds.delay();
     // 查询文件信息并且下载
     for (var i = 0; i < 20; i++) {
       var res = await queryAndDownloadFile(id);
@@ -44,7 +43,9 @@ class FileSyncService with IsarServiceMixin {
         path: path,
         name: name,
         createTime: DateTime.now().millisecondsSinceEpoch);
-    await documentIsar.writeTxn(() => documentIsar.filePOs.put(filePO));
+    await documentIsar.writeTxn(() async {
+      await documentIsar.filePOs.put(filePO);
+    });
     // 3.创建同步任务
     await serviceManager.uploadTaskService.uploadFile(uuid);
     return filePO;
@@ -109,7 +110,9 @@ class FileSyncService with IsarServiceMixin {
             size: size,
             name: filename,
             createTime: DateTime.now().millisecondsSinceEpoch);
-        await documentIsar.writeTxn(() => documentIsar.filePOs.put(filePO));
+        await documentIsar.writeTxn(() async {
+          await documentIsar.filePOs.put(filePO);
+        });
         return filePO;
       }
     } catch (e) {

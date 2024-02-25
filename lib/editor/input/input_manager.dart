@@ -44,6 +44,7 @@ class InputManager with TextInputClient, DeltaTextInputClient {
       TextInputConfiguration(
         inputAction: TextInputAction.newline,
         enableDeltaModel: Platform.isAndroid || Platform.isIOS ? true : false,
+
       ),
     )..setEditingState(const TextEditingValue());
     connection!.show();

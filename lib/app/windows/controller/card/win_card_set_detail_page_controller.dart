@@ -82,7 +82,7 @@ class WinCardSetDetailPageController extends ServiceManagerController {
     await studyService.generateStudyQueue(cardSet.cardSet.uuid);
     await fetchGraphxData();
     searchTask?.stopTask();
-    searchTask = BaseTask.start((task) async {
+    searchTask = BaseTask(task: (task) async {
       todayStudyQueue =
           await studyService.queryTodayStudyQueue(cardSet.cardSet.uuid);
       reviewQueue = await studyService.queryReviewQueue(cardSet.cardSet.uuid);
@@ -140,6 +140,7 @@ class WinCardSetDetailPageController extends ServiceManagerController {
         }
       }
     });
+    await searchTask!.doTask();
   }
 
   Future<void> fetchGraphxData() async {

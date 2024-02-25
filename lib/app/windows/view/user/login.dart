@@ -1,13 +1,14 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:wenznote/app/windows/controller/user/login.dart';
 import 'package:wenznote/app/windows/controller/user/sign.dart';
 import 'package:wenznote/app/windows/theme/colors.dart';
 import 'package:wenznote/app/windows/view/user/sign.dart';
 import 'package:wenznote/commons/mvc/view.dart';
-import 'package:wenznote/service/service_manager.dart';
-import 'package:oktoast/oktoast.dart';
+import 'package:wenznote/widgets/root_widget.dart';
 
 class WinLoginDialog extends MvcView<WinLoginController> {
   const WinLoginDialog({
@@ -86,7 +87,7 @@ class WinLoginDialog extends MvcView<WinLoginController> {
     );
   }
 
-  void doLogin(BuildContext context) async {
+  Future<void> doLogin(BuildContext context) async {
     var result = false;
     await showDialog(
         useSafeArea: true,
@@ -99,10 +100,12 @@ class WinLoginDialog extends MvcView<WinLoginController> {
             ));
     if (result == true) {
       showToast("登录成功！");
-      ServiceManager.of(context).restartService();
     } else {
       showToast("登录失败！");
     }
+    SchedulerBinding.instance.scheduleFrameCallback((timeStamp) {
+      ServiceManagerWidgetState.of(context).restart();
+    });
   }
 
   void openSignDialog(BuildContext context) {

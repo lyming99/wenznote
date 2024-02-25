@@ -67,7 +67,7 @@ WenElement? createWenElementFromYMap(YMap map) {
   } else if (type == "code") {
     return WenCodeElement(
       code: (map.get("code") as YText).toString(),
-      language: map.get("language")??"text",
+      language: map.get("language") ?? "text",
     );
   } else if (type == "table") {
     var element = WenTableElement();
@@ -77,9 +77,9 @@ WenElement? createWenElementFromYMap(YMap map) {
   return null;
 }
 
-Future<Doc> jsonToYDoc(int clientId,String? json) async {
+Future<Doc> jsonToYDoc(int clientId, String? json) async {
   Doc doc = Doc();
-  doc.clientID=clientId;
+  doc.clientID = clientId;
   var blocks = doc.getArray("blocks");
   if (json == null || json.isEmpty) {
     return doc;
@@ -113,6 +113,7 @@ void applyYMapToElement(
       if (code is YText) {
         var codeElement = (element as WenCodeElement);
         codeElement.code = code.toString();
+        codeElement.language = map.get("language") ?? "text";
       }
       break;
     case WenTextElement:
@@ -122,7 +123,7 @@ void applyYMapToElement(
       text.itemType = map.get("itemType");
       text.alignment = map.get("alignment");
       text.indent = map.get("indent");
-      text.type = map.get("type")??"text";
+      text.type = map.get("type") ?? "text";
       if (map.has("text")) {
         applyYTextToTextElement(map.get("text"), text);
       }
@@ -178,9 +179,9 @@ void applyYMapToElement(
   }
 }
 
-List<WenElement> yDocToWenElements(Doc ?doc) {
+List<WenElement> yDocToWenElements(Doc? doc) {
   var res = <WenElement>[];
-  if(doc!=null) {
+  if (doc != null) {
     var array = doc.getArray("blocks");
     for (var value in array) {
       var item = createWenElementFromYMap(value);

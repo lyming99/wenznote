@@ -1418,6 +1418,11 @@ class YsTree {
     // undoManager?.stopCapturing();
     undoManager?.stopCapturing();
   }
+
+  void updateCodeLanguage(int blockIndex, String language) {
+    var block = blocks[blockIndex];
+    YsCode.of(block).updateLanguage(language);
+  }
 }
 //数据发生变化，要记录变化时的cursor
 

@@ -19,16 +19,17 @@ class SearchService with IsarServiceMixin {
 
   SearchService(this.serviceManager);
 
-  void searchDoc({
+  Future<void> searchDoc({
     String? pid,
     String? type,
+    int Function(DocPO a, DocPO b)? orderBy,
     required String text,
     required Function(DocPO doc, List<SearchResultVO> result) callback,
     Function? onEnd,
     int maxElementCount = 1,
   }) async {
     searchTask?.cancel = true;
-    searchTask = BaseTask.start((BaseTask task) async {
+    searchTask = BaseTask(task: (BaseTask task) async {
       try {
         if (pid == null) {
           List<DocPO> docList;
@@ -37,6 +38,9 @@ class SearchService with IsarServiceMixin {
                 await documentIsar.docPOs.filter().typeEqualTo(type).findAll();
           } else {
             docList = await documentIsar.docPOs.where().findAll();
+          }
+          if(orderBy!=null) {
+            docList.sort(orderBy);
           }
           await searchDocListContent(docList, task, text, callback);
         } else {
@@ -76,6 +80,7 @@ class SearchService with IsarServiceMixin {
         onEnd?.call();
       }
     });
+    await searchTask!.doTask();
   }
 
   Future<void> searchDocListContent(

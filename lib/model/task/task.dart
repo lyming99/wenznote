@@ -6,10 +6,6 @@ class BaseTask {
     required this.task,
   });
 
-  BaseTask.start(this.task) {
-    doTask();
-  }
-
   void stopTask(){
     cancel=true;
   }

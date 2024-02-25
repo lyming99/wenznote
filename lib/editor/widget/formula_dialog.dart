@@ -65,7 +65,7 @@ class _FormulaState extends State<FormulaWidget> {
           Container(
               width: double.infinity,
               height: height,
-              color: Colors.white,
+              color: fluent.FluentTheme.of(context).resources.solidBackgroundFillColorTertiary,
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,

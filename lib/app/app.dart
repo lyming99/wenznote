@@ -276,57 +276,60 @@ class AppWidget extends MvcView<AppController> {
 
   @override
   Widget build(BuildContext context) {
-    return ServiceManagerWidget(builder: (context) {
-      var serviceManager = ServiceManager.of(context);
-      return OKToast(
-        backgroundColor: Colors.transparent,
-        child: IgnoreParentMousePointerContainer(
-          child: Obx(() {
-            var brightness = serviceManager.themeManager.getBrightness();
-            if (serviceManager.themeManager.themeMode.value ==
-                ThemeMode.system) {
-              brightness = MediaQuery.of(context).platformBrightness;
-            }
-            return MaterialApp.router(
-              title: "温知笔记",
-              routerConfig: _router,
-              debugShowCheckedModeBanner: false,
-              theme: ThemeData(
-                // fontFamily: "MiSans",
-                brightness: brightness,
-                colorScheme: ColorScheme.fromSeed(
-                  seedColor: Colors.blue,
-                  brightness: brightness,
-                ),
-                textTheme: const TextTheme().useSystemChineseFont(brightness),
-              ),
-              locale: const Locale('zh', 'CN'),
-              supportedLocales: const [
-                Locale('zh', 'CN'),
-                Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
-                Locale('en', ''),
-              ],
-              localizationsDelegates: const [
-                GlobalMaterialLocalizations.delegate,
-                fluent.FluentLocalizations.delegate,
-              ],
-              builder: (context, child) {
-                return fluent.FluentTheme(
-                  data: fluent.FluentThemeData(
+    return ServiceManagerWidget(
+        router: _router,
+        builder: (context) {
+          var serviceManager = ServiceManager.of(context);
+          return OKToast(
+            backgroundColor: Colors.transparent,
+            child: IgnoreParentMousePointerContainer(
+              child: Obx(() {
+                var brightness = serviceManager.themeManager.getBrightness();
+                if (serviceManager.themeManager.themeMode.value ==
+                    ThemeMode.system) {
+                  brightness = MediaQuery.of(context).platformBrightness;
+                }
+                return MaterialApp.router(
+                  title: "温知笔记",
+                  routerConfig: _router,
+                  debugShowCheckedModeBanner: false,
+                  theme: ThemeData(
                     // fontFamily: "MiSans",
                     brightness: brightness,
-                    acrylicBackgroundColor: Colors.grey.withAlpha(10),
+                    colorScheme: ColorScheme.fromSeed(
+                      seedColor: Colors.blue,
+                      brightness: brightness,
+                    ),
+                    textTheme:
+                        const TextTheme().useSystemChineseFont(brightness),
                   ),
-                  child: WindowBorderWidget(
-                    brightness: brightness,
-                    child: Container(child: child ?? Container()),
-                  ),
+                  locale: const Locale('zh', 'CN'),
+                  supportedLocales: const [
+                    Locale('zh', 'CN'),
+                    Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
+                    Locale('en', ''),
+                  ],
+                  localizationsDelegates: const [
+                    GlobalMaterialLocalizations.delegate,
+                    fluent.FluentLocalizations.delegate,
+                  ],
+                  builder: (context, child) {
+                    return fluent.FluentTheme(
+                      data: fluent.FluentThemeData(
+                        // fontFamily: "MiSans",
+                        brightness: brightness,
+                        acrylicBackgroundColor: Colors.grey.withAlpha(10),
+                      ),
+                      child: WindowBorderWidget(
+                        brightness: brightness,
+                        child: Container(child: child ?? Container()),
+                      ),
+                    );
+                  },
                 );
-              },
-            );
-          }),
-        ),
-      );
-    });
+              }),
+            ),
+          );
+        });
   }
 }

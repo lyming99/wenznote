@@ -13,6 +13,8 @@ import 'package:wenznote/editor/crdt/doc_utils.dart';
 import 'package:wenznote/model/note/po/doc_state_po.dart';
 import 'package:wenznote/service/service_manager.dart';
 
+import '../../commons/util/log_util.dart';
+
 /// 读取数据 = 读取全量数据(离线)+读取合并数据(用户)+增量数据(用户)
 /// 写入数据 = 写入全量数据+写入增量数据
 /// 每500个增量合并一次
@@ -114,7 +116,9 @@ class DocEditService {
           .findFirst();
       state ??= DocStatePO(docId: docId, clientId: clientId);
       state.updateTime = DateTime.now().millisecondsSinceEpoch;
-      await isar.writeTxn(() => isar.docStatePOs.put(state!));
+      await isar.writeTxn(() async {
+        await isar.docStatePOs.put(state!);
+      });
       // 增加上传快照任务
       if (needUpload) {
         await serviceManager.uploadTaskService.uploadDoc(docId);
@@ -126,24 +130,44 @@ class DocEditService {
     String docId,
     Uint8List delta, {
     bool needUpload = true,
+    bool checkUpload = false,
   }) async {
     return _updateLock.synchronized(() async {
       try {
         _updateCache[docId] = delta;
         var doc = _docCache[docId];
         if (doc != null) {
-          applyUpdateV2(doc, delta, null);
+          try {
+            applyUpdateV2(doc, delta, null);
+          } catch (e) {
+            printLog("更新doc失败, applyUpdateV2 error: $e");
+          }
         }
         var docBytes = await readDocFile(docId);
         var newBytes = mergeUpdatesV2([delta, if (docBytes != null) docBytes]);
         await writeDocFile(docId, newBytes);
+        bool uploadNow = false;
+        if (checkUpload && docBytes != null) {
+          var pullState = decodeSnapshotV2(delta);
+          var localState = decodeSnapshotV2(docBytes);
+          var localId = localState.sv[serviceManager.userService.clientId];
+          var serverId = pullState.sv[serviceManager.userService.clientId];
+          if (localId != serverId) {
+            //数据不同，需要上传，并且需要通知同步
+            needUpload = true;
+            uploadNow = true;
+          }
+        }
         if (needUpload) {
-          await serviceManager.uploadTaskService.uploadDoc(docId);
+          if (uploadNow) {
+            await serviceManager.uploadTaskService.uploadDoc(docId, 1);
+          } else {
+            await serviceManager.uploadTaskService.uploadDoc(docId);
+          }
         }
         return !_equalsSnapShot(docBytes ?? Uint8List(0), newBytes);
       } catch (e) {
-        print(e);
-        e.printError();
+        printLog("合并doc失败, error: $e");
         return false;
       }
     });

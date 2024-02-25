@@ -231,6 +231,17 @@ class MobileCardPage extends MvcView<MobileCardPageController> {
                   );
                 }),
               ),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    controller.fetchData();
+                  },
+                  child: Container(
+                      padding: EdgeInsets.all(6),
+                      child: Icon(Icons.refresh_outlined)),
+                ),
+              ),
             ],
           ),
         ),

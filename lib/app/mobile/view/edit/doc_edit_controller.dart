@@ -1,13 +1,10 @@
-import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:oktoast/oktoast.dart';
 import 'package:wenznote/app/windows/outline/outline_controller.dart';
 import 'package:wenznote/commons/mvc/controller.dart';
-import 'package:wenznote/commons/widget/flayout.dart';
 import 'package:wenznote/editor/crdt/YsEditController.dart';
 import 'package:wenznote/editor/crdt/YsTree.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
@@ -63,7 +60,8 @@ class MobileDocEditController extends ServiceManagerController {
     );
     editController.addListener(() {
       SchedulerBinding.instance.scheduleFrameCallback((timeStamp) {
-        outlineController.updateTree(editController.viewContext, editController);
+        outlineController.updateTree(
+            editController.viewContext, editController);
       });
     });
     title.listen((val) {
@@ -177,11 +175,15 @@ class MobileDocEditController extends ServiceManagerController {
   }
 
   void copyContent(BuildContext ctx) {
-    serviceManager.copyService.copyDocContent(ctx, doc?.uuid??"");
+    serviceManager.copyService.copyDocContent(ctx, doc?.uuid ?? "");
   }
 
   void deleteNote(BuildContext ctx) {
     serviceManager.docService.deleteDoc(doc!);
     ctx.pop();
+  }
+
+  void sync(BuildContext ctx) {
+    serviceManager.docSnapshotService.downloadDocFile(doc?.uuid ?? "");
   }
 }

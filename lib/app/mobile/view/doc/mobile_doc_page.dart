@@ -251,6 +251,17 @@ class MobileDocPage extends MvcView<MobileDocPageController> {
                   });
                 }),
               ),
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    controller.fetchData();
+                  },
+                  child: Container(
+                      padding: EdgeInsets.all(6),
+                      child: Icon(Icons.refresh_outlined)),
+                ),
+              ),
             ],
           ),
         ),
@@ -471,7 +482,7 @@ class MobileDocPage extends MvcView<MobileDocPageController> {
               vertical: 10,
               horizontal: 10,
             ),
-            margin: EdgeInsets.symmetric(vertical: 10),
+            margin: EdgeInsets.symmetric(vertical: 4),
             height: 60,
             decoration: BoxDecoration(
               color: (hover || selected || pressed)

@@ -1,12 +1,10 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
-import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+import 'package:synchronized/extension.dart';
 import 'package:wenznote/app/windows/service/doc/win_doc_list_service.dart';
 import 'package:wenznote/app/windows/service/today/win_today_service.dart';
 import 'package:wenznote/commons/mvc/controller.dart';
 import 'package:wenznote/commons/service/copy_service.dart';
-import 'package:wenznote/commons/util/device_utils.dart';
 import 'package:wenznote/commons/service/document_manager.dart';
 import 'package:wenznote/commons/service/settings_manager.dart';
 import 'package:wenznote/service/card/card_service.dart';
@@ -24,7 +22,6 @@ import 'package:wenznote/service/sync/record_sync_service.dart';
 import 'package:wenznote/service/sync/upload_task_service.dart';
 import 'package:wenznote/service/user/user_service.dart';
 import 'package:wenznote/widgets/root_widget.dart';
-import 'package:window_manager/window_manager.dart';
 
 import 'config/config_manager.dart';
 import 'theme/theme_manager.dart';
@@ -83,6 +80,7 @@ class ServiceManager with ChangeNotifier {
   ServiceManager();
 
   void onInitState(BuildContext context) {
+    this.context = context;
     isarService = IsarService(this);
     userService = UserService(this);
     fileManager = FileManager(this);
@@ -104,49 +102,44 @@ class ServiceManager with ChangeNotifier {
     fileSyncService = FileSyncService(this);
     searchService = SearchService(this);
     themeManager = ThemeManager(this);
-    startService();
   }
 
-
-
   Future<void> startService() async {
-    Hive.init("${await fileManager.getRootDir()}/hive");
-    await Hive.openBox("settings");
-    try {
-      await userService.startUserService();
-    } catch (e) {
-      print(e);
-    }
-    await isarService.open();
-    await themeManager.readConfig();
-    p2pService.connect();
-    recordSyncService.startPullTimer();
-    uploadTaskService.startUploadTimer();
-    docSnapshotService.startDownloadTimer();
-    isStart = true;
-    notifyListeners();
+    await synchronized(() async {
+      if (isStart) {
+        return;
+      }
+      Hive.init("${await fileManager.getRootDir()}/hive");
+      await Hive.openBox("settings");
+      try {
+        await userService.startUserService();
+      } catch (e) {
+        print(e);
+      }
+      await isarService.open();
+      await themeManager.readConfig();
+      p2pService.connect();
+      recordSyncService.startPullTimer();
+      uploadTaskService.startUploadTimer();
+      docSnapshotService.startDownloadTimer();
+      isStart = true;
+      notifyListeners();
+    });
   }
 
   Future<void> stopService() async {
-    await Hive.close();
-    await isarService.close();
-    isarService = IsarService(this);
-    p2pService.close();
-    p2pService = P2pService(this);
-    recordSyncService.stopPullTimer();
-    recordSyncService = RecordSyncService(this);
-    uploadTaskService.stopUploadTimer();
-    uploadTaskService = UploadTaskService(this);
-    docSnapshotService.stopDownloadTimer();
-    docSnapshotService = DocSnapshotService(this);
-    isStart = false;
-    notifyListeners();
-  }
-
-  Future<void> restartService() async {
-    await stopService();
-    await 100.milliseconds.delay();
-    await startService();
+    await synchronized(() async {
+      if (!isStart) {
+        return;
+      }
+      await Hive.close();
+      await isarService.close();
+      p2pService.close();
+      recordSyncService.stopPullTimer();
+      uploadTaskService.stopUploadTimer();
+      docSnapshotService.stopDownloadTimer();
+      isStart = false;
+    });
   }
 
   bool canPop() {

@@ -1,11 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:fluent_ui/fluent_ui.dart' as fluent;
 
 class ServiceManagerWidget extends StatefulWidget {
   final WidgetBuilder builder;
+  final GoRouter router;
 
-  const ServiceManagerWidget({super.key, required this.builder});
+  const ServiceManagerWidget({
+    super.key,
+    required this.builder,
+    required this.router,
+  });
 
   @override
   State<ServiceManagerWidget> createState() => ServiceManagerWidgetState();
@@ -21,8 +29,9 @@ class ServiceManagerWidgetState extends State<ServiceManagerWidget> {
   @override
   void initState() {
     super.initState();
-    serviceManager.onInitState(context);
     serviceManager.addListener(onServiceChanged);
+    serviceManager.onInitState(context);
+    serviceManager.startService();
   }
 
   void onServiceChanged() {
@@ -36,12 +45,29 @@ class ServiceManagerWidgetState extends State<ServiceManagerWidget> {
     serviceManager.stopService();
   }
 
+  void restart() async {
+    var router = widget.router;
+    while (router.canPop()) {
+      router.pop();
+    }
+    serviceManager.removeListener(onServiceChanged);
+    await serviceManager.stopService();
+    setState(() {});
+    await 300.milliseconds.delay();
+    setState(() {
+      serviceManager = ServiceManager();
+      serviceManager.addListener(onServiceChanged);
+      serviceManager.onInitState(context);
+      serviceManager.startService().then((value) {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    serviceManager.context=context;
+    serviceManager.context = context;
     if (!serviceManager.isStart) {
-      return Material(
-        child: const  Center(
+      return const Material(
+        child: Center(
           child: RefreshProgressIndicator(),
         ),
       );
@@ -50,9 +76,11 @@ class ServiceManagerWidgetState extends State<ServiceManagerWidget> {
       return widget.builder.call(context);
     });
   }
+
   @override
   void didUpdateWidget(covariant ServiceManagerWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
+    serviceManager.context = context;
   }
 
   void changeUser(String userId) {

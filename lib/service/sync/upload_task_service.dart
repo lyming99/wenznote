@@ -12,6 +12,8 @@ import 'package:wenznote/model/note/po/doc_state_po.dart';
 import 'package:wenznote/model/note/po/upload_task_po.dart';
 import 'package:wenznote/service/service_manager.dart';
 
+import '../../commons/util/log_util.dart';
+
 class UploadTaskService {
   ServiceManager serviceManager;
   Timer? _uploadTimer;
@@ -39,7 +41,9 @@ class UploadTaskService {
     task ??= UploadTaskPO(dataId: docId, type: "note", planTime: planTime);
     task.planTime = planTime;
     task.isDone = false;
-    await isar.writeTxn(() => isar.uploadTaskPOs.put(task!));
+    await isar.writeTxn(() async {
+      await isar.uploadTaskPOs.put(task!);
+    });
     Timer(Duration(seconds: seconds), () {
       doUpload();
     });
@@ -52,7 +56,9 @@ class UploadTaskService {
     task ??= UploadTaskPO(dataId: fileId, type: "file", planTime: planTime);
     task.planTime = planTime;
     task.isDone = false;
-    await isar.writeTxn(() => isar.uploadTaskPOs.put(task!));
+    await isar.writeTxn(() async {
+      await isar.uploadTaskPOs.put(task!);
+    });
     Timer(Duration(seconds: seconds), () {
       doUpload();
     });
@@ -73,10 +79,12 @@ class UploadTaskService {
         try {
           if (await doUploadTask(task)) {
             task.isDone = true;
-            await isar.writeTxn(() => isar.uploadTaskPOs.put(task));
+            await isar.writeTxn(() async {
+              await isar.uploadTaskPOs.put(task);
+            });
           }
         } catch (e) {
-          print(e);
+          printLog("上传任务失败, error: $e");
         }
       }
     });
@@ -179,7 +187,7 @@ class UploadTaskService {
       // 查询差异数据，或者先下载数据
       serviceManager.docSnapshotService.downloadDocFile(docId!);
     } catch (e) {
-      print(e);
+      printLog("上传笔记任务失败, error: $e");
     }
     return false;
   }

@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wenznote/service/service_manager.dart';
 import 'package:wenznote/service/user/user_service.dart';
+import 'package:wenznote/widgets/root_widget.dart';
 
 class MobileUserController extends ServiceManagerController {
   var accountName = "lyming".obs;
@@ -26,8 +27,8 @@ class MobileUserController extends ServiceManagerController {
 
   void logout() async {
     await userService.logout();
-    await serviceManager.restartService();
     SchedulerBinding.instance.scheduleFrameCallback((timeStamp) {
+      ServiceManagerWidgetState.of(context).restart();
       GoRouter.of(context).go("/mobile/today");
     });
   }

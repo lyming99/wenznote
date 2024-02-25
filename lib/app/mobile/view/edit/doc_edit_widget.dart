@@ -885,6 +885,22 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
           text: Row(
             children: [
               Text(
+                "立即同步",
+                style: TextStyle(
+                  color: editTheme.fontColor,
+                ),
+              ),
+            ],
+          ),
+          onPress: (ctx) {
+            hideDropMenu(ctx);
+            controller.sync(ctx);
+          },
+        ),
+        DropMenu(
+          text: Row(
+            children: [
+              Text(
                 "复制内容",
                 style: TextStyle(
                   color: editTheme.fontColor,

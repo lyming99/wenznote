@@ -1,11 +1,13 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:go_router/go_router.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:wenznote/app/mobile/controller/user/mobile_user_login_controller.dart';
 import 'package:wenznote/app/mobile/theme/mobile_theme.dart';
 import 'package:wenznote/commons/mvc/view.dart';
-import 'package:oktoast/oktoast.dart';
+import 'package:wenznote/widgets/root_widget.dart';
 
 class MobileUserLoginPage extends MvcView<MobileUserLoginController> {
   const MobileUserLoginPage({super.key, required super.controller});
@@ -170,6 +172,9 @@ class MobileUserLoginPage extends MvcView<MobileUserLoginController> {
             ));
     if (result == true) {
       showToast("登录成功！");
+      SchedulerBinding.instance.scheduleFrameCallback((timeStamp) {
+        ServiceManagerWidgetState.of(context).restart();
+      });
     } else {
       showToast("登录失败！");
     }

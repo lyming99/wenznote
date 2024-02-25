@@ -5,6 +5,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get_utils/get_utils.dart';
+import 'package:octo_image/octo_image.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:wenznote/commons/util/file_utils.dart';
 import 'package:wenznote/config/app_constants.dart';
@@ -13,8 +15,6 @@ import 'package:wenznote/model/client/client_vo.dart';
 import 'package:wenznote/model/client/server_vo.dart';
 import 'package:wenznote/model/user/user_vo.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:octo_image/octo_image.dart';
-import 'package:oktoast/oktoast.dart';
 
 /// 登录
 /// 登出
@@ -51,14 +51,14 @@ class UserService with ChangeNotifier {
     required String email,
     required String password,
   }) async {
-    if(Platform.isIOS) {
+    if (Platform.isIOS) {
       await Permission.appTrackingTransparency.request();
     }
     //1.调用接口登录
     //2.将token保存到本地
     //3.将用户信息保存到本地
     //4.如果是首次登录，则提示用户是否将本地离线数据导入
-    try{
+    try {
       var result = await Dio().post(
         "${AppConstants.apiUrl}/user/login",
         data: {"email": email, "password": password, "loginType": 1},
@@ -72,7 +72,7 @@ class UserService with ChangeNotifier {
         await startUserService();
         return true;
       }
-    }catch(e){
+    } catch (e) {
       print(e);
     }
     return false;
@@ -117,7 +117,7 @@ class UserService with ChangeNotifier {
     );
     var data = result.data;
     if (data["msg"] == AppConstants.success) {
-      currentUser = UserVO.fromMap(data["data"]);
+      currentUser = UserVO.fromMap(data["data"] ?? "{}");
       client = await createClient("${currentUser?.id}", token ?? "");
       noteServer = await queryNoteServer();
       await saveUserInfo();
@@ -189,11 +189,14 @@ class UserService with ChangeNotifier {
     }
   }
 
+  Future<void> clearUserInfo() async {
+    serviceManager.configManager.saveConfig("token", "");
+    serviceManager.configManager.saveConfig("currentUser", "");
+  }
+
   Future<void> logout() async {
+    await clearUserInfo();
     await sendLogout();
-    currentUser = null;
-    token = null;
-    await saveUserInfo();
     showToast("已退出登录！");
     notifyListeners();
   }

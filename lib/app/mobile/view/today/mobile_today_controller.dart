@@ -6,6 +6,7 @@ import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:uuid/uuid.dart';
 import 'package:wenznote/app/windows/view/doc/win_select_doc_dir_dialog.dart';
 import 'package:wenznote/commons/mvc/controller.dart';
 import 'package:wenznote/model/note/enum/note_order_type.dart';
@@ -14,7 +15,6 @@ import 'package:wenznote/model/note/po/doc_dir_po.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:wenznote/service/search/search_result_vo.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:uuid/uuid.dart';
 
 /// 日记、便签、笔记、卡片*、待办*、重点*
 class MobileTodayController extends ServiceManagerController {
@@ -57,6 +57,27 @@ class MobileTodayController extends ServiceManagerController {
 
   void fetchDoc({bool refreshList = true}) async {
     doSearch(searchText.value);
+  }
+
+  int compareDoc(DocPO a, DocPO b) {
+    var comparators = <Comparator<DocPO>>[];
+    switch (orderParam.value) {
+      case OrderProperty.createTime:
+        comparators.add((a, b) => a.createTime!.compareTo(b.createTime!));
+        comparators.add((a, b) => a.updateTime!.compareTo(b.updateTime!));
+        break;
+      case OrderProperty.updateTime:
+        comparators.add((a, b) => a.updateTime!.compareTo(b.updateTime!));
+        comparators.add((a, b) => a.createTime!.compareTo(b.createTime!));
+        break;
+      case OrderProperty.memo:
+        break;
+    }
+    bool reverse = orderType.value == OrderType.desc;
+    if (reverse) {
+      return -compareMultiProperties(a, b, comparators);
+    }
+    return compareMultiProperties(a, b, comparators);
   }
 
   void sortDoc(List<SearchResultVO> docList) {
@@ -158,10 +179,12 @@ class MobileTodayController extends ServiceManagerController {
     );
   }
 
-  void doSearch(String text) {
+  Future<void> doSearch(String text) async {
+    var startTime = DateTime.now().millisecondsSinceEpoch;
     searchList.clear();
-    serviceManager.searchService.searchDoc(
+    await serviceManager.searchService.searchDoc(
       text: text,
+      orderBy: compareDoc,
       callback: (doc, list) {
         if (showNote.isFalse && doc.type == "note") {
           return;
@@ -173,10 +196,9 @@ class MobileTodayController extends ServiceManagerController {
           searchList.add(list.first);
         }
       },
-      onEnd: () {
-        sortDoc(searchList);
-      },
     );
+    var endTime = DateTime.now().millisecondsSinceEpoch;
+    print('fetch today list use time:${endTime - startTime}');
   }
 
   int compareMultiProperties<T>(T a, T b, List<Comparator<T>> comparators) {

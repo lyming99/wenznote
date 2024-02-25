@@ -4,13 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:wenznote/app/windows/outline/outline_controller.dart';
 import 'package:wenznote/app/windows/outline/outline_tree.dart';
 import 'package:wenznote/app/windows/theme/colors.dart';
 import 'package:wenznote/app/windows/view/card/win_create_card_dialog.dart';
 import 'package:wenznote/app/windows/view/doc/win_select_doc_dir_dialog.dart';
 import 'package:wenznote/app/windows/widgets/win_edit_tab.dart';
+import 'package:wenznote/app/windows/widgets/win_tab_view.dart';
 import 'package:wenznote/commons/mvc/view.dart';
+import 'package:wenznote/commons/util/log_util.dart';
 import 'package:wenznote/commons/widget/split_pane.dart';
 import 'package:wenznote/editor/crdt/YsEditController.dart';
 import 'package:wenznote/editor/crdt/YsTree.dart';
@@ -23,7 +26,6 @@ import 'package:wenznote/model/note/enum/note_type.dart';
 import 'package:wenznote/model/note/po/doc_dir_po.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:wenznote/service/task/task.dart';
-import 'package:oktoast/oktoast.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WinNoteEditTabController extends WinEditTabController {
@@ -231,9 +233,15 @@ class WinNoteEditTabController extends WinEditTabController {
     isCreateMode = false;
     title.value = text;
   }
+
+  void sync(BuildContext ctx) {
+    printLog("手动同步笔记：${doc.uuid},${doc.name}");
+    homeController.serviceManager.docSnapshotService
+        .downloadDocFile(doc.uuid ?? "");
+  }
 }
 
-class WinNoteEditTab extends MvcView<WinNoteEditTabController> {
+class WinNoteEditTab extends MvcView<WinNoteEditTabController> with Focusable {
   Doc? docContent;
   var updateTime = 0.obs;
 
@@ -243,6 +251,13 @@ class WinNoteEditTab extends MvcView<WinNoteEditTabController> {
   WinNoteEditTabController get controller => super.controller!;
 
   DocPO get doc => controller.doc;
+
+  @override
+  void focus() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      controller.editController.requestFocus();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -270,7 +285,8 @@ class WinNoteEditTab extends MvcView<WinNoteEditTabController> {
                               right: BorderSide(
                                 color: fluent.FluentTheme.of(context)
                                     .resources
-                                    .cardStrokeColorDefaultSolid.withOpacity(0.1),
+                                    .cardStrokeColorDefaultSolid
+                                    .withOpacity(0.1),
                               ),
                             ),
                           ),
@@ -335,7 +351,8 @@ class WinNoteEditTab extends MvcView<WinNoteEditTabController> {
           bottom: BorderSide(
             color: fluent.FluentTheme.of(context)
                 .resources
-                .cardStrokeColorDefaultSolid.withOpacity(0.1),
+                .cardStrokeColorDefaultSolid
+                .withOpacity(0.1),
           ),
         ),
       ),
@@ -416,6 +433,22 @@ class WinNoteEditTab extends MvcView<WinNoteEditTabController> {
   void showNoteItemContextMenu(BuildContext context) {
     var editTheme = EditTheme.of(context);
     showDropMenu(context, childrenWidth: 150, menus: [
+      DropMenu(
+        text: Row(
+          children: [
+            Text(
+              "立即同步",
+              style: TextStyle(
+                color: editTheme.fontColor,
+              ),
+            ),
+          ],
+        ),
+        onPress: (ctx) {
+          hideDropMenu(ctx);
+          controller.sync(ctx);
+        },
+      ),
       DropMenu(
         text: Row(
           children: [

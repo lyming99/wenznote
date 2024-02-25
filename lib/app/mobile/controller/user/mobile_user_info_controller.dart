@@ -9,6 +9,7 @@ import 'package:image_cropping/image_cropping.dart' as cropping;
 import 'package:image_picker/image_picker.dart';
 import 'package:wenznote/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
+import 'package:wenznote/widgets/root_widget.dart';
 
 // Import package
 
@@ -55,10 +56,8 @@ class MobileUserInfoController extends ServiceManagerController {
 
   void logout() async {
     await serviceManager.userService.logout();
-    GoRouter.of(context).pop();
-    await serviceManager.restartService();
     SchedulerBinding.instance.scheduleFrameCallback((timeStamp) {
-      // GoRouter.of(context).go("/mobile/today");
+      ServiceManagerWidgetState.of(context).restart();
     });
   }
 

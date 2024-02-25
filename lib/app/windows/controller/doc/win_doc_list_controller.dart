@@ -161,8 +161,7 @@ class WinDocListController extends ServiceManagerController {
       BuildContext context, WinDocListItemVO docItem, String text) async {
     await docListService.updateName(docItem.doc ?? docItem.dir, text);
     if (!docItem.isFolder) {
-      WinHomeController home = Get.find();
-      var tab = home.getDocTab(docItem.uuid);
+      var tab = docPageController.homeController.getDocTab(docItem.uuid);
       tab?.controller.onRename(text);
     }
   }
@@ -189,10 +188,10 @@ class WinDocListController extends ServiceManagerController {
     docListService.moveToDir(dir, list.map((e) => e.doc ?? e.dir).toList());
   }
 
-  void searchDoc(String text) async {
+  Future<void> searchDoc(String text) async {
     searchTask?.cancel = true;
     searchResultList.clear();
-    searchTask = BaseTask.start((BaseTask task) async {
+    searchTask = BaseTask(task: (BaseTask task) async {
       var searchDocList = <DocPO>[];
       await queryChildDocList(
           docList.map((element) => element.item!).toList(), searchDocList);
@@ -207,6 +206,7 @@ class WinDocListController extends ServiceManagerController {
         }
       }
     });
+    await searchTask!.doTask();
   }
 
   Future<void> queryChildDocList(List<dynamic> list, List<DocPO> result) async {

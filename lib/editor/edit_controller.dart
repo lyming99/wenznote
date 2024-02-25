@@ -883,7 +883,8 @@ class EditController with ChangeNotifier {
                                   child: fluent.ContentDialog(
                                     constraints: isMobile
                                         ? const BoxConstraints(maxWidth: 300)
-                                        : fluent.kDefaultContentDialogConstraints,
+                                        : fluent
+                                            .kDefaultContentDialogConstraints,
                                     content: fluent.Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
@@ -1317,6 +1318,7 @@ class EditController with ChangeNotifier {
   ///单击
   void onOneClick(Offset location) {
     //弹出输入法
+    requestFocus();
     if (editable) {
       inputManager.composing = null;
       inputManager.closeInputMethod();
@@ -1689,6 +1691,7 @@ class EditController with ChangeNotifier {
           inputManager.openInputMethod();
         }
         showCursorOnOpen();
+        startCursorTimer();
       }
     }
   }
@@ -3231,7 +3234,8 @@ class EditController with ChangeNotifier {
   }
 
   void onInputAction(TextInputAction action) {
-    if (action == TextInputAction.newline) {
+    print('hello');
+    if (action == TextInputAction.newline || action == TextInputAction.done) {
       if (Platform.isAndroid || Platform.isIOS) {
         enter();
         record();
@@ -3294,6 +3298,13 @@ class EditController with ChangeNotifier {
                 ),
               ));
       if (blocks != null) {
+        // 移除前后换行符号
+        while (blocks.isNotEmpty && blocks.first.isEmpty) {
+          blocks.removeAt(0);
+        }
+        while (blocks.isNotEmpty && blocks.last.isEmpty) {
+          blocks.removeLast();
+        }
         insertContent(blocks, text);
         record();
         requestFocus();
@@ -3776,7 +3787,7 @@ class EditController with ChangeNotifier {
     if (cursorPos != text.length) {
       return false;
     }
-    if (!text.startsWith("```")) {
+    if (!(text.startsWith("```") || text.startsWith("···"))) {
       return false;
     }
     for (var i = 3; i < text.length; i++) {
@@ -4004,6 +4015,7 @@ class EditController with ChangeNotifier {
       }
       insertBlocks = parseTextToBlock(insertText);
     }
+    insertBlocks = dealPasteBlocks(insertBlocks);
     deleteSelectRange();
     var cursor = cursorState.cursorPosition;
     if (cursor == null) {
@@ -4932,7 +4944,7 @@ class EditController with ChangeNotifier {
   }
 
   void onSystemInputText(TextEditingValue value) async {
-    if(!value.text.contains("\n")){
+    if (!value.text.contains("\n")) {
       onInputText(value);
       return;
     }
@@ -4943,5 +4955,42 @@ class EditController with ChangeNotifier {
     } else {
       onInputText(value);
     }
+  }
+
+  void updateCodeLanguage(CodeBlock codeBlock, String language) {
+    codeBlock.element.language = language;
+    codeBlock.relayoutFlag = true;
+    updateWidgetState();
+  }
+
+  List<WenBlock> dealPasteBlocks(List<WenBlock> insertBlocks) {
+    List<WenBlock> result = [];
+    bool preIsEmpty = false;
+    for (var block in insertBlocks) {
+      if (block is TextBlock) {
+        var text = block.element.getText();
+        if (text.isEmpty) {
+          if (preIsEmpty) {
+            continue;
+          }
+          preIsEmpty = true;
+        } else {
+          preIsEmpty = false;
+        }
+        if (text.contains("\n")) {
+          var lines = text.split("\n");
+          for (var line in lines) {
+            result.add(TextBlock(
+                context: block.context,
+                editController: block.editController,
+                textElement: block.textElement.copyStyle(line, [])));
+          }
+        }
+      } else {
+        preIsEmpty = false;
+      }
+      result.add(block);
+    }
+    return result;
   }
 }

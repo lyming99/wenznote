@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wenznote/service/service_manager.dart';
 
@@ -10,12 +9,6 @@ class MobileUserLoginController extends ServiceManagerController {
   Future<bool> doLogin() async {
     bool result = await serviceManager.userService.login(
         email: usernameController.text, password: passwordController.text);
-    if (result) {
-      SchedulerBinding.instance.scheduleFrameCallback((timeStamp) {
-        context.pop();
-        serviceManager.restartService();
-      });
-    }
     return result;
   }
 

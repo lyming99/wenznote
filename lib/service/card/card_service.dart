@@ -101,7 +101,9 @@ class CardService with IsarServiceMixin {
     card.createTime = DateTime.now().millisecondsSinceEpoch;
     card.updateTime = DateTime.now().millisecondsSinceEpoch;
     await upsertDbDelta(
-        dataId: card.uuid!, dataType: "card-${card.cardSetId}", properties: card.toMap());
+        dataId: card.uuid!,
+        dataType: "card-${card.cardSetId}",
+        properties: card.toMap());
     await documentIsar.writeTxn(() async {
       documentIsar.cardPOs.put(card);
     });
@@ -152,7 +154,9 @@ class CardService with IsarServiceMixin {
         dataId: card.uuid!,
         dataType: "card-${card.cardSetId}",
         properties: diffMap(oldItem?.toMap() ?? {}, card.toMap()));
-    await documentIsar.writeTxn(() => documentIsar.cardPOs.put(card));
+    await documentIsar.writeTxn(() async {
+      await documentIsar.cardPOs.put(card);
+    });
   }
 
   Future<CardSetPO?> queryCardSet(String? cardSetId) async {

@@ -76,7 +76,7 @@ class MobileCardDetailController extends ServiceManagerController {
     await serviceManager.cardStudyService.generateStudyQueue(cardSetId);
     await fetchGraphxData();
     searchTask?.stopTask();
-    searchTask = BaseTask.start((task) async {
+    searchTask = BaseTask(task: (task) async {
       todayStudyQueue = await studyService.queryTodayStudyQueue(cardSetId);
       reviewQueue = await studyService.queryReviewQueue(cardSetId);
       var cardList = await cardService.queryCardList(
@@ -134,6 +134,7 @@ class MobileCardDetailController extends ServiceManagerController {
         }
       }
     });
+    await searchTask!.doTask();
   }
 
   Future<void> fetchGraphxData() async {

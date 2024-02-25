@@ -141,13 +141,17 @@ class YsCode {
       block.yMap.set('code', code);
     }
     StringBuffer sb = StringBuffer();
-    for (var value in content) {
-      var text = value.element.getText();
-      sb.writeln(text);
+    for (var i = 0; i < content.length; i++) {
+      var text = content[i].element.getText();
+      if (i == content.length - 1) {
+        sb.write(text);
+      } else {
+        sb.writeln(text);
+      }
     }
     code.insert(textOffset, sb.toString());
     block.tree.setCursor(
-        createTextCursor(block.tree, blockIndex, textOffset + sb.length));
+        createCodeCursor(block.tree, blockIndex, textOffset + sb.length));
   }
 
   void addIndent({required int blockIndex}) {
@@ -324,5 +328,9 @@ class YsCode {
       block.tree.selection?.end =
           (YsCursor.code(block.tree, blockIndex, selectEndOffset));
     }
+  }
+
+  void updateLanguage(String language) {
+    block.yMap.set("language", language);
   }
 }

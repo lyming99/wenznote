@@ -10,8 +10,11 @@ import 'package:wenznote/app/windows/widgets/custom_tab_view.dart';
 import 'package:wenznote/commons/mvc/controller.dart';
 import 'package:wenznote/commons/mvc/view.dart';
 import 'package:wenznote/widgets/mac_window_button.dart';
-import 'package:wenznote/widgets/window_button/decorated_button.dart';
 import 'package:window_manager/window_manager.dart';
+
+mixin Focusable {
+  void focus() {}
+}
 
 class WinTabController extends MvcController {
   WinHomeController homeController;
@@ -33,6 +36,10 @@ class WinTabController extends MvcController {
       var tab = tabs[i];
       if (tab.key == ValueKey(id)) {
         currentIndex = i;
+        var body = tab.body;
+        if (body is Focusable) {
+          (body as Focusable).focus();
+        }
         notifyListeners();
         return;
       }
@@ -61,13 +68,17 @@ class WinTabController extends MvcController {
         break;
       }
     }
-    if(tabs.isEmpty){
-      homeController.showNavPage.value=true;
+    if (tabs.isEmpty) {
+      homeController.showNavPage.value = true;
     }
   }
 
   void selectTab(int x) {
     currentIndex = x;
+    var body = tabs[x].body;
+    if (body is Focusable) {
+      (body as Focusable).focus();
+    }
     notifyListeners();
   }
 

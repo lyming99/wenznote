@@ -163,6 +163,7 @@ class YsEditController extends EditController {
       }
       insertBlocks = parseTextToBlock(insertText);
     }
+    insertBlocks = dealPasteBlocks(insertBlocks);
     ysTree?.insertContent(insertBlocks);
     record();
   }
@@ -587,6 +588,11 @@ class YsEditController extends EditController {
   @override
   void setTextColor(int index) {
     ysTree?.setTextColor(defaultColors[index]?.value);
+    record();
+  }
+  @override
+  void updateCodeLanguage(CodeBlock codeBlock, String language) {
+    ysTree?.updateCodeLanguage(codeBlock.blockIndex,language);
     record();
   }
 

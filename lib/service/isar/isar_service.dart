@@ -29,6 +29,9 @@ class IsarService {
 
   Future<bool> open() async {
     return synchronized(() async {
+      if(_documentIsar!=null){
+        return true;
+      }
       var dir = await serviceManager.fileManager.getRootDir();
       var databases =
           Directory("$dir/${serviceManager.userService.userPath}databases");
@@ -62,8 +65,9 @@ class IsarService {
 
   Future<void> close() async {
     return synchronized(() async {
-      await _documentIsar?.close();
+      var future = _documentIsar?.close();
       _documentIsar = null;
+      await future;
     });
   }
 }

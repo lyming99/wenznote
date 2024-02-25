@@ -61,6 +61,7 @@ class MobileDocPageController extends ServiceManagerController {
   Future<void> fetchData() async {
     await queryPathList();
     await queryDocList();
+    doSearch();
   }
 
   void doSearch() {

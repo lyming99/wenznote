@@ -217,7 +217,7 @@ Future<void> _parseHtmlToBlockElement(
     var id = element.elementId;
     var src = element.attributes["src"];
     var imageFile =
-        await ServiceManager.of(context).fileManager.getImageFile(id);
+        await ServiceManager.of(context).fileManager.getImageFile(id, false);
     if (imageFile != null && File(imageFile).existsSync()) {
       var size = await readImageFileSize(imageFile);
       result.add(WenImageElement(

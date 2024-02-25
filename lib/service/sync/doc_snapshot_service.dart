@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:synchronized/extension.dart';
+import 'package:wenznote/commons/util/log_util.dart';
 import 'package:wenznote/config/app_constants.dart';
 import 'package:wenznote/model/note/po/doc_state_po.dart';
 import 'package:wenznote/service/service_manager.dart';
@@ -107,7 +108,9 @@ class DocSnapshotService {
             .findFirstSync() ??
         DocStatePO(clientId: clientId, docId: dataId, updateTime: clientTime);
     state.updateTime = clientTime;
-    await isar.writeTxn(() => isar.docStatePOs.put(state));
+    await isar.writeTxn(() async {
+      await isar.docStatePOs.put(state);
+    });
     serviceManager.editService
         .updateDoc(dataId, Uint8List.fromList(pkt.content), needUpload: false);
   }
@@ -183,13 +186,15 @@ class DocSnapshotService {
           lastQueryTime < DateTime.now().millisecondsSinceEpoch) {
         return;
       }
+      var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;
+      if (noteServerUrl == null) {
+        return;
+      }
       // 因为服务器会限制下载文件频率
       // 所有创建8秒下载锁，避免重复下载
       queryDeltaTimeRecord[docId] =
-          DateTime.now().millisecondsSinceEpoch + 8000;
-      var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;
+          DateTime.now().millisecondsSinceEpoch + 1000;
       var isar = serviceManager.isarService.documentIsar;
-
       var result = await Dio().post(
         "$noteServerUrl/snapshot/download/$docId",
         options: Options(
@@ -252,19 +257,22 @@ class DocSnapshotService {
         }
         // 写入文件,并且通知upload
         try {
-          // 此处可能会卡住界面
+          // 更新文档，并且检测文档是否需要更新
           await serviceManager.editService.updateDoc(
             docId,
             fileBytes,
             needUpload: needUpload,
+            checkUpload: true,
           );
         } catch (e) {
           // 可能存在yjs合并失败的bug，需要处理yjs类型转换问题
           // type 'ContentDeleted' is not a subtype of type 'ContentType' in type cast
-          print(e);
+          printLog("更新doc失败: $e");
         }
         // 写入状态
-        await isar.writeTxn(() => isar.docStatePOs.putAll(saveStates));
+        await isar.writeTxn(() async {
+          await isar.docStatePOs.putAll(saveStates);
+        });
       }
     });
   }
