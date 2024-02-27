@@ -181,19 +181,10 @@ class DocSnapshotService {
 
   Future<void> downloadDocFile(String docId) async {
     return _downloadLock.synchronized(() async {
-      var lastQueryTime = downloadDocFileTimeRecord[docId];
-      if (lastQueryTime != null &&
-          lastQueryTime < DateTime.now().millisecondsSinceEpoch) {
-        return;
-      }
       var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;
       if (noteServerUrl == null) {
         return;
       }
-      // 因为服务器会限制下载文件频率
-      // 所有创建8秒下载锁，避免重复下载
-      queryDeltaTimeRecord[docId] =
-          DateTime.now().millisecondsSinceEpoch + 1000;
       var isar = serviceManager.isarService.documentIsar;
       var result = await Dio().post(
         "$noteServerUrl/snapshot/download/$docId",
@@ -267,7 +258,7 @@ class DocSnapshotService {
         } catch (e) {
           // 可能存在yjs合并失败的bug，需要处理yjs类型转换问题
           // type 'ContentDeleted' is not a subtype of type 'ContentType' in type cast
-          printLog("更新doc失败: $e");
+          printLog("下载文档时，更新ydoc失败: $e");
         }
         // 写入状态
         await isar.writeTxn(() async {
@@ -277,6 +268,12 @@ class DocSnapshotService {
     });
   }
 
+  /// 通过clientId,updateTime查询需要更新的文档
+  /// 一旦查询到需要下载的docId，那么这个docId必须下载成功
+  /// 否则，就会导致文档下载更新失败而无法打开
+  /// 所以，需要将查询到的需要更新的文档，存到任务队列，直到该文档下载成功
+  /// 需要注意的时，如果下载文档任务为定时任务，那么在文档编辑过程中不要执行该任务，直到编辑器关闭
+  /// 编辑过程，用户可以手动下载文档进行更新，或者编辑器会自动触发p2p更新，无需下载文档
   Future<List<String>?> queryUpdateList() async {
     var token = serviceManager.userService.token;
     if (token == null) {
@@ -303,6 +300,7 @@ class DocSnapshotService {
     return null;
   }
 
+  /// 返回文档状态的最大时间点 clientId,updateTime
   Future<Map<String, int>> getClientStates() async {
     var isar = serviceManager.isarService.documentIsar;
     var states = await isar.docStatePOs.where().findAll();

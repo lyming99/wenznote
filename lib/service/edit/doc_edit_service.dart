@@ -167,6 +167,7 @@ class DocEditService {
         }
         return !_equalsSnapShot(docBytes ?? Uint8List(0), newBytes);
       } catch (e) {
+        // todo 并doc失败, error: RangeError (index): Index out of range: no indices are valid: 0
         printLog("合并doc失败, error: $e");
         return false;
       }

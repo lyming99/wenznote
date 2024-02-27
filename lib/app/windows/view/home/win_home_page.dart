@@ -60,6 +60,7 @@ class WinHomePage extends MvcView<WinHomeController> {
     );
   }
 
+  /// app内容：导航栏(左) + 一级内容(中) + 二级内容(右)
   Widget buildAppContent(BuildContext context) {
     return Obx(() {
       return Row(
@@ -76,6 +77,7 @@ class WinHomePage extends MvcView<WinHomeController> {
     });
   }
 
+  /// 导航栏
   Widget buildWindowsNavBar(BuildContext context) {
     var theme = fluent.FluentTheme.of(context);
     return Container(
@@ -288,10 +290,11 @@ class WinHomePage extends MvcView<WinHomeController> {
     );
   }
 
+  ///主页分割内容界面：导航|内容
   Widget buildPage(BuildContext context) {
     return Obx(() {
       if (controller.showNavPage.isFalse) {
-        return buildEditPane(context);
+        return buildEditTabsPane(context);
       }
       return SplitPane(
         primaryIndex: PaneIndex.one,
@@ -299,11 +302,12 @@ class WinHomePage extends MvcView<WinHomeController> {
         subMinSize: 340,
         onlyShowIndex: controller.showEditPane.value ? null : PaneIndex.one,
         one: buildNavPane(context),
-        two: buildEditPane(context),
+        two: buildEditTabsPane(context),
       );
     });
   }
 
+  ///导航内容：今天、笔记、卡片
   Widget buildNavPane(BuildContext context) {
     var navPages = [
       buildTodayPage(context),
@@ -318,6 +322,7 @@ class WinHomePage extends MvcView<WinHomeController> {
     });
   }
 
+  ///今天列表界面
   Widget buildTodayPage(BuildContext context) {
     var theme = fluent.FluentTheme.of(context);
     return DropRegion(
@@ -374,6 +379,7 @@ class WinHomePage extends MvcView<WinHomeController> {
     );
   }
 
+  /// 编辑列表页面
   Widget buildNotePage(BuildContext context) {
     var theme = fluent.FluentTheme.of(context);
     return Container(
@@ -393,6 +399,7 @@ class WinHomePage extends MvcView<WinHomeController> {
         ));
   }
 
+  /// 卡片列表页面
   Widget buildCardPage(BuildContext context) {
     var theme = fluent.FluentTheme.of(context);
     return Container(
@@ -412,7 +419,8 @@ class WinHomePage extends MvcView<WinHomeController> {
         ));
   }
 
-  Widget buildEditPane(BuildContext context) {
+  /// 编辑区域,多标签界面
+  Widget buildEditTabsPane(BuildContext context) {
     var theme = fluent.FluentTheme.of(context);
     return Material(
       color: theme.resources.solidBackgroundFillColorSecondary,
@@ -427,6 +435,8 @@ class WinHomePage extends MvcView<WinHomeController> {
     );
   }
 
+
+  /// 侧边导航栏菜单按钮
   Widget buildNavMenu(BuildContext context) {
     var theme = fluent.FluentTheme.of(context);
     return fluent.Tooltip(

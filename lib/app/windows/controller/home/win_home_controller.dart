@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import 'package:uuid/uuid.dart';
 import 'package:wenznote/app/mobile/controller/settings/mobile_settings_controller.dart';
 import 'package:wenznote/app/mobile/view/settings/mobile_settings_page.dart';
 import 'package:wenznote/app/windows/controller/card/win_card_set_controller.dart';
@@ -14,12 +16,11 @@ import 'package:wenznote/app/windows/widgets/win_tab_view.dart';
 import 'package:wenznote/commons/mvc/controller.dart';
 import 'package:wenznote/commons/util/markdown/markdown.dart';
 import 'package:wenznote/editor/crdt/doc_utils.dart';
+import 'package:wenznote/editor/widget/drop_menu.dart';
 import 'package:wenznote/model/note/enum/note_type.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:wenznote/service/file/file_manager.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:super_drag_and_drop/super_drag_and_drop.dart';
-import 'package:uuid/uuid.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../widgets/doc_title_widget.dart';
@@ -102,15 +103,17 @@ class WinHomeController extends ServiceManagerController {
   void openDoc(DocPO doc, [bool isCreateMode = false]) {
     openTab(
       id: "doc-${doc.uuid}",
-      text: DocTitleWidget(controller: DocTitleController(doc),),
+      text: DocTitleWidget(
+        controller: DocTitleController(doc),
+      ),
       body: WinNoteEditTab(
         controller: WinNoteEditTabController(
             homeController: this,
             doc: doc,
             isCreateMode: isCreateMode,
             onUpdate: (content) {
-              docController.reloadDoc(doc,content);
-              todayController.reloadDoc(doc,content);
+              docController.reloadDoc(doc, content);
+              todayController.reloadDoc(doc, content);
               getDocTab(doc.uuid)?.controller.notifyListeners();
             }),
       ),

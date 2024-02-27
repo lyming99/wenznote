@@ -9,6 +9,7 @@ import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
 import 'package:wenznote/app/windows/widgets/custom_tab_view.dart';
 import 'package:wenznote/commons/mvc/controller.dart';
 import 'package:wenznote/commons/mvc/view.dart';
+import 'package:wenznote/editor/widget/drop_menu.dart';
 import 'package:wenznote/widgets/mac_window_button.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -25,6 +26,24 @@ class WinTabController extends MvcController {
 
   List<CustomTab> tabs = [];
 
+  int findTabIndex(String id) {
+    for (var i = 0; i < tabs.length; i++) {
+      var tab = tabs[i];
+      if (tab.key == ValueKey(id)) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  bool isStartTab(int tabIndex) {
+    return tabIndex == 0;
+  }
+
+  bool isEndTab(int tabIndex) {
+    return tabIndex == tabs.length - 1;
+  }
+
   void openTab({
     required String id,
     required Widget text,
@@ -32,21 +51,25 @@ class WinTabController extends MvcController {
     Widget? icon,
     String? semanticLabel,
   }) {
-    for (var i = 0; i < tabs.length; i++) {
-      var tab = tabs[i];
-      if (tab.key == ValueKey(id)) {
-        currentIndex = i;
-        var body = tab.body;
-        if (body is Focusable) {
-          (body as Focusable).focus();
-        }
-        notifyListeners();
-        return;
+    int tabIndex = findTabIndex(id);
+    if (tabIndex != -1) {
+      var tab = tabs[tabIndex];
+      currentIndex = tabIndex;
+      var body = tab.body;
+      if (body is Focusable) {
+        (body as Focusable).focus();
       }
+      notifyListeners();
+      return;
     }
     tabs.add(CustomTab(
       key: ValueKey(id),
-      text: text,
+      text: GestureDetector(
+        child: text,
+        onSecondaryTapUp: (d) {
+          showTabContextMenu(d, id);
+        },
+      ),
       semanticLabel: semanticLabel,
       icon: icon,
       body: body,
@@ -55,6 +78,79 @@ class WinTabController extends MvcController {
       },
     ));
     currentIndex = tabs.length - 1;
+    notifyListeners();
+  }
+
+  void showTabContextMenu(TapUpDetails event, String id) {
+    int tabIndex = findTabIndex(id);
+    showMouseDropMenu(
+      context,
+      event.globalPosition & Size.zero,
+      menus: [
+        DropMenu(
+          text: Text("关闭标签页"),
+          onPress: (ctx) {
+            hideDropMenu(ctx);
+            closeTab(id);
+          },
+        ),
+        DropMenu(
+          text: Text("关闭其它标签页"),
+          onPress: (ctx) {
+            hideDropMenu(ctx);
+            closeOtherTabs(tabIndex);
+          },
+        ),
+        DropMenu(
+          text: Text("关闭所有标签页"),
+          onPress: (ctx) {
+            hideDropMenu(ctx);
+            closeAllTab(tabIndex);
+          },
+        ),
+        if (!isStartTab(tabIndex))
+          DropMenu(
+            text: Text("关闭左侧标签页"),
+            onPress: (ctx) {
+              hideDropMenu(ctx);
+              closeLeftTabs(tabIndex);
+            },
+          ),
+        if (!isEndTab(tabIndex))
+          DropMenu(
+            text: Text("关闭右侧侧标签页"),
+            onPress: (ctx) {
+              hideDropMenu(ctx);
+              closeRightTabs(tabIndex);
+            },
+          ),
+      ],
+    );
+  }
+
+  void closeOtherTabs(int index) {
+    var current = tabs[index];
+    tabs.removeWhere((element) => element != current);
+    currentIndex = 0;
+    notifyListeners();
+  }
+
+  void closeAllTab(int index) {
+    currentIndex = 0;
+    tabs.clear();
+    notifyListeners();
+    homeController.showNavPage.value = true;
+  }
+
+  void closeLeftTabs(int index) {
+    tabs.removeRange(0, index);
+    currentIndex = 0;
+    notifyListeners();
+  }
+
+  void closeRightTabs(int index) {
+    tabs.removeRange(index + 1, tabs.length);
+    currentIndex = index;
     notifyListeners();
   }
 

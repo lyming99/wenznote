@@ -74,7 +74,7 @@ class DragMoveTabView extends StatefulWidget {
     this.tabWidthBehavior = TabWidthBehavior.equal,
     this.header,
     this.footer,
-    this.closeDelayDuration = const Duration(milliseconds: 400),
+    this.closeDelayDuration = const Duration(milliseconds: 200),
   });
 
   /// The index of the tab to be displayed

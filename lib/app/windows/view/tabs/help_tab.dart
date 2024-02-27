@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
 import 'package:wenznote/commons/util/markdown/markdown.dart';
 import 'package:wenznote/editor/edit_controller.dart';
 import 'package:wenznote/editor/edit_widget.dart';
