@@ -75,7 +75,10 @@ class _WindowBorderWidgetsState extends State<WindowBorderWidget>
 
   @override
   Widget build(BuildContext context) {
-    if (isFullScreen || !isCustomWindowBorder()) {
+    if (!isCustomWindowBorder()) {
+      return widget.child;
+    }
+    if (isFullScreen) {
       return DragToResizeArea(
         resizeEdgeSize: 2,
         child: widget.child,
