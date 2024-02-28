@@ -162,6 +162,26 @@ class WinNoteEditTabController extends WinEditTabController {
     );
   }
 
+  void copyText(BuildContext ctx) async {
+    await homeController.serviceManager.copyService.copyWenElements(
+        ctx, editController.blockManager.getWenElements(), true);
+    showToast(
+      "复制成功",
+      position: ToastPosition.bottom,
+    );
+  }
+
+  void copyHtml(BuildContext ctx) {}
+
+  void copyMarkdown(BuildContext ctx) async {
+    await homeController.serviceManager.copyService
+        .copyMarkdownContent(doc.uuid ?? "");
+    showToast(
+      "复制成功",
+      position: ToastPosition.bottom,
+    );
+  }
+
   void deleteNote(BuildContext ctx) async {
     homeController.closeDoc(doc);
 
@@ -450,21 +470,70 @@ class WinNoteEditTab extends MvcView<WinNoteEditTabController> with Focusable {
         },
       ),
       DropMenu(
-        text: Row(
-          children: [
-            Text(
-              "复制内容",
-              style: TextStyle(
-                color: editTheme.fontColor,
+          text: Row(
+            children: [
+              Text(
+                "复制全文",
+                style: TextStyle(
+                  color: editTheme.fontColor,
+                ),
               ),
+            ],
+          ),
+          onPress: (ctx) {
+            hideDropMenu(ctx);
+            controller.copyContent(ctx);
+          },
+          children: [
+            DropMenu(
+              text: Row(
+                children: [
+                  Text(
+                    "复制富文本",
+                    style: TextStyle(
+                      color: editTheme.fontColor,
+                    ),
+                  ),
+                ],
+              ),
+              onPress: (ctx) {
+                hideDropMenu(ctx);
+                controller.copyContent(ctx);
+              },
             ),
-          ],
-        ),
-        onPress: (ctx) {
-          hideDropMenu(ctx);
-          controller.copyContent(ctx);
-        },
-      ),
+            DropMenu(
+              text: Row(
+                children: [
+                  Text(
+                    "复制纯文本",
+                    style: TextStyle(
+                      color: editTheme.fontColor,
+                    ),
+                  ),
+                ],
+              ),
+              onPress: (ctx) {
+                hideDropMenu(ctx);
+                controller.copyText(ctx);
+              },
+            ),
+            DropMenu(
+              text: Row(
+                children: [
+                  Text(
+                    "复制 Markdown",
+                    style: TextStyle(
+                      color: editTheme.fontColor,
+                    ),
+                  ),
+                ],
+              ),
+              onPress: (ctx) {
+                hideDropMenu(ctx);
+                controller.copyMarkdown(ctx);
+              },
+            ),
+          ]),
       if (controller.doc.type != 'doc')
         DropMenu(
           text: Row(

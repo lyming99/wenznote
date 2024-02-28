@@ -87,19 +87,19 @@ class WenTableElement extends WenElement {
     if (maxCount <= 0) {
       return "";
     }
-    String ans = "";
+    String result = "";
     // header
     var header = rows[0];
-    ans += "|";
+    result += "|";
     for (int i = 0; i < maxCount; i++) {
       String itemHtml = "";
       if (header.isNotEmpty && i < header.length) {
         itemHtml = header[i].getMarkDown(filePathBuilder: filePathBuilder);
       }
-      ans += "$itemHtml|";
+      result += "$itemHtml|";
     }
     // alignment
-    ans += "\n|";
+    result += "\n|";
     for (int i = 0; i < maxCount; i++) {
       String alignmentText = "";
       var align = alignments?[i];
@@ -110,9 +110,9 @@ class WenTableElement extends WenElement {
       } else {
         alignmentText = ":---";
       }
-      ans += "$alignmentText|";
+      result += "$alignmentText|";
     }
-    ans += "\n";
+    result += "\n";
     // rows
     for (int r = 1; r < rows.length; r++) {
       var items = rows[r];
@@ -121,10 +121,13 @@ class WenTableElement extends WenElement {
         if (items.isNotEmpty && i < items.length) {
           itemHtml = items[i].getMarkDown(filePathBuilder: filePathBuilder);
         }
-        ans += "$itemHtml|";
+        result += "$itemHtml|";
+      }
+      if (r <= rows.length - 1) {
+        result += "\n";
       }
     }
-    return ans;
+    return result;
   }
 
   @override

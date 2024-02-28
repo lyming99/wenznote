@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:wenznote/editor/block/element/element.dart';
-import 'package:wenznote/editor/crdt/doc_utils.dart';
-import 'package:wenznote/service/service_manager.dart';
 import 'package:rich_clipboard/rich_clipboard.dart';
 import 'package:uuid/uuid.dart';
+import 'package:wenznote/editor/block/element/element.dart';
+import 'package:wenznote/editor/block/image/image_element.dart';
+import 'package:wenznote/editor/crdt/doc_utils.dart';
+import 'package:wenznote/service/service_manager.dart';
 
 class CopyService {
   ServiceManager serviceManager;
@@ -91,15 +92,21 @@ class CopyService {
     var doc = await serviceManager.editService.readDoc(uuid);
     var copyElements = yDocToWenElements(doc);
     for (var element in copyElements) {
+      var filePath = "";
+      if (element is WenImageElement) {
+        var imageId = element.id;
+        filePath = await serviceManager.fileManager.getImageFile(imageId) ?? "";
+      }
       markdown.writeln(element.getMarkDown(filePathBuilder: (uuid) {
-        return uuid;
+        return filePath;
       }));
     }
     await RichClipboard.setData(RichClipboardData(text: markdown.toString()));
   }
 
   Future<void> copyWenElements(
-      BuildContext context, List<WenElement> copyElements) async {
+      BuildContext context, List<WenElement> copyElements,
+      [bool copyPlanText = false]) async {
     var copyId = generateCopyId();
     StringBuffer html = StringBuffer();
     html.writeln("<!DOCTYPE html>\n"
@@ -113,7 +120,7 @@ class CopyService {
       html.writeln(element.getHtml());
     }
     html.writeln("</body>");
-    RichClipboard.setData(
-        RichClipboardData(html: html.toString(), text: text.toString()));
+    RichClipboard.setData(RichClipboardData(
+        html: copyPlanText ? null : html.toString(), text: text.toString()));
   }
 }
