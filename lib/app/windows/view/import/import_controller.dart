@@ -55,13 +55,13 @@ class ImportController extends ServiceManagerController {
       } else if (path.endsWith(".zip")) {
         await importZipFile(file: path, conflictMode: conflictMode);
       } else if (path.endsWith(".md")) {
-        await serviceManager.documentManager.importMarkdownFile(
+        await serviceManager.importService.importMarkdownFile(
           file: path,
           toPath: toPath,
           conflictMode: conflictMode,
         );
       } else if (path.endsWith(".wdoc")) {
-        await serviceManager.documentManager.importWdoc(
+        await serviceManager.importService.importWdoc(
           file: path,
           toPath: toPath,
           conflictMode: conflictMode,

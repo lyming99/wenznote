@@ -358,6 +358,19 @@ class FileManager {
     }
     return file;
   }
+
+  Future<String> getNoteDir() async {
+    return getDocDir();
+  }
+
+  Future<String> getNoteFilePath(String docId) async {
+    var noteDir = await getNoteDir();
+    if (!await Directory(noteDir).exists()) {
+      await Directory(noteDir).create(recursive: true);
+    }
+    return "$noteDir/$docId.wnote";
+  }
+
 }
 
 class JsonContent {

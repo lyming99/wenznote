@@ -27,17 +27,18 @@ class DocEditService {
   final _docCache = <String, Doc>{};
   final _updateCache = <String, Uint8List>{};
   final _updateLock = Lock();
+  final _openedDocList = <String>{};
 
-  Future<String> getNoteDir() async {
-    return serviceManager.fileManager.getDocDir();
+  void openDocEditor(String id) {
+    _openedDocList.add(id);
   }
 
-  Future<String> getNoteFilePath(String docId) async {
-    var noteDir = await getNoteDir();
-    if (!await Directory(noteDir).exists()) {
-      await Directory(noteDir).create(recursive: true);
-    }
-    return "$noteDir/$docId.wnote";
+  void closeDocEditor(String id) {
+    _openedDocList.remove(id);
+  }
+
+  bool hasOpenDocEditor(String id) {
+    return _openedDocList.contains(id);
   }
 
   Future<Uint8List?> readDocFile(String? docId) async {
@@ -48,7 +49,8 @@ class DocEditService {
     if (item != null) {
       return item;
     }
-    var noteFile = File(await getNoteFilePath(docId));
+    var noteFile =
+        File(await serviceManager.fileManager.getNoteFilePath(docId));
     if (noteFile.existsSync()) {
       var result = await noteFile.readAsBytes();
       _fileCache[docId] = result;
@@ -61,7 +63,8 @@ class DocEditService {
     if (docId == null || docId.isEmpty) {
       return;
     }
-    var noteFile = File(await getNoteFilePath(docId));
+    var noteFile =
+        File(await serviceManager.fileManager.getNoteFilePath(docId));
     await noteFile.writeAsBytes(data);
     _fileCache[docId] = data;
   }
@@ -177,7 +180,7 @@ class DocEditService {
   Future<void> deleteDocFile(String docId) async {
     _docCache.remove(docId);
     _fileCache.remove(docId);
-    var path = await getNoteFilePath(docId);
+    var path = await serviceManager.fileManager.getNoteFilePath(docId);
     try {
       File(path).deleteSync();
     } catch (e) {

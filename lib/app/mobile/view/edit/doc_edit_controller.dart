@@ -44,6 +44,7 @@ class MobileDocEditController extends ServiceManagerController {
   @override
   void onInitState(BuildContext context) {
     super.onInitState(context);
+    serviceManager.editService.openDocEditor(doc?.uuid ?? "");
     canUpdateTitle.value = title.value.isEmpty;
     editController = YsEditController(
       copyService: serviceManager.copyService,
@@ -80,6 +81,12 @@ class MobileDocEditController extends ServiceManagerController {
     };
     editController.viewContext = context;
     readDoc();
+  }
+
+  @override
+  void onDispose() {
+    super.onDispose();
+    serviceManager.editService.closeDocEditor(doc?.uuid ?? "");
   }
 
   @override

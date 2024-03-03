@@ -62,7 +62,7 @@ class ServiceManager with ChangeNotifier {
   late CopyService copyService;
   late WinDocListService docListService;
   late SettingsManager settingsManager;
-  late DocumentManager documentManager;
+  late ImportService importService;
   late ConfigManager configManager;
   late RecordSyncService recordSyncService;
   late CryptService cryptService;
@@ -92,7 +92,7 @@ class ServiceManager with ChangeNotifier {
     copyService = CopyService(this);
     docListService = WinDocListService(this);
     settingsManager = SettingsManager(this);
-    documentManager = DocumentManager(this);
+    importService = ImportService(this);
     configManager = ConfigManager(this);
     recordSyncService = RecordSyncService(this);
     cryptService = CryptService(this);

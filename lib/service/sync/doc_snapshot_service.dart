@@ -179,7 +179,16 @@ class DocSnapshotService {
     await downloadDocFile(dataId);
   }
 
+  Future<void> addDownloadDocFileTask(List<String> docList) async {
+    // 下载文档任务
+    // 下载文件任务
+    // 同步
+  }
+
   Future<void> downloadDocFile(String docId) async {
+    if (serviceManager.editService.hasOpenDocEditor(docId)) {
+      return;
+    }
     return _downloadLock.synchronized(() async {
       var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;
       if (noteServerUrl == null) {

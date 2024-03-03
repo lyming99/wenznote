@@ -74,8 +74,14 @@ class WinNoteEditTabController extends WinEditTabController {
   @override
   void onInitState(BuildContext context) {
     super.onInitState(context);
+    homeController.serviceManager.editService.openDocEditor(doc.uuid ?? "");
     title.value = getDocTitle();
     readDoc();
+  }
+
+  @override
+  void onDispose() {
+    homeController.serviceManager.editService.closeDocEditor(doc.uuid ?? "");
   }
 
   Future<void> readDoc() async {

@@ -11,11 +11,11 @@ import 'package:uuid/uuid.dart';
 
 enum ConflictMode { keepNew, keepAll }
 
-class DocumentManager {
+class ImportService {
   ServiceManager serviceManager;
 
 
-  DocumentManager(this.serviceManager);
+  ImportService(this.serviceManager);
 
   Future<void> importWdoc({
     required String file,

@@ -9,7 +9,6 @@ import 'package:wenznote/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
 
 class WinDocListService {
-  @override
   ServiceManager serviceManager;
 
   WinDocListService(this.serviceManager);
