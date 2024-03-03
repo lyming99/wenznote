@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -219,11 +218,7 @@ class MobileTodayController extends ServiceManagerController {
       createTime: DateTime.now().millisecondsSinceEpoch,
       updateTime: DateTime.now().millisecondsSinceEpoch,
     );
-    await serviceManager.todayService.createDoc(doc);
-    var docContent = serviceManager.editService.createDoc();
-    serviceManager.p2pService
-        .sendDocEditMessage(doc.uuid!, encodeStateAsUpdateV2(docContent, null));
-    await serviceManager.editService.writeDoc(doc.uuid, docContent);
+    await serviceManager.docService.createDoc(doc, null);
     await GoRouter.of(context).push("/mobile/doc/edit", extra: {"doc": doc});
     fetchDoc(refreshList: true);
   }

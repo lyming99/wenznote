@@ -10,6 +10,7 @@ import 'package:isar/isar.dart';
 import 'package:synchronized/extension.dart';
 import 'package:wenznote/editor/crdt/YsText.dart';
 import 'package:wenznote/editor/crdt/doc_utils.dart';
+import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:wenznote/model/note/po/doc_state_po.dart';
 import 'package:wenznote/service/service_manager.dart';
 
@@ -25,9 +26,9 @@ class DocEditService {
 
   final _fileCache = <String, Uint8List>{};
   final _docCache = <String, Doc>{};
-  final _updateCache = <String, Uint8List>{};
   final _updateLock = Lock();
   final _openedDocList = <String>{};
+  final _docUserEditMap = <String, bool>{};
 
   void openDocEditor(String id) {
     _openedDocList.add(id);
@@ -41,7 +42,19 @@ class DocEditService {
     return _openedDocList.contains(id);
   }
 
-  Future<Uint8List?> readDocFile(String? docId) async {
+  bool isNotEditUpdate(String docId) {
+    return _docUserEditMap[docId] ?? false;
+  }
+
+  void setNotEditUpdate(String docId, bool? state) {
+    if (state == null) {
+      _docUserEditMap.remove(docId);
+      return;
+    }
+    _docUserEditMap[docId] = state;
+  }
+
+  Future<Uint8List?> readDocBytes(String? docId) async {
     if (docId == null || docId.isEmpty) {
       return null;
     }
@@ -59,7 +72,7 @@ class DocEditService {
     return null;
   }
 
-  Future<void> writeDocFile(String? docId, Uint8List data) async {
+  Future<void> writeDocBytes(String? docId, Uint8List data) async {
     if (docId == null || docId.isEmpty) {
       return;
     }
@@ -78,8 +91,10 @@ class DocEditService {
       return doc;
     }
     // 如何将读取耗时控制在一定范围内？
-    var bytes = await readDocFile(docId);
+    var bytes = await readDocBytes(docId);
     if (bytes == null) {
+      // 读取失败，应该触发1秒后从服务器下载文档数据
+      serviceManager.docSnapshotService.downloadDocFile(docId);
       return null;
     }
     try {
@@ -100,15 +115,16 @@ class DocEditService {
     String? docId,
     Doc doc, {
     bool needUpload = true,
+    bool uploadNow = false,
   }) async {
     if (docId == null) {
       return;
     }
     useV2Encoding();
-    _updateLock.synchronized(() async {
+    await _updateLock.synchronized(() async {
       var bytes = encodeStateAsUpdate(doc, null);
       _docCache[docId] = doc;
-      await writeDocFile(docId, bytes);
+      await writeDocBytes(docId, bytes);
       // 更新doc state
       var isar = serviceManager.isarService.documentIsar;
       var clientId = serviceManager.userService.clientId;
@@ -124,53 +140,52 @@ class DocEditService {
       });
       // 增加上传快照任务
       if (needUpload) {
-        await serviceManager.uploadTaskService.uploadDoc(docId);
+        if (uploadNow) {
+          await serviceManager.uploadTaskService.uploadDoc(docId, 0);
+        } else {
+          await serviceManager.uploadTaskService.uploadDoc(docId);
+        }
       }
     });
   }
 
-  Future<bool> updateDoc(
+  /// 收到数据，或者下载数据时，会促发这个方法
+  /// 需要通知界面刷新具体的数据
+  Future<bool> updateDocContent(
     String docId,
-    Uint8List delta, {
-    bool needUpload = true,
-    bool checkUpload = false,
-  }) async {
+    Uint8List delta,
+  ) async {
+    if (delta.isEmpty) {
+      return false;
+    }
+    // 提出问题，这个方法能否在 on update 里面直接调用？
     return _updateLock.synchronized(() async {
       try {
-        _updateCache[docId] = delta;
+        // 1.更新到编辑器
         var doc = _docCache[docId];
         if (doc != null) {
+          // 将此次更新设置位不需要上传变化，也不需要写到文件
+          setNotEditUpdate(docId, true);
           try {
             applyUpdateV2(doc, delta, null);
           } catch (e) {
             printLog("更新doc失败, applyUpdateV2 error: $e");
+          } finally {
+            setNotEditUpdate(docId, null);
           }
         }
-        var docBytes = await readDocFile(docId);
-        var newBytes = mergeUpdatesV2([delta, if (docBytes != null) docBytes]);
-        await writeDocFile(docId, newBytes);
-        bool uploadNow = false;
-        if (checkUpload && docBytes != null) {
-          var pullState = decodeSnapshotV2(delta);
-          var localState = decodeSnapshotV2(docBytes);
-          var localId = localState.sv[serviceManager.userService.clientId];
-          var serverId = pullState.sv[serviceManager.userService.clientId];
-          if (localId != serverId) {
-            //数据不同，需要上传，并且需要通知同步
-            needUpload = true;
-            uploadNow = true;
-          }
+        // 2.写到文件
+        var newBytes = delta;
+        var docBytes = await readDocBytes(docId);
+        if (docBytes != null && docBytes.isNotEmpty) {
+          var mergeList = [delta, docBytes];
+          newBytes = mergeUpdatesV2(mergeList);
         }
-        if (needUpload) {
-          if (uploadNow) {
-            await serviceManager.uploadTaskService.uploadDoc(docId, 1);
-          } else {
-            await serviceManager.uploadTaskService.uploadDoc(docId);
-          }
-        }
-        return !_equalsSnapShot(docBytes ?? Uint8List(0), newBytes);
+        await writeDocBytes(docId, newBytes);
+        // 3.上传到服务器(20秒后)
+        await serviceManager.uploadTaskService.uploadDoc(docId);
+        return docBytes == null || !_equalsBytes(docBytes, newBytes);
       } catch (e) {
-        // todo 并doc失败, error: RangeError (index): Index out of range: no indices are valid: 0
         printLog("合并doc失败, error: $e");
         return false;
       }
@@ -194,23 +209,11 @@ class DocEditService {
     return jsonEncode(doc.toJSON());
   }
 
-  bool isInUpdateCache(String docId, Uint8List delta) {
-    var cache = _updateCache[docId];
-    if (cache == null) {
-      return false;
-    }
-    if (cache.length != delta.length) {
-      return false;
-    }
-    for (var i = 0; i < cache.length; i++) {
-      if (cache[i] != delta[i]) {
-        return false;
-      }
-    }
-    return true;
+  Future<Doc> readJsonDoc(String? content) async {
+    return jsonToYDoc(serviceManager.userService.clientId, content);
   }
 
-  bool _equalsSnapShot(Uint8List a, Uint8List b) {
+  bool _equalsBytes(Uint8List a, Uint8List b) {
     if (a.length != b.length) {
       return false;
     }
@@ -222,18 +225,19 @@ class DocEditService {
     return true;
   }
 
-  Future<void> saveDocStringFile(String? uuid, String? content) async {
-    if (uuid == null) {
-      return;
-    }
-    var doc = await jsonToYDoc(serviceManager.userService.clientId, content);
-    await writeDoc(uuid, doc);
+  bool _equalsSnapshot(Uint8List bytes1, Uint8List bytes2) {
+    Doc doc1 = Doc();
+    applyUpdateV2(doc1, bytes1, null);
+    Doc doc2 = Doc();
+    applyUpdateV2(doc2, bytes2, null);
+    return equalSnapshots(snapshot(doc1), snapshot(doc2));
   }
 
-  Doc createDoc() {
+  Doc createYDoc(DocPO info) {
     var doc = Doc();
     doc.clientID = serviceManager.userService.clientId;
     doc.getArray("blocks").insert(0, [createEmptyTextYMap()]);
+    writeDoc(info.uuid, doc, uploadNow: true);
     return doc;
   }
 

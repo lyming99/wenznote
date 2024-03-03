@@ -113,11 +113,7 @@ class WinTodayController extends ServiceManagerController {
       createTime: DateTime.now().millisecondsSinceEpoch,
       updateTime: DateTime.now().millisecondsSinceEpoch,
     );
-    await serviceManager.todayService.createDoc(doc);
-    var docContent = serviceManager.editService.createDoc();
-    serviceManager.p2pService
-        .sendDocEditMessage(doc.uuid!, encodeStateAsUpdateV2(docContent, null));
-    await serviceManager.editService.writeDoc(doc.uuid, docContent);
+    await serviceManager.docService.createDoc(doc,null);
     homeController.openDoc(doc);
     startSearchTask();
   }

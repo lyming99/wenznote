@@ -66,11 +66,6 @@ class WinTodayService with IsarServiceMixin {
     return result;
   }
 
-  /// 创建文档: 便签
-  Future<void> createDoc(DocPO doc) async {
-    await serviceManager.docService.createDoc(doc);
-  }
-
   Future<WenElement?> searchElement(
       YMap<dynamic> map, String searchContent) async {
     var element = createWenElementFromYMap(map);

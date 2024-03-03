@@ -42,14 +42,13 @@ class DocSnapshotService {
       return;
     }
     var dataId = pkt.dataIdList[0];
-    var updated = await serviceManager.editService
-        .updateDoc(dataId, Uint8List.fromList(pkt.content), needUpload: false);
+    var updated = await serviceManager.editService.updateDocContent(
+      dataId,
+      Uint8List.fromList(pkt.content),
+    );
+    // 没有更新成功，数据错位导致的，发送请求完整数据
     if (updated == false) {
-      var snap = await serviceManager.editService.queryDocSnap(dataId);
-      if (snap == null || snap.isEmpty) {
-        return;
-      }
-      serviceManager.p2pService.sendQueryDocMessage(dataId, snap);
+      printLog("收到编辑更新消息，但内容没有得到更新,需要修复最新数据.");
     }
   }
 
@@ -111,8 +110,10 @@ class DocSnapshotService {
     await isar.writeTxn(() async {
       await isar.docStatePOs.put(state);
     });
-    serviceManager.editService
-        .updateDoc(dataId, Uint8List.fromList(pkt.content), needUpload: false);
+    serviceManager.editService.updateDocContent(
+      dataId,
+      Uint8List.fromList(pkt.content),
+    );
   }
 
   /// 查询文档状态数据
@@ -157,6 +158,16 @@ class DocSnapshotService {
       // 所有创建8秒查询锁：一个文档的查询间隔调大，避免无限查询，导致查询量剧增，造成网络阻塞
       queryDeltaTimeRecord[docId] =
           DateTime.now().millisecondsSinceEpoch + 8000;
+      var snap = await serviceManager.editService.queryDocSnap(docId);
+      if (snap == null || snap.isEmpty) {
+        continue;
+      }
+      serviceManager.p2pService.sendQueryDocMessage(docId, snap);
+    }
+  }
+
+  Future<void> verifyDoc(List<String> docList) async {
+    for (var docId in docList) {
       var snap = await serviceManager.editService.queryDocSnap(docId);
       if (snap == null || snap.isEmpty) {
         continue;
@@ -258,11 +269,9 @@ class DocSnapshotService {
         // 写入文件,并且通知upload
         try {
           // 更新文档，并且检测文档是否需要更新
-          await serviceManager.editService.updateDoc(
+          await serviceManager.editService.updateDocContent(
             docId,
             fileBytes,
-            needUpload: needUpload,
-            checkUpload: true,
           );
         } catch (e) {
           // 可能存在yjs合并失败的bug，需要处理yjs类型转换问题

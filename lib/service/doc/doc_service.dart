@@ -1,11 +1,12 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:isar/isar.dart';
+import 'package:uuid/uuid.dart';
 import 'package:wenznote/model/note/enum/note_type.dart';
 import 'package:wenznote/model/note/po/doc_dir_po.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:wenznote/service/isar/isar_service_mixin.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:uuid/uuid.dart';
 
 class DocService with IsarServiceMixin, ChangeNotifier {
   @override
@@ -13,14 +14,17 @@ class DocService with IsarServiceMixin, ChangeNotifier {
 
   DocService(this.serviceManager);
 
-  Future<void> createDoc(DocPO doc) async {
-    doc.uuid ??= const Uuid().v1();
-    doc.createTime = doc.updateTime = DateTime.now().millisecondsSinceEpoch;
+  Future<void> createDoc(DocPO info, Doc? content) async {
+    info.uuid ??= const Uuid().v1();
+    info.createTime = info.updateTime = DateTime.now().millisecondsSinceEpoch;
     await upsertDbDelta(
-        dataId: doc.uuid!, dataType: "note", properties: doc.toMap());
+        dataId: info.uuid!, dataType: "note", properties: info.toMap());
     await documentIsar.writeTxn(() async {
-      await documentIsar.docPOs.put(doc);
+      await documentIsar.docPOs.put(info);
     });
+    var yDoc = serviceManager.editService.createYDoc(info);
+    serviceManager.p2pService
+        .sendDocEditMessage(info.uuid!, encodeStateAsUpdateV2(yDoc, null));
   }
 
   Future<void> deleteDoc(DocPO doc) async {

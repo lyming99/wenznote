@@ -4,13 +4,14 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:fixnum/fixnum.dart';
+import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
+import 'package:web_socket_channel/io.dart';
 import 'package:wenznote/commons/util/serial_util.dart';
 import 'package:wenznote/model/note/po/doc_state_po.dart';
 import 'package:wenznote/service/service_manager.dart';
 import 'package:wenznote/service/sync/p2p_packet.pb.dart';
-import 'package:web_socket_channel/io.dart';
 
 class MessageType {
   static const int heart = -1;
@@ -25,6 +26,9 @@ class MessageType {
   static const int downloadDoc = 5;
   static const int queryDocState = 6;
   static const int docState = 7;
+
+  /// 校验文档，通知立即同步文档
+  static const int verifyDoc = 8;
 }
 
 class UpdateInfo {
@@ -33,9 +37,13 @@ class UpdateInfo {
 
 class P2pService {
   ServiceManager serviceManager;
+
+  // 检验文档完整性延迟，单位：毫秒
+  int verifyDocDuration = 5000;
   IOWebSocketChannel? socket;
   bool isUserClosed = false;
   Timer? heartTimer;
+  SendDeltaQueue? verifyDocMessageQueue;
 
   P2pService(this.serviceManager);
 
@@ -61,14 +69,15 @@ class P2pService {
       return;
     }
     var token = serviceManager.userService.token;
-    if(token==null){
+    if (token == null) {
       return;
     }
+    verifyDocMessageQueue = SendDeltaQueue(
+        resendDuration: verifyDocDuration, sender: sendVerifyDocMessage);
     var clientId = serviceManager.userService.clientId;
     var uri = Uri.parse(
         "ws://${noteServer.host}:${noteServer.port}/client/websocket/$clientId");
-    socket = IOWebSocketChannel.connect(uri,
-        headers: {'token': token});
+    socket = IOWebSocketChannel.connect(uri, headers: {'token': token});
     socket!.stream.listen(
       (data) {
         _onReceive(data);
@@ -110,6 +119,9 @@ class P2pService {
       case MessageType.docEditEvent:
         // 编辑文档消息
         serviceManager.docSnapshotService.receiveDocEditEvent(pkt);
+        break;
+      case MessageType.verifyDoc:
+        serviceManager.docSnapshotService.verifyDoc(pkt.dataIdList);
         break;
       case MessageType.queryDocDelta:
         // 查询文档增量消息
@@ -189,6 +201,14 @@ class P2pService {
       content: delta,
       dataIdList: [dataId],
     );
+    verifyDocMessageQueue?.addSendTask(dataId);
+  }
+
+  void sendVerifyDocMessage(String dataId) {
+    sendPkt(
+      messageType: MessageType.verifyDoc,
+      dataIdList: [dataId],
+    );
   }
 
   void sendQueryDocMessage(String dataId, Uint8List snap) {
@@ -246,5 +266,38 @@ class P2pService {
         messageType: MessageType.docState,
         toClientIds: [clientId],
         content: utf8.encode(states));
+  }
+}
+
+class SendDeltaQueue {
+  final _sendMap = <String, int>{};
+  int resendDuration;
+  Function(String docId) sender;
+
+  SendDeltaQueue({
+    required this.resendDuration,
+    required this.sender,
+  });
+
+  void addSendTask(String docId) {
+    var now = DateTime.now().millisecondsSinceEpoch;
+    // 达到下个发送周期才会发送
+    var sendTime = resendDuration + now;
+    var maxTime = max(_sendMap.get(docId) ?? 0, sendTime);
+    _sendMap[docId] = maxTime;
+    resendDuration.milliseconds.delay(resend);
+  }
+
+  /// 连续输入时，在一定时间后补发，避免数据丢失的情况
+  void resend() {
+    var currentTime = DateTime.now().millisecondsSinceEpoch;
+    for (var task in _sendMap.entries) {
+      var sendTime = task.value;
+      var docId = task.key;
+      if (sendTime <= currentTime) {
+        sender.call(docId);
+      }
+    }
+    _sendMap.removeWhere((key, value) => value <= currentTime);
   }
 }

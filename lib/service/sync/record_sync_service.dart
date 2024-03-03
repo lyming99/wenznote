@@ -295,10 +295,8 @@ class RecordSyncService with IsarServiceMixin {
               dataIdList: dataIdList,
               dataType: dataType,
             );
-          } catch (e) {
-            if (e is FormatException) {
-              print(e.source);
-            }
+          } catch (e, stack) {
+            print(stack);
             printLog("同步时下载$dataType类型数据失败，$e");
           }
         }

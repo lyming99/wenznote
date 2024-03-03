@@ -1,12 +1,8 @@
-import 'package:flutter_crdt/flutter_crdt.dart';
-import 'package:get/get.dart';
-import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
+import 'package:uuid/uuid.dart';
 import 'package:wenznote/app/windows/model/doc/win_doc_list_item_vo.dart';
-import 'package:wenznote/editor/crdt/YsText.dart';
 import 'package:wenznote/model/note/po/doc_dir_po.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:uuid/uuid.dart';
 
 class WinDocListService {
   ServiceManager serviceManager;
@@ -46,10 +42,7 @@ class WinDocListService {
       name: text,
       type: "doc",
     );
-    await serviceManager.docService.createDoc(item);
-    var docContent = Doc();
-    docContent.getArray("blocks").insert(0, [createEmptyTextYMap()]);
-    await serviceManager.editService.writeDoc(item.uuid, docContent);
+    await serviceManager.docService.createDoc(item, null);
     return item;
   }
 
@@ -83,7 +76,7 @@ class WinDocListService {
         item.pid = toDir.uuid;
         item.updateTime = DateTime.now().millisecondsSinceEpoch;
         await serviceManager.docService.updateDocDir(item);
-      } else if(value is DocPO){
+      } else if (value is DocPO) {
         var doc = value;
         doc.pid = toDir.uuid;
         doc.updateTime = DateTime.now().millisecondsSinceEpoch;

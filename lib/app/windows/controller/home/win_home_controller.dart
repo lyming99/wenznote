@@ -16,7 +16,6 @@ import 'package:wenznote/app/windows/widgets/win_tab_view.dart';
 import 'package:wenznote/commons/mvc/controller.dart';
 import 'package:wenznote/commons/util/markdown/markdown.dart';
 import 'package:wenznote/editor/crdt/doc_utils.dart';
-import 'package:wenznote/editor/widget/drop_menu.dart';
 import 'package:wenznote/model/note/enum/note_type.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:wenznote/service/file/file_manager.dart';
@@ -177,8 +176,7 @@ class WinHomeController extends ServiceManagerController {
       type: NoteType.note.name,
     );
     var yDoc = await elementsToYDoc(elements);
-    await serviceManager.editService.writeDoc(doc.uuid, yDoc);
-    await serviceManager.docService.createDoc(doc);
+    await serviceManager.docService.createDoc(doc, yDoc);
     openDoc(doc);
   }
 

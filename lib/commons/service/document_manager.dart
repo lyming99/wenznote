@@ -1,19 +1,18 @@
 import 'dart:convert';
 
 import 'package:isar/isar.dart';
+import 'package:uuid/uuid.dart';
 import 'package:wenznote/commons/util/markdown/markdown.dart';
 import 'package:wenznote/commons/util/string.dart';
 import 'package:wenznote/commons/util/wdoc/wdoc.dart';
 import 'package:wenznote/model/note/po/doc_dir_po.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:uuid/uuid.dart';
 
 enum ConflictMode { keepNew, keepAll }
 
 class ImportService {
   ServiceManager serviceManager;
-
 
   ImportService(this.serviceManager);
 
@@ -22,7 +21,7 @@ class ImportService {
     String toPath = "",
     ConflictMode conflictMode = ConflictMode.keepAll,
   }) async {
-    var docInfo = await readWdocFile(serviceManager.fileManager,file);
+    var docInfo = await readWdocFile(serviceManager.fileManager, file);
     var infoPo = docInfo.info;
     if (infoPo != null) {
       var dir = await createDocPath(toPath);
@@ -31,20 +30,19 @@ class ImportService {
       if (infoPo.uuid != null) {
         oldItem = await serviceManager.docService.queryDoc(infoPo.uuid!);
       }
+      var yDoc = await serviceManager.editService.readJsonDoc(docInfo.content);
       if (conflictMode == ConflictMode.keepAll) {
         //保留旧的和新的
         infoPo.id = Isar.autoIncrement;
         if (oldItem?.uuid == infoPo.uuid) {
           infoPo.uuid = const Uuid().v1();
         }
-        await serviceManager.docService.createDoc(infoPo);
-        await serviceManager.editService.saveDocStringFile(infoPo.uuid, docInfo.content);
+        await serviceManager.docService.createDoc(infoPo, yDoc);
       } else {
         //保留新的 oldTime<=newTime
         if (compareDocTime(oldItem, infoPo) <= 0) {
           await serviceManager.docService.deleteDocReally(infoPo.uuid!);
-          await serviceManager.docService.createDoc(infoPo);
-          await serviceManager.editService.saveDocStringFile(infoPo.uuid, docInfo.content);
+          await serviceManager.docService.createDoc(infoPo, yDoc);
         }
       }
     }
@@ -64,7 +62,7 @@ class ImportService {
       {required String file,
       required String toPath,
       required ConflictMode conflictMode}) async {
-    var docInfo = await readMarkdownInfo(serviceManager.fileManager,file);
+    var docInfo = await readMarkdownInfo(serviceManager.fileManager, file);
     if (docInfo == null) {
       return;
     }
@@ -86,8 +84,9 @@ class ImportService {
       uuid: uuid,
       createTime: DateTime.now().millisecondsSinceEpoch,
     );
-    await serviceManager.docService.createDoc(doc);
-    await serviceManager.editService.saveDocStringFile(uuid, jsonEncode(elements));
+    var yDoc =
+        await serviceManager.editService.readJsonDoc(jsonEncode(elements));
+    await serviceManager.docService.createDoc(doc, yDoc);
   }
 
   Future<DocDirPO?> createDocPath(String path) async {

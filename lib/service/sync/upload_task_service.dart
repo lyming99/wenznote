@@ -44,9 +44,13 @@ class UploadTaskService {
     await isar.writeTxn(() async {
       await isar.uploadTaskPOs.put(task!);
     });
-    Timer(Duration(seconds: seconds), () {
-      doUpload();
-    });
+    if (seconds <= 0) {
+      await doUpload();
+    } else {
+      Timer(Duration(seconds: seconds), () {
+        doUpload();
+      });
+    }
   }
 
   Future<void> uploadFile(String fileId, [int seconds = 1]) async {
@@ -151,7 +155,7 @@ class UploadTaskService {
       // 1.读取文件
       // 2.读取state
       // 3.上传文件
-      var data = await serviceManager.editService.readDocFile(docId);
+      var data = await serviceManager.editService.readDocBytes(docId);
       if (data == null) {
         return false;
       }

@@ -25,12 +25,11 @@ import 'package:wenznote/model/note/enum/note_order_type.dart';
 import 'package:wenznote/model/note/enum/note_type.dart';
 import 'package:wenznote/model/note/po/doc_dir_po.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
-import 'package:wenznote/service/task/task.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WinNoteEditTabController extends WinEditTabController {
-  DocPO doc;
   bool isCreateMode;
+  DocPO doc;
   var title = "".obs;
   String firstCreatTitle = "";
   Function(Doc content)? onUpdate;
@@ -95,17 +94,17 @@ class WinNoteEditTabController extends WinEditTabController {
         yDoc: doc,
       );
       tree!.init();
-      doc.on("update", (args) async {
-        onContentChanged(doc);
-        var data = args[0];
-        if (homeController.serviceManager.editService
-            .isInUpdateCache(this.doc.uuid ?? "", data)) {
+      doc.on("update", (args) {
+        var editService = homeController.serviceManager.editService;
+        // 文档更新后，如果不是本地编辑导致的更新，则无需发送
+        if (editService.isNotEditUpdate(this.doc.uuid ?? "")) {
           return;
         }
-        await homeController.serviceManager.editService
-            .writeDoc(this.doc.uuid, doc);
+        onContentChanged(doc);
+        var deltaData = args[0];
+        editService.writeDoc(this.doc.uuid, doc);
         homeController.serviceManager.p2pService
-            .sendDocEditMessage(this.doc.uuid ?? "", data);
+            .sendDocEditMessage(this.doc.uuid ?? "", deltaData);
       });
       editController.waitLayout(() {
         editController.requestFocus();
@@ -114,31 +113,6 @@ class WinNoteEditTabController extends WinEditTabController {
   }
 
   void onContentChanged(Doc content) async {
-    if (isCreateMode) {
-      await TaskService.instance.executeTask(
-          taskGroup: "createModeQueue",
-          task: () async {
-            var docName = await homeController.serviceManager.docService
-                .getDocName(doc.id);
-            if (firstCreatTitle != docName) {
-              isCreateMode = false;
-            } else {
-              var blocks = editController.ysTree?.blocks;
-              if (blocks != null && blocks.length == 1) {
-                var text = blocks[0].yMap.get("text");
-                if (text is YText) {
-                  var name = text.toString();
-                  if (name.length > 20) {
-                    name = name.substring(0, 20);
-                  }
-                  doc.name = name;
-                  firstCreatTitle = name;
-                  title.value = getDocTitle();
-                }
-              }
-            }
-          });
-    }
     onUpdate?.call(content);
   }
 
@@ -260,10 +234,15 @@ class WinNoteEditTabController extends WinEditTabController {
     title.value = text;
   }
 
-  void sync(BuildContext ctx) {
+  void syncNow(BuildContext ctx) async {
     printLog("手动同步笔记：${doc.uuid},${doc.name}");
-    homeController.serviceManager.docSnapshotService
-        .downloadDocFile(doc.uuid ?? "");
+    var serviceManager = homeController.serviceManager;
+    serviceManager.docSnapshotService.downloadDocFile(doc.uuid ?? "");
+    var snap = await serviceManager.editService.queryDocSnap(doc.uuid ?? "");
+    if (snap == null || snap.isEmpty) {
+      return;
+    }
+    serviceManager.p2pService.sendQueryDocMessage(doc.uuid ?? "", snap);
   }
 }
 
@@ -472,7 +451,7 @@ class WinNoteEditTab extends MvcView<WinNoteEditTabController> with Focusable {
         ),
         onPress: (ctx) {
           hideDropMenu(ctx);
-          controller.sync(ctx);
+          controller.syncNow(ctx);
         },
       ),
       DropMenu(

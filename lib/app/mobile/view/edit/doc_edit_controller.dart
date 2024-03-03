@@ -122,13 +122,12 @@ class MobileDocEditController extends ServiceManagerController {
       editController.waitLayout(() {
         editController.requestFocus();
       });
-      doc.on("update", (args) async {
+      doc.on("update", (args) {
         var data = args[0];
-        if (serviceManager.editService
-            .isInUpdateCache(this.doc?.uuid ?? "", data)) {
+        if (serviceManager.editService.isNotEditUpdate(this.doc?.uuid ?? "")) {
           return;
         }
-        await serviceManager.editService.writeDoc(this.doc?.uuid, doc);
+        serviceManager.editService.writeDoc(this.doc?.uuid, doc);
         serviceManager.p2pService
             .sendDocEditMessage(this.doc?.uuid ?? "", data);
       });
