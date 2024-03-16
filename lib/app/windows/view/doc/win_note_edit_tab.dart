@@ -2,7 +2,6 @@ import 'package:date_format/date_format.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:wenznote/app/windows/outline/outline_controller.dart';
@@ -26,13 +25,14 @@ import 'package:wenznote/model/note/enum/note_type.dart';
 import 'package:wenznote/model/note/po/doc_dir_po.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:ydart/ydart.dart';
 
 class WinNoteEditTabController extends WinEditTabController {
   bool isCreateMode;
   DocPO doc;
   var title = "".obs;
   String firstCreatTitle = "";
-  Function(Doc content)? onUpdate;
+  Function(YDoc content)? onUpdate;
   late YsEditController editController;
 
   YsTree? tree;
@@ -94,25 +94,26 @@ class WinNoteEditTabController extends WinEditTabController {
         yDoc: doc,
       );
       tree!.init();
-      doc.on("update", (args) {
+      doc.updateV2.add((data, origin, transaction){
         var editService = homeController.serviceManager.editService;
         // 文档更新后，如果不是本地编辑导致的更新，则无需发送
         if (editService.isNotEditUpdate(this.doc.uuid ?? "")) {
           return;
         }
         onContentChanged(doc);
-        var deltaData = args[0];
+        var deltaData = data;
         editService.writeDoc(this.doc.uuid, doc);
         homeController.serviceManager.p2pService
             .sendDocEditMessage(this.doc.uuid ?? "", deltaData);
       });
+
       editController.waitLayout(() {
         editController.requestFocus();
       });
     }
   }
 
-  void onContentChanged(Doc content) async {
+  void onContentChanged(YDoc content) async {
     onUpdate?.call(content);
   }
 
@@ -181,7 +182,7 @@ class WinNoteEditTabController extends WinEditTabController {
     var content = editController.ysTree?.yDoc;
     if (content != null) {
       var blocks = content.getArray("blocks");
-      for (var block in blocks) {
+      for (var block in blocks.enumerateList()) {
         if (block is! YMap) {
           continue;
         }
@@ -247,7 +248,7 @@ class WinNoteEditTabController extends WinEditTabController {
 }
 
 class WinNoteEditTab extends MvcView<WinNoteEditTabController> with Focusable {
-  Doc? docContent;
+  YDoc? docContent;
   var updateTime = 0.obs;
 
   WinNoteEditTab({super.key, required super.controller});

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:wenznote/commons/util/platform_util.dart';
 import 'package:wenznote/editor/block/block.dart';
 import 'package:wenznote/editor/block/code/code.dart';
@@ -17,6 +16,7 @@ import 'package:wenznote/editor/crdt/YsSelection.dart';
 import 'package:wenznote/editor/cursor/cursor.dart';
 import 'package:wenznote/editor/edit_controller.dart';
 import 'package:wenznote/editor/edit_float_widget.dart';
+import 'package:ydart/ydart.dart';
 
 import 'YsTree.dart';
 
@@ -590,9 +590,10 @@ class YsEditController extends EditController {
     ysTree?.setTextColor(defaultColors[index]?.value);
     record();
   }
+
   @override
   void updateCodeLanguage(CodeBlock codeBlock, String language) {
-    ysTree?.updateCodeLanguage(codeBlock.blockIndex,language);
+    ysTree?.updateCodeLanguage(codeBlock.blockIndex, language);
     record();
   }
 

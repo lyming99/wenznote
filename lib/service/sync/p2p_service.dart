@@ -4,7 +4,6 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:fixnum/fixnum.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:web_socket_channel/io.dart';
@@ -283,7 +282,7 @@ class SendDeltaQueue {
     var now = DateTime.now().millisecondsSinceEpoch;
     // 达到下个发送周期才会发送
     var sendTime = resendDuration + now;
-    var maxTime = max(_sendMap.get(docId) ?? 0, sendTime);
+    var maxTime = max(_sendMap[docId] ?? 0, sendTime);
     _sendMap[docId] = maxTime;
     resendDuration.milliseconds.delay(resend);
   }

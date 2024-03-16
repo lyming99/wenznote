@@ -1,5 +1,4 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:isar/isar.dart';
 import 'package:uuid/uuid.dart';
 import 'package:wenznote/model/note/enum/note_type.dart';
@@ -7,6 +6,7 @@ import 'package:wenznote/model/note/po/doc_dir_po.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:wenznote/service/isar/isar_service_mixin.dart';
 import 'package:wenznote/service/service_manager.dart';
+import 'package:ydart/utils/y_doc.dart';
 
 class DocService with IsarServiceMixin, ChangeNotifier {
   @override
@@ -14,7 +14,7 @@ class DocService with IsarServiceMixin, ChangeNotifier {
 
   DocService(this.serviceManager);
 
-  Future<void> createDoc(DocPO info, Doc? content) async {
+  Future<void> createDoc(DocPO info, YDoc? content) async {
     info.uuid ??= const Uuid().v1();
     info.createTime = info.updateTime = DateTime.now().millisecondsSinceEpoch;
     await upsertDbDelta(
@@ -24,7 +24,7 @@ class DocService with IsarServiceMixin, ChangeNotifier {
     });
     var yDoc = serviceManager.editService.createYDoc(info);
     serviceManager.p2pService
-        .sendDocEditMessage(info.uuid!, encodeStateAsUpdateV2(yDoc, null));
+        .sendDocEditMessage(info.uuid!, yDoc.encodeStateAsUpdateV2(null));
   }
 
   Future<void> deleteDoc(DocPO doc) async {

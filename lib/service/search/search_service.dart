@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:isar/isar.dart';
 import 'package:wenznote/editor/block/element/element.dart';
 import 'package:wenznote/editor/crdt/doc_utils.dart';
@@ -10,6 +9,7 @@ import 'package:wenznote/model/task/task.dart';
 import 'package:wenznote/service/isar/isar_service_mixin.dart';
 import 'package:wenznote/service/search/search_result_vo.dart';
 import 'package:wenznote/service/service_manager.dart';
+import 'package:ydart/ydart.dart';
 
 class SearchService with IsarServiceMixin {
   @override
@@ -133,7 +133,7 @@ class SearchService with IsarServiceMixin {
   }
 
   Future<WenElement?> searchElement(
-      YMap<dynamic> map, String searchContent) async {
+      YMap map, String searchContent) async {
     var element = createWenElementFromYMap(map);
     if (searchContent.isEmpty) {
       return element;

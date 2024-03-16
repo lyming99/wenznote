@@ -1,6 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:wenznote/editor/block/block.dart';
 import 'package:wenznote/editor/block/code/code.dart';
 import 'package:wenznote/editor/block/line/line_element.dart';
@@ -12,6 +11,7 @@ import 'package:wenznote/editor/crdt/YsCode.dart';
 import 'package:wenznote/editor/crdt/YsImage.dart';
 import 'package:wenznote/editor/crdt/YsLine.dart';
 import 'package:wenznote/editor/cursor/cursor.dart';
+import 'package:ydart/ydart.dart';
 
 import 'YsBlock.dart';
 import 'YsCursor.dart';
@@ -30,7 +30,7 @@ class YsTree {
 
   var itemMap = <YMap, YsItem>{};
   var blocks = <YsBlock>[];
-  Doc yDoc;
+  YDoc yDoc;
   YArray? yArray;
   YsEditController editController;
   BuildContext context;
@@ -43,15 +43,15 @@ class YsTree {
 
   void init() {
     yArray = yDoc.getArray("blocks");
-    if (yArray!.isEmpty) {
+    if (yArray!.length == 0) {
       yArray!.insert(0, [createEmptyTextYMap()]);
     }
-    undoManager = UndoManager([yArray!]);
+    undoManager = UndoManager.create(yArray!);
     editController.initTree(this);
     initOk = true;
     buildBlocks();
     // blocks增删改差
-    yArray!.observe((event, transaction) {
+    yArray!.eventHandler = ((event, transaction) {
       // 在这里更新blocks
       buildBlocks();
     });
@@ -60,7 +60,7 @@ class YsTree {
         editController.requestFocus();
       });
     }
-    yArray!.observeDeep((eventList, transaction) {
+    yArray!.deepEventHandler = ((obj, args) {
       int blockIndex = 0;
       var current = blocks.first;
       for (var i = 1; i < blocks.length; i++) {
@@ -71,10 +71,10 @@ class YsTree {
       }
       var textOffset = 0;
       void getTextOffset() {
-        for (var event in eventList) {
-          for (var delta in event.delta) {
-            var retain = delta["retain"];
-            var insert = delta["insert"];
+        for (var event in args.events) {
+          for (var delta in event.changes.delta!) {
+            var retain = delta.retain;
+            var insert = delta.insert;
             if (retain is int) {
               textOffset = retain;
             }
@@ -93,7 +93,7 @@ class YsTree {
       } else if (current.blockType == 'table') {
         int rowIndex = 0;
         int colIndex = 0;
-        for (var event in eventList) {
+        for (var event in args.events) {
           var target = event.target;
           // ymap变化
           if (current.yMap == target) {
@@ -112,14 +112,14 @@ class YsTree {
               rowIndex = rowPos;
             }
             //单元格变化
-            for (var row in rows) {
+            for (var row in rows.enumerateList()) {
               if (row == target) {
                 print('table row changed.');
                 rowIndex = rowPos;
               }
               int cellPos = 0;
               if (row is YArray) {
-                for (var cell in row) {
+                for (var cell in row.enumerateList()) {
                   if (cell == target) {
                     print('table cell property changed.');
                     colIndex = cellPos;
@@ -156,14 +156,14 @@ class YsTree {
   void buildBlocks() {
     var buildBlocks = <YsBlock>[];
     var buildItemMap = <YMap, YsItem>{};
-    for (YMap item in yArray!) {
+    for (var item in yArray!.enumerateList()) {
       YsBlock ysBlock;
       if (itemMap.containsKey(item)) {
-        ysBlock = itemMap.get(item) as YsBlock;
+        ysBlock = itemMap[item as YMap] as YsBlock;
       } else {
         ysBlock = YsBlock(
           tree: this,
-          yMap: item,
+          yMap: item as YMap,
         );
         ysBlock.init();
         itemMap[item] = ysBlock;
@@ -172,7 +172,7 @@ class YsTree {
       buildItemMap[item] = ysBlock;
       buildBlocks.add(ysBlock);
     }
-    buildBlocks.removeWhere((element) => element.block==null);
+    buildBlocks.removeWhere((element) => element.block == null);
     blocks = buildBlocks;
     itemMap = buildItemMap;
     editController.setBlocks(buildBlocks.map((e) => e.block!).toList());
@@ -511,13 +511,13 @@ class YsTree {
 
   DeleteFlag deleteBetweenCursorAndEnd(YsCursor cursor) {
     AbsolutePosition? position =
-        createAbsolutePositionFromRelativePosition(cursor.positions[0], yDoc);
+        AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[0], yDoc);
     if (position == null) {
       return DeleteFlag.skip;
     }
     if (cursor.blockType == BlockType.code) {
       var codePs =
-          createAbsolutePositionFromRelativePosition(cursor.positions[1], yDoc);
+          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[1], yDoc);
       if (codePs == null) {
         return DeleteFlag.skip;
       }
@@ -530,7 +530,7 @@ class YsTree {
       return DeleteFlag.ok;
     } else if (cursor.blockType == BlockType.text) {
       var textPos =
-          createAbsolutePositionFromRelativePosition(cursor.positions[1], yDoc);
+          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[1], yDoc);
       if (textPos == null) {
         return DeleteFlag.skip;
       }
@@ -550,11 +550,11 @@ class YsTree {
       var block = yArray!.get(position.index) as YMap;
       //删除
       var rowPs =
-          createAbsolutePositionFromRelativePosition(cursor.positions[1], yDoc);
+          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[1], yDoc);
       var colPs =
-          createAbsolutePositionFromRelativePosition(cursor.positions[2], yDoc);
+          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[2], yDoc);
       var cellPs =
-          createAbsolutePositionFromRelativePosition(cursor.positions[3], yDoc);
+          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[3], yDoc);
       if (rowPs == null || colPs == null || cellPs == null) {
         return DeleteFlag.skip;
       }
@@ -594,13 +594,13 @@ class YsTree {
 
   DeleteFlag deleteBetweenStartAndCursor(YsCursor cursor) {
     AbsolutePosition? position =
-        createAbsolutePositionFromRelativePosition(cursor.positions[0], yDoc);
+        AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[0], yDoc);
     if (position == null) {
       return DeleteFlag.skip;
     }
     if (cursor.blockType == BlockType.code) {
       var codePs =
-          createAbsolutePositionFromRelativePosition(cursor.positions[1], yDoc);
+          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[1], yDoc);
       if (codePs == null) {
         return DeleteFlag.skip;
       }
@@ -613,7 +613,7 @@ class YsTree {
       return DeleteFlag.ok;
     } else if (cursor.blockType == BlockType.text) {
       var textPos =
-          createAbsolutePositionFromRelativePosition(cursor.positions[1], yDoc);
+          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[1], yDoc);
       if (textPos == null) {
         return DeleteFlag.skip;
       }
@@ -633,11 +633,11 @@ class YsTree {
       var block = yArray!.get(position.index) as YMap;
       //删除
       var rowPs =
-          createAbsolutePositionFromRelativePosition(cursor.positions[1], yDoc);
+          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[1], yDoc);
       var colPs =
-          createAbsolutePositionFromRelativePosition(cursor.positions[2], yDoc);
+          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[2], yDoc);
       var cellPs =
-          createAbsolutePositionFromRelativePosition(cursor.positions[3], yDoc);
+          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[3], yDoc);
       if (rowPs == null || colPs == null || cellPs == null) {
         return DeleteFlag.skip;
       }
@@ -979,7 +979,7 @@ class YsTree {
     });
   }
 
-  void toggleCode({String language=""}) {
+  void toggleCode({String language = ""}) {
     var selectBlockIndex = getSelectBlockIndex();
     if (selectBlockIndex.start == -1) {
       return;

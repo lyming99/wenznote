@@ -1,5 +1,4 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wenznote/app/windows/service/doc/win_doc_list_service.dart';

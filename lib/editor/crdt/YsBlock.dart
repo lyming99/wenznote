@@ -1,7 +1,6 @@
 import 'dart:collection';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:wenznote/editor/block/block.dart';
 import 'package:wenznote/editor/block/code/code.dart';
 import 'package:wenznote/editor/block/image/image_block.dart';
@@ -17,7 +16,7 @@ import 'package:wenznote/editor/block/text/title.dart';
 import 'package:wenznote/editor/crdt/YsCode.dart';
 import 'package:wenznote/editor/crdt/YsText.dart';
 import 'package:wenznote/editor/edit_controller.dart';
-
+import 'package:ydart/ydart.dart';
 import 'YsItem.dart';
 import 'doc_utils.dart';
 
@@ -30,7 +29,7 @@ class YsBlock extends YsItem {
   void init() {
     buildBlock();
     //如何将 ymap 转换为 element？
-    yMap.observeDeep((event, trans) {
+    yMap.deepEventHandler = ((event, trans) {
       updateBlock();
       tree.editController.refreshCursorPosition();
       tree.editController.updateWidgetState();
@@ -40,9 +39,9 @@ class YsBlock extends YsItem {
   void buildBlock() {
     updateTime = tree.changeClock++;
     var map = yMap;
-    var type = map.get("type");
+    var type = map.get("type") as String?;
     if (type == "text" || type == "quote") {
-      var textElement = WenTextElement(type: type);
+      var textElement = WenTextElement(type: type!);
       applyYMapToElement(map, textElement);
       block = TextBlock(
         context: tree.context,
@@ -59,10 +58,10 @@ class YsBlock extends YsItem {
       );
     } else if (type == "image") {
       var imageElement = WenImageElement(
-          id: map.get("id"),
-          file: map.get("id"),
-          width: map.get("width"),
-          height: map.get("height"));
+          id: map.get("id") as String,
+          file: map.get("id") as String,
+          width: map.get("width") as int,
+          height: map.get("height") as int);
       block = ImageBlock(
         context: tree.context,
         editController: tree.editController,
@@ -78,7 +77,7 @@ class YsBlock extends YsItem {
       block = CodeBlock(
         element: WenCodeElement(
           code: (map.get("code") as YText).toString(),
-          language: map.get("language"),
+          language: map.get("language") as String,
         ),
         context: context,
         editController: editController,
@@ -95,52 +94,53 @@ class YsBlock extends YsItem {
   }
 
   void applyToTableBlock(YMap map, TableBlock table) {
-    if (map.has("alignments")) {
+    if (map.containsKey("alignments")) {
       var alignments = map.get("alignments") as YMap;
       var old = table.tableElement.alignments;
       old ??= HashMap();
-      for (var en in alignments.entries()) {
+      var values = alignments.typeMapEnumerateValues();
+      for (var en in values.entries) {
         if (en.value == null) {
           old.remove(int.parse(en.key));
         } else {
-          old[int.parse(en.key)] = en.value;
+          old[int.parse(en.key)] = en.value as String;
         }
       }
       table.tableElement.alignments = old;
     }
     var tableRows = <List<WenBlock>>[];
-    if (map.has("rows")) {
+    if (map.containsKey("rows")) {
       var newCache = <AbstractType, dynamic>{};
       var rows = map.get("rows") as YArray;
-      for (var arr in rows) {
+      for (var arr in rows.enumerateList()) {
         var tableRow = <WenBlock>[];
         tableRows.add(tableRow);
         var row = arr as YArray;
-        for (var item in row) {
+        for (var item in row.enumerateList()) {
           var cell = item as YMap;
           WenBlock block;
           if (cache.containsKey(cell)) {
-            block = cache.get(cell);
+            block = cache[cell];
           } else {
-            String type = cell.get("type");
+            String type = cell.get("type") as String;
             if (type == "image") {
               var imageElement = WenImageElement(
-                  id: cell.get("id"),
-                  file: cell.get("id"),
-                  width: cell.get("width"),
-                  height: cell.get("height"));
+                  id: cell.get("id") as String,
+                  file: cell.get("id") as String,
+                  width: cell.get("width") as int,
+                  height: cell.get("height") as int);
               block = ImageTableCell(
                 context: context,
                 element: imageElement,
                 editController: editController,
                 tableBlock: table,
               );
-              cell.observeDeep((eventList, transaction) {
+              cell.deepEventHandler = ((eventList, transaction) {
                 var imageElement = WenImageElement(
-                    id: cell.get("id"),
-                    file: cell.get("id"),
-                    width: cell.get("width"),
-                    height: cell.get("height"));
+                    id: cell.get("id") as String,
+                    file: cell.get("id") as String,
+                    width: cell.get("width") as int,
+                    height: cell.get("height") as int);
                 (block as ImageTableCell).element = imageElement;
                 block.relayoutFlag = true;
               });
@@ -153,7 +153,7 @@ class YsBlock extends YsItem {
                 editController: editController,
                 tableBlock: table,
               );
-              cell.observeDeep((eventList, transaction) {
+              cell.deepEventHandler = ((eventList, transaction) {
                 var textElement = WenTextElement();
                 applyYMapToElement(cell, textElement);
                 (block as TextTableCell).textElement = textElement;
@@ -188,7 +188,7 @@ class YsBlock extends YsItem {
 
   EditController get editController => tree.editController;
 
-  String get blockType => yMap.get("type") ?? "text";
+  String get blockType => (yMap.get("type") as String?) ?? "text";
 
   bool get isText {
     var type = blockType;

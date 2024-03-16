@@ -1,9 +1,6 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:wenznote/test/service_test.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 import 'app/app.dart';
 import 'commons/util/device_utils.dart';
 import 'commons/util/log_util.dart';
@@ -13,17 +10,8 @@ Future<void> loadResources() async {
   await readDeviceInfo();
   printLog("readDeviceInfo end");
   if (isDesktop) {
-    // await flutter_acrylic.Window.initialize();
-    // await flutter_acrylic.Window.hideWindowControls();
     printLog("init windowManager start");
     await windowManager.ensureInitialized();
-    // if (isWin11()) {
-    //   await flutter_acrylic.Window.setEffect(
-    //     effect: flutter_acrylic.WindowEffect.acrylic,
-    //     color: Colors.transparent,
-    //     dark: false,
-    //   );
-    // }
     printLog("waitUntilReadyToShow start");
     await windowManager.waitUntilReadyToShow(
         const WindowOptions(
@@ -48,11 +36,17 @@ Future<void> loadResources() async {
   }
 }
 
+const test = false;
+
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   printLog("loadResources start");
   await loadResources();
   printLog("loadResources end");
+  if (test) {
+    await testService();
+    return;
+  }
   printLog("runApp start");
   runApp(
     AppWidget(

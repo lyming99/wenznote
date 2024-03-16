@@ -1,6 +1,5 @@
 import 'package:date_format/date_format.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:wenznote/editor/block/block.dart';
 import 'package:wenznote/editor/block/block_manager.dart';
 import 'package:wenznote/editor/block/element/element.dart';
@@ -10,10 +9,11 @@ import 'package:wenznote/editor/edit_widget.dart';
 import 'package:wenznote/model/note/enum/note_order_type.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:wenznote/service/service_manager.dart';
+import 'package:ydart/ydart.dart';
 
 class WinTodaySearchResultVO with ChangeNotifier {
   DocPO doc;
-  Doc? docContent;
+  YDoc? docContent;
   String searchText;
   int elementIndex;
   WenElement element;
@@ -28,7 +28,7 @@ class WinTodaySearchResultVO with ChangeNotifier {
     required this.elementIndex,
   });
 
-  Future<void> updateContent(Doc? doc) async {
+  Future<void> updateContent(YDoc? doc) async {
     docContent = doc;
     notifyListeners();
   }
@@ -76,7 +76,7 @@ class WinTodaySearchResultVO with ChangeNotifier {
 
   List<WenElement> getWenElements() {
     var result = <WenElement>[];
-    var blocks = docContent?.get("blocks");
+    var blocks = docContent?.getArray("blocks");
     if (blocks is! YArray) {
       return result;
     }
@@ -96,7 +96,7 @@ class WinTodaySearchResultVO with ChangeNotifier {
 
   List<WenElement> getAllWenElements() {
     var result = <WenElement>[];
-    var blocks = docContent?.get("blocks");
+    var blocks = docContent?.getArray("blocks");
     if (blocks is! YArray) {
       return result;
     }
@@ -152,7 +152,7 @@ class WinTodaySearchResultVO with ChangeNotifier {
     var content = docContent;
     if (content != null) {
       var blocks = content.getArray("blocks");
-      for (var block in blocks) {
+      for (var block in blocks.enumerateList()) {
         if (block is! YMap) {
           continue;
         }

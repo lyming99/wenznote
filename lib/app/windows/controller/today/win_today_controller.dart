@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
 import 'package:wenznote/app/windows/model/today/search_result_vo.dart';
 import 'package:wenznote/app/windows/view/doc/win_note_edit_tab.dart';
-import 'package:wenznote/commons/mvc/controller.dart';
 import 'package:wenznote/model/note/enum/note_order_type.dart';
 import 'package:wenznote/model/note/enum/note_type.dart';
 import 'package:wenznote/model/note/po/doc_dir_po.dart';
@@ -14,6 +12,7 @@ import 'package:wenznote/service/service_manager.dart';
 import 'package:wenznote/widgets/ticker_widget.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:uuid/uuid.dart';
+import 'package:ydart/ydart.dart';
 
 class WinTodayController extends ServiceManagerController {
   BaseTask? searchTask;
@@ -158,7 +157,7 @@ class WinTodayController extends ServiceManagerController {
     startSearchTask();
   }
 
-  void reloadDoc(DocPO doc, Doc content) {
+  void reloadDoc(DocPO doc, YDoc content) {
     for(var searchItem in searchResultList){
       if(searchItem.doc.uuid==doc.uuid){
         searchItem.updateContent(content);

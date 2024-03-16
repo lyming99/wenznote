@@ -1,6 +1,6 @@
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:wenznote/editor/crdt/YsTable.dart';
 import 'package:wenznote/editor/crdt/YsText.dart';
+import 'package:ydart/ydart.dart';
 
 import 'YsTree.dart';
 
@@ -70,20 +70,19 @@ class YsCursor {
     var tableMap = tree.yArray!.get(blockIndex) as YMap;
     var rows = tableMap.get("rows") as YArray;
     var row = rows.get(rowIndex) as YArray;
-    var cell = row.get(colIndex);
+    var cell = row.get(colIndex) as YMap;
     RelativePosition cellRelativePosition;
     if (cell.get("type") == "text") {
       var text = cell.get("text") as YText;
-      cellRelativePosition =
-          createRelativePositionFromTypeIndex(text, textOffset);
+      cellRelativePosition = RelativePosition.fromTypeIndex(text, textOffset);
     } else {
       cellRelativePosition =
-          createRelativePositionFromTypeIndex(row, colIndex, textOffset);
+          RelativePosition.fromTypeIndex(row, colIndex, textOffset);
     }
     var relativePositions = [
-      createRelativePositionFromTypeIndex(tree.yArray!, blockIndex),
-      createRelativePositionFromTypeIndex(rows, rowIndex),
-      createRelativePositionFromTypeIndex(row, colIndex),
+      RelativePosition.fromTypeIndex(tree.yArray!, blockIndex),
+      RelativePosition.fromTypeIndex(rows, rowIndex),
+      RelativePosition.fromTypeIndex(row, colIndex),
       cellRelativePosition,
     ];
     positions = relativePositions;
@@ -94,8 +93,8 @@ class YsCursor {
     var textMap = tree.yArray!.get(blockIndex) as YMap;
     var text = textMap.get("text") as YText;
     var relativePositions = [
-      createRelativePositionFromTypeIndex(tree.yArray!, blockIndex),
-      createRelativePositionFromTypeIndex(text, offset),
+      RelativePosition.fromTypeIndex(tree.yArray!, blockIndex),
+      RelativePosition.fromTypeIndex(text, offset),
     ];
     blockType = BlockType.text;
     positions = relativePositions;
@@ -103,7 +102,7 @@ class YsCursor {
 
   YsCursor.image(this.tree, int blockIndex, int offset) {
     var relativePositions = [
-      createRelativePositionFromTypeIndex(tree.yArray!, blockIndex, offset),
+      RelativePosition.fromTypeIndex(tree.yArray!, blockIndex, offset),
     ];
     blockType = BlockType.image;
     positions = relativePositions;
@@ -111,7 +110,7 @@ class YsCursor {
 
   YsCursor.line(this.tree, int blockIndex, int offset) {
     var relativePositions = [
-      createRelativePositionFromTypeIndex(tree.yArray!, blockIndex, offset),
+      RelativePosition.fromTypeIndex(tree.yArray!, blockIndex, offset),
     ];
     blockType = BlockType.line;
     positions = relativePositions;
@@ -121,8 +120,8 @@ class YsCursor {
     var textMap = tree.yArray!.get(blockIndex) as YMap;
     var text = textMap.get("code") as YText;
     var relativePositions = [
-      createRelativePositionFromTypeIndex(tree.yArray!, blockIndex),
-      createRelativePositionFromTypeIndex(text, offset),
+      RelativePosition.fromTypeIndex(tree.yArray!, blockIndex),
+      RelativePosition.fromTypeIndex(text, offset),
     ];
     blockType = BlockType.code;
     positions = relativePositions;
@@ -132,8 +131,8 @@ class YsCursor {
     if (positions.isEmpty) {
       return null;
     }
-    var abs =
-        createAbsolutePositionFromRelativePosition(positions.first, tree.yDoc);
+    var abs = AbsolutePosition.tryCreateFromRelativePosition(
+        positions.first, tree.yDoc);
     return abs?.index;
   }
 
@@ -142,7 +141,7 @@ class YsCursor {
       return null;
     }
     var abs =
-        createAbsolutePositionFromRelativePosition(positions[3], tree.yDoc);
+        AbsolutePosition.tryCreateFromRelativePosition(positions[3], tree.yDoc);
     if (abs != null) {
       var blockIndex = getBlockIndex();
       var rowIndex = getTableRowIndex();
@@ -168,8 +167,8 @@ class YsCursor {
         if (positions.length < 2) {
           return null;
         }
-        var abs =
-            createAbsolutePositionFromRelativePosition(positions[1], tree.yDoc);
+        var abs = AbsolutePosition.tryCreateFromRelativePosition(
+            positions[1], tree.yDoc);
         return abs?.index;
       case BlockType.table:
         return getTableTextOffset();
@@ -178,8 +177,8 @@ class YsCursor {
         if (positions.isEmpty) {
           return null;
         }
-        var abs =
-            createAbsolutePositionFromRelativePosition(positions[0], tree.yDoc);
+        var abs = AbsolutePosition.tryCreateFromRelativePosition(
+            positions[0], tree.yDoc);
         return abs?.assoc;
     }
   }
@@ -192,7 +191,7 @@ class YsCursor {
       return null;
     }
     var abs =
-        createAbsolutePositionFromRelativePosition(positions[2], tree.yDoc);
+        AbsolutePosition.tryCreateFromRelativePosition(positions[2], tree.yDoc);
     return abs?.index;
   }
 
@@ -250,7 +249,7 @@ class YsCursor {
       return null;
     }
     var abs =
-        createAbsolutePositionFromRelativePosition(positions[1], tree.yDoc);
+        AbsolutePosition.tryCreateFromRelativePosition(positions[1], tree.yDoc);
     return abs?.index;
   }
 

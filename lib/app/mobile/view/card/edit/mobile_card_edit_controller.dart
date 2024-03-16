@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:wenznote/app/mobile/view/edit/doc_edit_controller.dart';
 import 'package:wenznote/editor/block/element/element.dart';
 import 'package:wenznote/model/card/po/card_po.dart';
+import 'package:ydart/ydart.dart';
 
 class MobileCardEditController extends MobileDocEditController {
   CardPO card;
@@ -13,8 +13,8 @@ class MobileCardEditController extends MobileDocEditController {
     super.editOnOpen,
   });
 
-  Future<Doc> jsonToDoc(String? json) async {
-    Doc doc = Doc();
+  Future<YDoc> jsonToDoc(String? json) async {
+    YDoc doc = YDoc();
     var blocks = doc.getArray("blocks");
     if (json == null || json.isEmpty) {
       return doc;
@@ -39,13 +39,12 @@ class MobileCardEditController extends MobileDocEditController {
   @override
   Future<void> readDoc() async {
     title.value = "编辑卡片";
-    var doc = await jsonToDoc(card.content??"[]");
+    var doc = await jsonToDoc(card.content ?? "[]");
     initYsTree(doc);
     editController.waitLayout(() {
       editController.requestFocus();
     });
-
-    doc.on("update", (args) async {
+    doc.updateV2.add((data, origin, transaction) async {
       card.content = await getDocJson();
       await serviceManager.cardService.updateCard(card);
     });

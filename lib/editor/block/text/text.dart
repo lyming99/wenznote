@@ -6,7 +6,6 @@ import 'package:chinese_font_library/chinese_font_library.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:flutter_math_fork/flutter_math.dart';
 import 'package:wenznote/commons/util/html.dart';
 import 'package:wenznote/commons/util/widget_util.dart';
@@ -17,6 +16,7 @@ import 'package:wenznote/editor/block/text/rich_text_painter.dart';
 import 'package:wenznote/editor/proto/note.pb.dart';
 import 'package:wenznote/editor/theme/theme.dart';
 import 'package:wenznote/editor/widget/toggle_item.dart';
+import 'package:ydart/ydart.dart';
 
 import '../../edit_controller.dart';
 import '../../widget/drag.dart';

@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
-import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:synchronized/extension.dart';
 import 'package:wenznote/commons/util/log_util.dart';
@@ -25,7 +24,7 @@ class DocSnapshotService {
 
   void startDownloadTimer() {
     stopDownloadTimer();
-    _downloadTimer = Timer.periodic(5.minutes, (timer) {
+    _downloadTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
       _downloadUpdateSnapshot();
     });
     _downloadUpdateSnapshot();
@@ -206,15 +205,23 @@ class DocSnapshotService {
         return;
       }
       var isar = serviceManager.isarService.documentIsar;
-      var result = await Dio().post(
-        "$noteServerUrl/snapshot/download/$docId",
-        options: Options(
-          headers: {
-            "token": serviceManager.userService.token,
-          },
-          responseType: ResponseType.bytes,
-        ),
-      );
+      Response result;
+      try {
+        result = await Dio().post(
+          "$noteServerUrl/snapshot/download/$docId",
+          options: Options(
+            headers: {
+              "token": serviceManager.userService.token,
+            },
+            responseType: ResponseType.bytes,
+          ),
+        );
+      } catch (e) {
+        var doc = await serviceManager.docService.queryDoc(docId);
+        print(
+            "download doc file [${doc?.type}/${doc?.name}] error: $docId");
+        return;
+      }
       // result 返回的是数据+文件zip压缩包{state,file}
       if (result.statusCode == 200) {
         var data = result.data;

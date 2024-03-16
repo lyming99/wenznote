@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:wenznote/editor/block/block.dart';
 import 'package:wenznote/editor/block/element/element.dart';
 import 'package:wenznote/editor/block/image/image_block.dart';
@@ -9,6 +8,7 @@ import 'package:wenznote/editor/block/text/text.dart';
 import 'package:wenznote/editor/crdt/YsBlock.dart';
 import 'package:wenznote/editor/crdt/YsText.dart';
 import 'package:wenznote/editor/crdt/YsTree.dart';
+import 'package:ydart/ydart.dart';
 
 import 'YsCursor.dart';
 
@@ -255,7 +255,7 @@ class YsTable {
         block.tree, blockIndex, rowIndex, colIndex, textOffset));
   }
 
-  List<List<YMap<dynamic>>> getTableCellMaps(TableBlock first) {
+  List<List<YMap>> getTableCellMaps(TableBlock first) {
     var cellMaps = <List<YMap>>[];
     for (var row in first.rows) {
       var cellRow = <YMap>[];
@@ -325,7 +325,7 @@ class YsTable {
       rows = YArray();
       block.yMap.set("rows", rows);
     }
-    return rows.get(rowIndex);
+    return rows.get(rowIndex) as YArray;
   }
 
   void addRow(YArray row) {
@@ -337,7 +337,7 @@ class YsTable {
     rows.insert(rows.length, [row]);
   }
 
-  void replaceCursorCells(List<List<YMap<dynamic>>> cellMaps) {
+  void replaceCursorCells(List<List<YMap>> cellMaps) {
     if (cellMaps.isEmpty) {
       return;
     }
@@ -361,7 +361,7 @@ class YsTable {
     var colCount = this.colCount;
     var rowCount = this.rowCount;
     var insertRowPos = rowIndex;
-    for (List<YMap<dynamic>> insertRow in cellMaps) {
+    for (List<YMap> insertRow in cellMaps) {
       if (insertRowPos < rowCount) {
         YArray tableRow = getRow(insertRowPos);
         tableRow.delete(colIndex, min(colCount - colIndex, contentColCount));
@@ -387,7 +387,7 @@ class YsTable {
     }
   }
 
-  void replaceCursorCell(YMap<dynamic> yMap) {
+  void replaceCursorCell(YMap yMap) {
     var cursor = block.tree.cursor;
     if (cursor == null) {
       return;
@@ -405,7 +405,7 @@ class YsTable {
     row.insert(colIndex, [yMap]);
   }
 
-  void insertCursorCellText(YMap<dynamic> yMap) {
+  void insertCursorCellText(YMap yMap) {
     var cursor = block.tree.cursor;
     if (cursor == null) {
       return;
@@ -466,7 +466,7 @@ class YsTable {
       var first = content.first;
       if (first is TableBlock) {
         // replace cells to table
-        List<List<YMap<dynamic>>> cellMaps = getTableCellMaps(first);
+        List<List<YMap>> cellMaps = getTableCellMaps(first);
         replaceCursorCells(cellMaps);
         block.tree.setCursor(
             createTableCursor(block.tree, blockIndex, rowIndex, colIndex, 0));
@@ -612,7 +612,7 @@ class YsTable {
       var removeKeys = <String>[];
       var curColCount = colCount;
       var changeMap = <String, String>{};
-      for (var entry in alignments.entries()) {
+      for (var entry in alignments.typeMapEnumerateValues().entries) {
         var index = int.parse(entry.key);
         if (index >= curColCount) {
           removeKeys.add(entry.key);
@@ -620,7 +620,7 @@ class YsTable {
         if (index >= colIndex) {
           removeKeys.add("$index");
           removeKeys.remove('${index + 1}');
-          changeMap['${index + 1}'] = entry.value;
+          changeMap['${index + 1}'] = entry.value as String;
         }
       }
       for (var key in removeKeys) {
@@ -676,7 +676,7 @@ class YsTable {
       var removeKeys = <String>[];
       var curColCount = colCount;
       var changeMap = <String, String>{};
-      for (var entry in alignments.entries()) {
+      for (var entry in alignments.typeMapEnumerateValues().entries) {
         var index = int.parse(entry.key);
         if (index >= curColCount) {
           removeKeys.add(entry.key);
@@ -684,7 +684,7 @@ class YsTable {
         if (index >= colIndex + 1) {
           removeKeys.add("$index");
           removeKeys.remove('${index + 1}');
-          changeMap['${index + 1}'] = entry.value;
+          changeMap['${index + 1}'] = entry.value as String;
         }
       }
       for (var key in removeKeys) {
@@ -791,7 +791,7 @@ class YsTable {
       var removeKeys = <String>[];
       var curColCount = colCount;
       var changeMap = <String, String>{};
-      for (var entry in alignments.entries()) {
+      for (var entry in alignments.typeMapEnumerateValues().entries) {
         var index = int.parse(entry.key);
         if (index >= curColCount) {
           removeKeys.add(entry.key);
@@ -799,7 +799,7 @@ class YsTable {
         if (index >= selectIndex.startCol) {
           removeKeys.add("$index");
           removeKeys.remove('${index - selectIndex.colCount}');
-          changeMap['${index - selectIndex.colCount}'] = entry.value;
+          changeMap['${index - selectIndex.colCount}'] = entry.value as String;
         }
       }
       for (var key in removeKeys) {
@@ -1197,7 +1197,7 @@ class YsTableInfo {
 
   YsTableInfo(YMap map) {
     rows = [];
-    if (!map.has("rows")) {
+    if (!map.containsKey("rows")) {
       map.set("rows", YArray());
     }
     rowsArray = map.get("rows") as YArray;
@@ -1263,7 +1263,7 @@ class YsTableInfo {
     if (colIndex >= array.length) {
       return null;
     }
-    return array.get(colIndex);
+    return array.get(colIndex) as YMap?;
   }
 }
 

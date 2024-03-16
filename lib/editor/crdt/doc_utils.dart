@@ -1,13 +1,13 @@
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:wenznote/editor/block/code/code.dart';
 import 'package:wenznote/editor/block/element/element.dart';
 import 'package:wenznote/editor/block/image/image_element.dart';
 import 'package:wenznote/editor/block/line/line_element.dart';
 import 'package:wenznote/editor/block/table/table_element.dart';
 import 'package:wenznote/editor/block/text/text.dart';
+import 'package:ydart/ydart.dart';
 
 void applyYTextToTextElement(YText? yText, WenTextElement text) {
   if (yText == null) {
@@ -18,7 +18,7 @@ void applyYTextToTextElement(YText? yText, WenTextElement text) {
   for (var item in delta) {
     ///attributes
     var element = WenTextElement();
-    var insert = item["insert"];
+    var insert = item.insert;
     if (insert is String) {
       element.text = insert;
     } else if (insert is Map) {
@@ -28,10 +28,10 @@ void applyYTextToTextElement(YText? yText, WenTextElement text) {
       continue;
     }
     elements.add(element);
-    if (!item.containsKey("attributes")) {
+    if (item.attributes == null) {
       continue;
     }
-    var attr = item['attributes'] as Map<dynamic, dynamic>;
+    var attr = item.attributes!;
     element.background = attr['background'] as int?;
     element.color = attr['color'] as int?;
     element.url = attr['url'] as String?;
@@ -57,17 +57,17 @@ WenElement? createWenElementFromYMap(YMap map) {
     return textElement;
   } else if (type == "image") {
     var imageElement = WenImageElement(
-        id: map.get("id"),
-        file: map.get("id"),
-        width: map.get("width"),
-        height: map.get("height"));
+        id: map.get("id") as String,
+        file: map.get("id") as String,
+        width: map.get("width") as int,
+        height: map.get("height") as int);
     return imageElement;
   } else if (type == "line") {
     return LineElement();
   } else if (type == "code") {
     return WenCodeElement(
       code: (map.get("code") as YText).toString(),
-      language: map.get("language") ?? "text",
+      language: (map.get("language") as String?) ?? "text",
     );
   } else if (type == "table") {
     var element = WenTableElement();
@@ -77,9 +77,9 @@ WenElement? createWenElementFromYMap(YMap map) {
   return null;
 }
 
-Future<Doc> jsonToYDoc(int clientId, String? json) async {
-  Doc doc = Doc();
-  doc.clientID = clientId;
+Future<YDoc> jsonToYDoc(int clientId, String? json) async {
+  YDoc doc = YDoc();
+  doc.clientId = clientId;
   var blocks = doc.getArray("blocks");
   if (json == null || json.isEmpty) {
     return doc;
@@ -96,8 +96,8 @@ Future<Doc> jsonToYDoc(int clientId, String? json) async {
   return doc;
 }
 
-Future<Doc> elementsToYDoc(List<WenElement> elements) async {
-  Doc doc = Doc();
+Future<YDoc> elementsToYDoc(List<WenElement> elements) async {
+  YDoc doc = YDoc();
   var blocks = doc.getArray("blocks");
   blocks.insert(0, elements.map((e) => e.getYMap()).toList());
   return doc;
@@ -113,36 +113,36 @@ void applyYMapToElement(
       if (code is YText) {
         var codeElement = (element as WenCodeElement);
         codeElement.code = code.toString();
-        codeElement.language = map.get("language") ?? "text";
+        codeElement.language = (map.get("language") as String?) ?? "text";
       }
       break;
     case WenTextElement:
       var text = element as WenTextElement;
-      text.level = map.get("level") ?? 0;
-      text.checked = map.get("checked");
-      text.itemType = map.get("itemType");
-      text.alignment = map.get("alignment");
-      text.indent = map.get("indent");
-      text.type = map.get("type") ?? "text";
-      if (map.has("text")) {
-        applyYTextToTextElement(map.get("text"), text);
+      text.level = (map.get("level") as int?) ?? 0;
+      text.checked = map.get("checked") as bool?;
+      text.itemType = map.get("itemType") as String?;
+      text.alignment = map.get("alignment") as String?;
+      text.indent = map.get("indent") as int?;
+      text.type = (map.get("type") as String?) ?? "text";
+      if (map.containsKey("text")) {
+        applyYTextToTextElement(map.get("text") as YText, text);
       }
       break;
     case WenImageElement:
-      element.alignment = map.get("alignment");
-      element.indent = map.get("indent");
+      element.alignment = map.get("alignment") as String?;
+      element.indent = map.get("indent") as int?;
       break;
     case WenTableElement:
       var table = element as WenTableElement;
-      if (map.has("alignments")) {
+      if (map.containsKey("alignments")) {
         var alignments = map.get("alignments") as YMap;
         var old = table.alignments;
         old ??= HashMap();
-        for (var en in alignments.entries()) {
+        for (var en in alignments.typeMapEnumerateValues().entries) {
           if (en.value == null) {
             old.remove(int.parse(en.key));
           } else {
-            old[int.parse(en.key)] = en.value;
+            old[int.parse(en.key)] = en.value as String;
           }
         }
         table.alignments = old;
@@ -150,21 +150,21 @@ void applyYMapToElement(
         table.alignments = {};
       }
       var tableRows = <List<WenElement>>[];
-      if (map.has("rows")) {
+      if (map.containsKey("rows")) {
         var rows = map.get("rows") as YArray;
-        for (var arr in rows) {
+        for (var arr in rows.enumerateList()) {
           var tableRow = <WenElement>[];
           tableRows.add(tableRow);
           var row = arr as YArray;
-          for (var item in row) {
+          for (var item in row.enumerateList()) {
             var cell = item as YMap;
-            String type = cell.get("type");
+            String type = cell.get("type") as String;
             if (type == "image") {
               var imageElement = WenImageElement(
-                  id: cell.get("id"),
-                  file: cell.get("id"),
-                  width: cell.get("width"),
-                  height: cell.get("height"));
+                  id: cell.get("id") as String,
+                  file: cell.get("id") as String,
+                  width: cell.get("width") as int,
+                  height: cell.get("height") as int);
               tableRow.add(imageElement);
             } else {
               var textElement = WenTextElement();
@@ -179,12 +179,12 @@ void applyYMapToElement(
   }
 }
 
-List<WenElement> yDocToWenElements(Doc? doc) {
+List<WenElement> yDocToWenElements(YDoc? doc) {
   var res = <WenElement>[];
   if (doc != null) {
     var array = doc.getArray("blocks");
-    for (var value in array) {
-      var item = createWenElementFromYMap(value);
+    for (var value in array.enumerateList()) {
+      var item = createWenElementFromYMap(value as YMap);
       if (item != null) {
         res.add(item);
       }

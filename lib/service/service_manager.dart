@@ -17,6 +17,7 @@ import 'package:wenznote/service/isar/isar_service.dart';
 import 'package:wenznote/service/search/search_service.dart';
 import 'package:wenznote/service/sync/doc_snapshot_service.dart';
 import 'package:wenznote/service/sync/file_sync_service.dart';
+import 'package:wenznote/service/sync/impl/record_sync_service_impl.dart';
 import 'package:wenznote/service/sync/p2p_service.dart';
 import 'package:wenznote/service/sync/record_sync_service.dart';
 import 'package:wenznote/service/sync/upload_task_service.dart';
@@ -41,7 +42,6 @@ class ServiceManagerController extends MvcController {
   void onDidUpdateWidget(BuildContext context, MvcController oldController) {
     super.onDidUpdateWidget(context, oldController);
     serviceManager = (oldController as ServiceManagerController).serviceManager;
-    serviceManager.context = context;
   }
 }
 
@@ -75,12 +75,10 @@ class ServiceManager with ChangeNotifier {
   bool isStart = false;
   bool _canPop = false;
   int time = DateTime.now().millisecondsSinceEpoch;
-  late BuildContext context;
 
   ServiceManager();
 
-  void onInitState(BuildContext context) {
-    this.context = context;
+  void init() {
     isarService = IsarService(this);
     userService = UserService(this);
     fileManager = FileManager(this);
@@ -94,7 +92,7 @@ class ServiceManager with ChangeNotifier {
     settingsManager = SettingsManager(this);
     importService = ImportService(this);
     configManager = ConfigManager(this);
-    recordSyncService = RecordSyncService(this);
+    recordSyncService = RecordSyncServiceImpl(this);
     cryptService = CryptService(this);
     p2pService = P2pService(this);
     docSnapshotService = DocSnapshotService(this);

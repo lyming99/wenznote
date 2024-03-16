@@ -1,5 +1,3 @@
-import 'package:flutter_crdt/flutter_crdt.dart';
-
 import '../../proto/note.pb.dart';
 import '../element/element.dart';
 

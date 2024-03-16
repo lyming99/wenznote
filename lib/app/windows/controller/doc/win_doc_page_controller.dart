@@ -1,10 +1,10 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:wenznote/app/windows/controller/doc/win_doc_list_controller.dart';
 import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
 import 'package:wenznote/commons/mvc/controller.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:ydart/ydart.dart';
 
 class WinDocPageController extends MvcController {
   WinHomeController homeController;
@@ -43,7 +43,7 @@ class WinDocPageController extends MvcController {
     homeController.openDoc(doc, isCreateMode);
   }
 
-  void reloadDoc(DocPO doc, Doc content) {
+  void reloadDoc(DocPO doc, YDoc content) {
     for (var listController in docListControllerMap.values) {
       var docList = listController.searchResultList;
       for (var docItem in docList) {

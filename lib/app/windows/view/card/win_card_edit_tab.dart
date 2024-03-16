@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
 import 'package:wenznote/app/windows/widgets/card_editor.dart';
 import 'package:wenznote/commons/mvc/controller.dart';
 import 'package:wenznote/commons/mvc/view.dart';
 import 'package:wenznote/editor/crdt/YsEditController.dart';
-import 'package:wenznote/editor/widget/toggle_item.dart';
 import 'package:wenznote/model/card/po/card_po.dart';
 import 'package:wenznote/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
-import 'package:window_manager/window_manager.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
+import 'package:ydart/ydart.dart';
 
 class WinCardEditController extends MvcController {
   WinHomeController homeController;
@@ -22,7 +20,7 @@ class WinCardEditTab extends MvcView<WinCardEditController> {
   CardPO card;
   bool isCreateMode;
   CardEditor? cardEditor;
-  Doc? cardYDoc;
+  YDoc? cardYDoc;
   late ServiceManager serviceManager;
 
   WinCardEditTab({

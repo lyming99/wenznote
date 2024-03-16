@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get_utils/get_utils.dart';
 import 'package:octo_image/octo_image.dart';
 import 'package:oktoast/oktoast.dart';
@@ -15,6 +14,7 @@ import 'package:wenznote/model/client/client_vo.dart';
 import 'package:wenznote/model/client/server_vo.dart';
 import 'package:wenznote/model/user/user_vo.dart';
 import 'package:wenznote/service/service_manager.dart';
+import 'package:ydart/utils/y_doc.dart';
 
 /// 登录
 /// 登出
@@ -45,7 +45,7 @@ class UserService with ChangeNotifier {
 
   int? get uid => currentUser?.id;
 
-  int get clientId => client?.id ?? generateNewClientId();
+  int get clientId => client?.id ?? YDoc.generateNewClientId();
 
   Future<bool> login({
     required String email,

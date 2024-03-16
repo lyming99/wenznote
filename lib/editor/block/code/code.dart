@@ -4,7 +4,6 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:flutter_code_editor/flutter_code_editor.dart';
 import 'package:flutter_code_editor/src/code_field/span_builder.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:flutter_highlight/theme_map.dart';
 import 'package:highlight/highlight.dart' as hl;
 import 'package:oktoast/oktoast.dart';
@@ -13,6 +12,7 @@ import 'package:wenznote/commons/util/html.dart';
 import 'package:wenznote/commons/widget/ignore_parent_pointer.dart';
 import 'package:wenznote/commons/widget/popup_stack.dart';
 import 'package:wenznote/editor/widget/toggle_item.dart';
+import 'package:ydart/ydart.dart';
 
 import '../../edit_controller.dart';
 import '../../proto/note.pb.dart';
@@ -100,7 +100,7 @@ class WenCodeElement extends WenElement {
   }
 
   @override
-  YMap getYMap([Doc? doc]) {
+  YMap getYMap([YDoc? doc]) {
     var map = YMap();
     map.set("type", "code");
     map.set("code", YText(code));

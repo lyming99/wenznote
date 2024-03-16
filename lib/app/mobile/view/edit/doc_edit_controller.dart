@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wenznote/app/windows/outline/outline_controller.dart';
@@ -9,8 +8,9 @@ import 'package:wenznote/editor/crdt/YsEditController.dart';
 import 'package:wenznote/editor/crdt/YsTree.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:wenznote/service/service_manager.dart';
+import 'package:ydart/ydart.dart';
 
-typedef DocReader = Future<Doc> Function(BuildContext context);
+typedef DocReader = Future<YDoc> Function(BuildContext context);
 
 class MobileDocEditController extends ServiceManagerController {
   var title = "便签".obs;
@@ -122,8 +122,7 @@ class MobileDocEditController extends ServiceManagerController {
       editController.waitLayout(() {
         editController.requestFocus();
       });
-      doc.on("update", (args) {
-        var data = args[0];
+      doc.updateV2.add((data, origin, transaction) {
         if (serviceManager.editService.isNotEditUpdate(this.doc?.uuid ?? "")) {
           return;
         }
@@ -134,7 +133,7 @@ class MobileDocEditController extends ServiceManagerController {
     }
   }
 
-  void initYsTree(Doc doc) {
+  void initYsTree(YDoc doc) {
     ysTree = YsTree(
       context: context,
       editController: editController,

@@ -1,10 +1,11 @@
 import 'dart:convert';
+import 'dart:math';
 
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:wenznote/editor/block/block.dart';
 import 'package:wenznote/editor/block/element/element.dart';
 import 'package:wenznote/editor/crdt/YsBlock.dart';
 import 'package:wenznote/editor/crdt/YsCursor.dart';
+import 'package:ydart/ydart.dart';
 
 import 'YsTree.dart';
 
@@ -56,12 +57,12 @@ YMap createYMap() {
 }
 
 YArray createYArray(Object doc) {
-  var map = YArray.create();
+  var map = YArray();
   return map;
 }
 
 YText createYText() {
-  var map = YText.create();
+  var map = YText("");
   return map;
 }
 
@@ -84,18 +85,18 @@ int insertYsText(YMap origin, int offset, YMap content) {
 
 int insertYText(YText origin, int offset, YText content) {
   if (content.doc == null) {
-    content.innerIntegrate(Doc(), null);
+    content.integrate(YDoc(), null);
   }
   var deltas = content.toDelta();
   int pos = offset;
   for (var op in deltas) {
     // value: {insert,attributes}
-    var insert = op['insert'];
-    var attributes = op['attributes'];
+    var insert = op.insert;
+    var attributes = op.attributes;
     if (insert is String) {
       if (attributes is Map) {
-        var attr = <String, dynamic>{};
-        for (var entry in attributes.entries) {
+        var attr = <String, Object?>{};
+        for (var entry in attributes!.entries) {
           attr[entry.key] = entry.value;
         }
         origin.insert(pos, insert, attr);
@@ -123,29 +124,32 @@ class YsText {
     }
     int pos = 0;
     var deltas = text.toDelta();
-    var newDeltas = <Map<String, Object?>>[];
+    var newDeltas = <Delta>[];
     for (var op in deltas) {
       // value: {insert,attributes}
-      var insert = op['insert'];
-      var attributes = op['attributes'];
+      var insert = op.insert;
+      var attributes = op.attributes;
       if (insert is String) {
-        if (offset - pos >= 0 && offset - pos < insert.length) {
-          newDeltas.add({
-            'insert': insert.substring(offset - pos),
-            'attributes': attributes
-          });
+        if (offset < pos + insert.length) {
+          newDeltas.add(Delta(
+            insert: insert.substring(max(0, offset - pos)),
+            attributes: attributes,
+          ));
         }
         pos += insert.length;
       } else {
-        if (pos >= offset) {
-          newDeltas.add({'insert': insert, 'attributes': attributes});
+        if (offset < pos + 1) {
+          newDeltas.add(Delta(
+            insert: insert,
+            attributes: attributes,
+          ));
         }
         pos += 1;
       }
     }
     var result = createYMap();
     var newText = createYText()..applyDelta(newDeltas);
-    for (var attr in block.yMap.entries()) {
+    for (var attr in block.yMap.typeMapEnumerateValues().entries) {
       var key = attr.key;
       if (key == 'text') {
         continue;
@@ -168,17 +172,11 @@ class YsText {
     var deltas = text.toDelta();
     for (var op in deltas) {
       // value: {insert,attributes}
-      var insert = op['insert'];
-      var attributes = op['attributes'];
+      var insert = op.insert;
+      var attributes = op.attributes;
       if (insert is String) {
         if (attributes != null) {
-          try {
-            curText.insert(
-                curText.length, insert, attributes as Map<String, Object?>);
-          } catch (e) {
-            curText.insert(curText.length, insert,
-                jsonDecode(jsonEncode(attributes)) as Map<String, Object?>);
-          }
+          curText.insert(curText.length, insert, attributes);
         } else {
           curText.insert(curText.length, insert);
         }
@@ -395,7 +393,7 @@ class YsText {
   }
 
   String? get itemType {
-    return block.yMap.get("itemType");
+    return block.yMap.get("itemType") as String?;
   }
 
   void insertContent(List<WenBlock> content) {

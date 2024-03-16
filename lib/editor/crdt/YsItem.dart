@@ -1,4 +1,4 @@
-import 'package:flutter_crdt/flutter_crdt.dart';
+import 'package:ydart/ydart.dart';
 
 import 'YsTree.dart';
 

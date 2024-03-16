@@ -1,17 +1,17 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_crdt/flutter_crdt.dart';
 import 'package:wenznote/editor/block/element/element.dart';
 import 'package:wenznote/editor/crdt/YsEditController.dart';
 import 'package:wenznote/editor/crdt/YsTree.dart';
 import 'package:wenznote/editor/edit_widget.dart';
 import 'package:wenznote/model/card/po/card_po.dart';
+import 'package:ydart/ydart.dart';
 
 class CardEditor extends StatefulWidget {
   final CardPO card;
   final YsEditController editController;
-  final Function(Doc? doc)? onCardUpdate;
+  final Function(YDoc? doc)? onCardUpdate;
 
   const CardEditor({
     Key? key,
@@ -34,8 +34,8 @@ class _CardEditorState extends State<CardEditor>
     readDoc();
   }
 
-  Future<Doc> jsonToDoc(String? json) async {
-    Doc doc = Doc();
+  Future<YDoc> jsonToDoc(String? json) async {
+    YDoc doc = YDoc();
     var blocks = doc.getArray("blocks");
     if (json == null || json.isEmpty) {
       return doc;
@@ -69,11 +69,12 @@ class _CardEditorState extends State<CardEditor>
       yDoc: doc,
     );
     tree!.init();
-    doc.on("update", (args) async {
+    doc.updateV2.add((data, origin, transaction) async {
       var json = await getJson();
       widget.card.content = json;
       widget.onCardUpdate?.call(doc);
     });
+
     setState(() {});
   }
 
@@ -83,7 +84,9 @@ class _CardEditorState extends State<CardEditor>
     if (tree == null) {
       return Container();
     }
-    return EditWidget(controller: tree!.editController,);
+    return EditWidget(
+      controller: tree!.editController,
+    );
   }
 
   @override

@@ -30,7 +30,7 @@ class ServiceManagerWidgetState extends State<ServiceManagerWidget> {
   void initState() {
     super.initState();
     serviceManager.addListener(onServiceChanged);
-    serviceManager.onInitState(context);
+    serviceManager.init();
     serviceManager.startService();
   }
 
@@ -57,14 +57,13 @@ class ServiceManagerWidgetState extends State<ServiceManagerWidget> {
     setState(() {
       serviceManager = ServiceManager();
       serviceManager.addListener(onServiceChanged);
-      serviceManager.onInitState(context);
+      serviceManager.init();
       serviceManager.startService().then((value) {});
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    serviceManager.context = context;
     if (!serviceManager.isStart) {
       return const Material(
         child: Center(
@@ -80,7 +79,6 @@ class ServiceManagerWidgetState extends State<ServiceManagerWidget> {
   @override
   void didUpdateWidget(covariant ServiceManagerWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    serviceManager.context = context;
   }
 
   void changeUser(String userId) {
