@@ -188,8 +188,6 @@ class UploadTaskService {
       if (result.data['msg'] == AppConstants.success) {
         return true;
       }
-      // 查询差异数据，或者先下载数据
-      serviceManager.docSnapshotService.downloadDocFile(docId!);
     } catch (e) {
       printLog("上传笔记任务失败, error: $e");
     }

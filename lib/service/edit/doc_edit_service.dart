@@ -99,15 +99,21 @@ class DocEditService {
       }
       return null;
     }
+    var docItem = await serviceManager.docService.queryDoc(docId);
+    dynamic createTime = docItem?.createTime;
+    String? dateTime;
+    if (createTime != null) {
+      var date = DateTime.fromMillisecondsSinceEpoch(createTime);
+      dateTime = date.toString();
+    }
     try {
       var result = YDoc()..clientId = serviceManager.userService.clientId;
       result.applyUpdateV2(bytes);
       _docCache[docId] = result;
       return result;
     } catch (e, stack) {
-      var doc = await serviceManager.docService.queryDoc(docId);
       print(
-          "read doc file [${doc?.type}/${doc?.name}] lenth: ${bytes.length} error:${await serviceManager.fileManager.getNoteFilePath(docId)}");
+          "read doc file [${docItem?.type}/${docItem?.name}] lenth: ${bytes.length} create time:$dateTime error:${await serviceManager.fileManager.getNoteFilePath(docId)}");
       return null;
     }
   }

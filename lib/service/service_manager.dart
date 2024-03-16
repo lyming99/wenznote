@@ -123,6 +123,23 @@ class ServiceManager with ChangeNotifier {
       isStart = true;
       notifyListeners();
     });
+    readDocTest();
+  }
+  Future<void> readDocTest()async{
+    var docList = await docService.queryDocAndNoteList();
+    docList.sort((a,b)=>(b.createTime??0)-(a.createTime??0));
+    for(var docItem in docList) {
+      dynamic createTime = docItem.createTime;
+      String? dateTime;
+      if (createTime != null) {
+        var date = DateTime.fromMillisecondsSinceEpoch(createTime);
+        dateTime = date.toString();
+        if (dateTime.contains("3-16")) {
+          var path = await fileManager.getNoteFilePath(docItem.uuid??"");
+          print('today create: $dateTime ${docItem.type} path:${path}');
+        }
+      }
+    }
   }
 
   Future<void> stopService() async {

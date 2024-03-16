@@ -205,6 +205,7 @@ class DocSnapshotService {
         return;
       }
       var isar = serviceManager.isarService.documentIsar;
+      var doc = await serviceManager.docService.queryDoc(docId);
       Response result;
       try {
         result = await Dio().post(
@@ -217,9 +218,7 @@ class DocSnapshotService {
           ),
         );
       } catch (e) {
-        var doc = await serviceManager.docService.queryDoc(docId);
-        print(
-            "download doc file [${doc?.type}/${doc?.name}] error: $docId");
+        print("download doc file [${doc?.type}/${doc?.name}] error: $docId");
         return;
       }
       // result 返回的是数据+文件zip压缩包{state,file}
@@ -242,6 +241,7 @@ class DocSnapshotService {
         if (stateBytes == null || fileBytes == null) {
           return;
         }
+        print("download doc file [${doc?.type}/${doc?.name}] success: $docId");
         // 读取状态
         var stateMap = (jsonDecode(utf8.decode(stateBytes)) as Map)
             .map((key, value) => MapEntry(key.toString(), value as int));
