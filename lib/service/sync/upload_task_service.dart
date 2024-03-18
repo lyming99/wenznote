@@ -5,7 +5,7 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:isar/isar.dart';
-import 'package:synchronized/extension.dart';
+import 'package:wenznote/commons/util/mehod_time_record.dart';
 import 'package:wenznote/config/app_constants.dart';
 import 'package:wenznote/model/file/file_po.dart';
 import 'package:wenznote/model/note/po/doc_state_po.dart';
@@ -14,16 +14,24 @@ import 'package:wenznote/service/service_manager.dart';
 
 import '../../commons/util/log_util.dart';
 
+/// 上传定时任务间隔设置为10分钟，每10分钟都会再次执行上传失败的任务
+const uploadTimerMinutes = 10;
+
 class UploadTaskService {
   ServiceManager serviceManager;
   Timer? _uploadTimer;
-  final _uploadLock = Object();
+  final _uploadNoteLock = Object();
+  final _uploadFileLock = Object();
+  bool _taskDoing = false;
 
   UploadTaskService(this.serviceManager);
 
+  Isar get isar => serviceManager.isarService.documentIsar;
+
   void startUploadTimer() {
     stopUploadTimer();
-    _uploadTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+    _uploadTimer =
+        Timer.periodic(const Duration(minutes: uploadTimerMinutes), (timer) {
       doUpload();
     });
     doUpload();
@@ -35,7 +43,7 @@ class UploadTaskService {
   }
 
   Future<void> uploadDoc(String docId, [int seconds = 20]) async {
-    var planTime = DateTime.now().millisecondsSinceEpoch + seconds * 000 - 100;
+    var planTime = DateTime.now().millisecondsSinceEpoch + seconds * 000 - 1;
     var task =
         await isar.uploadTaskPOs.filter().dataIdEqualTo(docId).findFirst();
     task ??= UploadTaskPO(dataId: docId, type: "note", planTime: planTime);
@@ -45,16 +53,16 @@ class UploadTaskService {
       await isar.uploadTaskPOs.put(task!);
     });
     if (seconds <= 0) {
-      await doUpload();
+      doUploadSingle(docId);
     } else {
       Timer(Duration(seconds: seconds), () {
-        doUpload();
+        doUploadSingle(docId);
       });
     }
   }
 
   Future<void> uploadFile(String fileId, [int seconds = 1]) async {
-    var planTime = DateTime.now().millisecondsSinceEpoch + seconds * 000 - 100;
+    var planTime = DateTime.now().millisecondsSinceEpoch + seconds * 000 - 1;
     var task =
         await isar.uploadTaskPOs.filter().dataIdEqualTo(fileId).findFirst();
     task ??= UploadTaskPO(dataId: fileId, type: "file", planTime: planTime);
@@ -63,16 +71,29 @@ class UploadTaskService {
     await isar.writeTxn(() async {
       await isar.uploadTaskPOs.put(task!);
     });
-    Timer(Duration(seconds: seconds), () {
-      doUpload();
+    Timer(Duration(seconds: seconds), () async {
+      doUploadSingle(fileId);
     });
   }
 
-  Isar get isar => serviceManager.isarService.documentIsar;
+  Future<void> doUploadSingle(String dataId) async {
+    // 查询
+    var task = await isar.uploadTaskPOs
+        .filter()
+        .dataIdEqualTo(dataId)
+        .isDoneEqualTo(false)
+        .findFirst();
+    if (task != null) {
+      _doUploadTask(task);
+    }
+  }
 
   Future<void> doUpload() async {
-    return _uploadLock.synchronized(() async {
-      // 查询
+    if (_taskDoing) {
+      return;
+    }
+    try {
+      _taskDoing = true;
       var tasks = await isar.uploadTaskPOs
           .filter()
           .planTimeLessThan(DateTime.now().millisecondsSinceEpoch)
@@ -81,7 +102,7 @@ class UploadTaskService {
           .findAll();
       for (var task in tasks) {
         try {
-          if (await doUploadTask(task)) {
+          if (await _doUploadTask(task)) {
             task.isDone = true;
             await isar.writeTxn(() async {
               await isar.uploadTaskPOs.put(task);
@@ -91,22 +112,28 @@ class UploadTaskService {
           printLog("上传任务失败, error: $e");
         }
       }
-    });
+    } finally {
+      _taskDoing = false;
+    }
   }
 
-  Future<bool> doUploadTask(UploadTaskPO task) async {
+  Future<bool> _doUploadTask(UploadTaskPO task) async {
     switch (task.type) {
       case "doc":
       case "note":
-        return await doUploadNote(task);
+        return await _uploadNoteLock.synchronizedWithLog(
+            () => _doUploadNote(task),
+            logTitle: "doUploadNote");
       case "file":
-        return await doUploadFile(task);
+        return await _uploadFileLock.synchronizedWithLog(
+            () => _doUploadFile(task),
+            logTitle: "doUploadFile");
     }
     return false;
   }
 
   /// 上传文件
-  Future<bool> doUploadFile(UploadTaskPO task) async {
+  Future<bool> _doUploadFile(UploadTaskPO task) async {
     // 1.读取文件
     // 2.读取token
     // 3.读取noteserver
@@ -145,7 +172,7 @@ class UploadTaskService {
   }
 
   /// 上传笔记快照
-  Future<bool> doUploadNote(UploadTaskPO task) async {
+  Future<bool> _doUploadNote(UploadTaskPO task) async {
     try {
       var token = serviceManager.userService.token;
       if (token == null) {
@@ -188,6 +215,7 @@ class UploadTaskService {
       if (result.data['msg'] == AppConstants.success) {
         return true;
       }
+      // 版本较旧导致更新失败，放弃这次上传？
     } catch (e) {
       printLog("上传笔记任务失败, error: $e");
     }

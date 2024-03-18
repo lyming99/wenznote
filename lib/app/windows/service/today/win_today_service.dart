@@ -44,7 +44,12 @@ class WinTodayService with IsarServiceMixin {
     }
     var blocks = docContent.getArray("blocks");
     for (var index = 0; index < blocks.length; index++) {
-      var value = blocks.get(index);
+      Object? value;
+      try {
+        value = blocks.get(index);
+      } catch (e) {
+        print(e);
+      }
       if (value is! YMap) {
         continue;
       }
@@ -66,8 +71,7 @@ class WinTodayService with IsarServiceMixin {
     return result;
   }
 
-  Future<WenElement?> searchElement(
-      YMap map, String searchContent) async {
+  Future<WenElement?> searchElement(YMap map, String searchContent) async {
     var element = createWenElementFromYMap(map);
     if (searchContent.isEmpty) {
       return element;

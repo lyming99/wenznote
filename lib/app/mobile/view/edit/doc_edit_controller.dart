@@ -10,6 +10,8 @@ import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:wenznote/service/service_manager.dart';
 import 'package:ydart/ydart.dart';
 
+import '../../../../commons/util/log_util.dart';
+
 typedef DocReader = Future<YDoc> Function(BuildContext context);
 
 class MobileDocEditController extends ServiceManagerController {
@@ -87,6 +89,7 @@ class MobileDocEditController extends ServiceManagerController {
   void onDispose() {
     super.onDispose();
     serviceManager.editService.closeDocEditor(doc?.uuid ?? "");
+    ysTree?.dispose();
   }
 
   @override
@@ -123,7 +126,8 @@ class MobileDocEditController extends ServiceManagerController {
         editController.requestFocus();
       });
       doc.updateV2.add((data, origin, transaction) {
-        if (serviceManager.editService.isNotEditUpdate(this.doc?.uuid ?? "")) {
+        if (transaction.local != true) {
+          // 如果不是本地更新的话，就不需要写入文件了
           return;
         }
         serviceManager.editService.writeDoc(this.doc?.uuid, doc);
@@ -188,7 +192,9 @@ class MobileDocEditController extends ServiceManagerController {
     ctx.pop();
   }
 
-  void sync(BuildContext ctx) {
-    serviceManager.docSnapshotService.downloadDocFile(doc?.uuid ?? "");
+  void syncNow(BuildContext ctx) async {
+    printLog("手动同步笔记：${doc?.uuid},${doc?.name}");
+    await serviceManager.docSnapshotService.downloadDocFile(doc?.uuid ?? "");
+    await serviceManager.uploadTaskService.uploadDoc(doc?.uuid ?? "", 0);
   }
 }

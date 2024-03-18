@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:wenznote/service/file/file_manager.dart';
 import 'package:wenznote/commons/widget/popup_stack.dart';
 import 'package:wenznote/editor/theme/theme.dart';
 
-import '../edit_controller.dart';
 import '../cursor/cursor.dart';
+import '../edit_controller.dart';
 import 'element/element.dart';
 import 'text/link.dart';
 
@@ -30,6 +29,8 @@ abstract class WenBlock {
   bool catchEnter = false;
 
   bool catchScroll = false;
+
+  String updateBeforeText = "";
 
   List<TextSelection>? get searchRanges {
     return null;

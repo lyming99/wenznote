@@ -1,5 +1,6 @@
 import 'package:date_format/date_format.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
@@ -35,7 +36,7 @@ class WinNoteEditTabController extends WinEditTabController {
   Function(YDoc content)? onUpdate;
   late YsEditController editController;
 
-  YsTree? tree;
+  YsTree? ysTree;
 
   var outlineController = OutlineController();
   var showOutline = false.obs;
@@ -81,6 +82,7 @@ class WinNoteEditTabController extends WinEditTabController {
   @override
   void onDispose() {
     homeController.serviceManager.editService.closeDocEditor(doc.uuid ?? "");
+    ysTree?.dispose();
   }
 
   Future<void> readDoc() async {
@@ -88,18 +90,17 @@ class WinNoteEditTabController extends WinEditTabController {
         await homeController.serviceManager.editService.readDoc(this.doc.uuid);
     if (doc != null) {
       editController.viewContext = context;
-      tree = YsTree(
+      ysTree = YsTree(
         context: context,
         editController: editController,
         yDoc: doc,
       );
-      tree!.init();
-      doc.updateV2.add((data, origin, transaction){
-        var editService = homeController.serviceManager.editService;
-        // 文档更新后，如果不是本地编辑导致的更新，则无需发送
-        if (editService.isNotEditUpdate(this.doc.uuid ?? "")) {
+      ysTree!.init();
+      doc.updateV2.add((data, origin, transaction) {
+        if (transaction.local != true) {
           return;
         }
+        var editService = homeController.serviceManager.editService;
         onContentChanged(doc);
         var deltaData = data;
         editService.writeDoc(this.doc.uuid, doc);
@@ -238,12 +239,13 @@ class WinNoteEditTabController extends WinEditTabController {
   void syncNow(BuildContext ctx) async {
     printLog("手动同步笔记：${doc.uuid},${doc.name}");
     var serviceManager = homeController.serviceManager;
-    serviceManager.docSnapshotService.downloadDocFile(doc.uuid ?? "");
-    var snap = await serviceManager.editService.queryDocSnap(doc.uuid ?? "");
-    if (snap == null || snap.isEmpty) {
-      return;
-    }
-    serviceManager.p2pService.sendQueryDocMessage(doc.uuid ?? "", snap);
+    await serviceManager.docSnapshotService.downloadDocFile(doc.uuid ?? "");
+    await serviceManager.uploadTaskService.uploadDoc(doc.uuid ?? "", 0);
+  }
+
+  Future<String> getDocPath() async {
+    var serviceManager = homeController.serviceManager;
+    return serviceManager.fileManager.getNoteFilePath(doc.uuid ?? "");
   }
 }
 
@@ -386,6 +388,27 @@ class WinNoteEditTab extends MvcView<WinNoteEditTabController> with Focusable {
             ],
           )),
 
+          if (kDebugMode)
+            ToggleItem(
+              itemBuilder: (BuildContext context, bool checked, bool hover,
+                  bool pressed) {
+                return Container(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Icon(
+                    Icons.info_outline,
+                    size: 22,
+                    color: hover
+                        ? theme.resources.textFillColorSecondary
+                        : theme.resources.textFillColorSecondary
+                            .withOpacity(0.8),
+                  ),
+                );
+              },
+              onTap: (ctx) {
+                hideDropMenu(ctx);
+                showDocId(ctx);
+              },
+            ),
           ToggleItem(
             itemBuilder:
                 (BuildContext context, bool checked, bool hover, bool pressed) {
@@ -404,7 +427,6 @@ class WinNoteEditTab extends MvcView<WinNoteEditTabController> with Focusable {
               controller.showOutline.value = !controller.showOutline.isTrue;
             },
           ),
-
           // actio
           SizedBox(
             width: 4,
@@ -588,5 +610,26 @@ class WinNoteEditTab extends MvcView<WinNoteEditTabController> with Focusable {
             },
           );
         });
+  }
+
+  void showDocId(BuildContext ctx) async {
+    var path = await controller.getDocPath();
+    WidgetsBinding.instance.scheduleFrameCallback((timeStamp) {
+      showDialog(
+        context: ctx,
+        builder: (ctx) {
+          return fluent.ContentDialog(
+            title: const Text("文件路径"),
+            constraints: const BoxConstraints(
+              maxHeight: 160,
+              maxWidth: 300,
+            ),
+            content: fluent.TextBox(
+              controller: TextEditingController(text: path),
+            ),
+          );
+        },
+      );
+    });
   }
 }

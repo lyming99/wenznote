@@ -26,12 +26,19 @@ class CardEditor extends StatefulWidget {
 
 class _CardEditorState extends State<CardEditor>
     with AutomaticKeepAliveClientMixin {
-  YsTree? tree;
+  YsTree? ysTree;
 
   @override
   void initState() {
     super.initState();
     readDoc();
+  }
+
+
+  @override
+  void dispose() {
+    super.dispose();
+    ysTree?.dispose();
   }
 
   Future<YDoc> jsonToDoc(String? json) async {
@@ -53,7 +60,7 @@ class _CardEditorState extends State<CardEditor>
   }
 
   Future<String?> getJson() async {
-    var json = tree?.editController.blockManager.getSaveContentJson();
+    var json = ysTree?.editController.blockManager.getSaveContentJson();
     if (json != null) {
       return jsonEncode(json);
     }
@@ -63,12 +70,12 @@ class _CardEditorState extends State<CardEditor>
   Future<void> readDoc() async {
     var doc = await jsonToDoc(widget.card.content);
     widget.editController.viewContext = context;
-    tree = YsTree(
+    ysTree = YsTree(
       context: context,
       editController: widget.editController,
       yDoc: doc,
     );
-    tree!.init();
+    ysTree!.init();
     doc.updateV2.add((data, origin, transaction) async {
       var json = await getJson();
       widget.card.content = json;
@@ -81,11 +88,11 @@ class _CardEditorState extends State<CardEditor>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (tree == null) {
+    if (ysTree == null) {
       return Container();
     }
     return EditWidget(
-      controller: tree!.editController,
+      controller: ysTree!.editController,
     );
   }
 

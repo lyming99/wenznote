@@ -16,7 +16,6 @@ import 'package:ydart/ydart.dart';
 import 'YsBlock.dart';
 import 'YsCursor.dart';
 import 'YsEditController.dart';
-import 'YsItem.dart';
 import 'YsSelection.dart';
 import 'YsTable.dart';
 import 'YsText.dart';
@@ -28,14 +27,13 @@ class YsTree {
     required this.yDoc,
   });
 
-  var itemMap = <YMap, YsItem>{};
   var blocks = <YsBlock>[];
   YDoc yDoc;
   YArray? yArray;
   YsEditController editController;
   BuildContext context;
   YsCursor? cursor;
-  YsCursor? chagnedPosition;
+  YsCursor? changedPosition;
   YsSelection? selection;
   UndoManager? undoManager;
   bool initOk = false;
@@ -60,6 +58,7 @@ class YsTree {
         editController.requestFocus();
       });
     }
+    // 监听变化，计算光标位置
     yArray!.deepEventHandler = ((obj, args) {
       int blockIndex = 0;
       var current = blocks.first;
@@ -89,46 +88,34 @@ class YsTree {
 
       if (current.isText || current.blockType == 'code') {
         getTextOffset();
-        chagnedPosition = YsCursor.create(this, blockIndex, textOffset);
+        changedPosition = YsCursor.create(this, blockIndex, textOffset);
       } else if (current.blockType == 'table') {
         int rowIndex = 0;
         int colIndex = 0;
         for (var event in args.events) {
           var target = event.target;
-          // ymap变化
-          if (current.yMap == target) {
-            print('table property changed.');
-          }
-          //alignments属性变化
-          if (current.yMap.get("alignments") == target) {
-            print('table alignments changed.');
-          }
           var rows = current.yMap.get("rows");
           int rowPos = 0;
           if (rows is YArray) {
             //行发生变化
             if (rows == target) {
-              print('table rows changed.');
               rowIndex = rowPos;
             }
             //单元格变化
             for (var row in rows.enumerateList()) {
               if (row == target) {
-                print('table row changed.');
                 rowIndex = rowPos;
               }
               int cellPos = 0;
               if (row is YArray) {
                 for (var cell in row.enumerateList()) {
                   if (cell == target) {
-                    print('table cell property changed.');
                     colIndex = cellPos;
                     rowIndex = rowPos;
                   }
                   if (cell is YMap) {
                     var text = cell.get("text");
                     if (text == target) {
-                      print('table cell text changed..');
                       colIndex = cellPos;
                       rowIndex = rowPos;
                       getTextOffset();
@@ -141,12 +128,18 @@ class YsTree {
             rowPos++;
           }
         }
-        chagnedPosition =
+        changedPosition =
             YsCursor.table(this, blockIndex, rowIndex, colIndex, textOffset);
       } else {
-        chagnedPosition = YsCursor.create(this, blockIndex, textOffset);
+        changedPosition = YsCursor.create(this, blockIndex, textOffset);
       }
     });
+  }
+
+  void dispose() {
+    for (var value in blocks) {
+      value.yMap.holder.remove(this);
+    }
   }
 
   void transact(Function(dynamic transaction) t) {
@@ -154,30 +147,29 @@ class YsTree {
   }
 
   void buildBlocks() {
-    var buildBlocks = <YsBlock>[];
-    var buildItemMap = <YMap, YsItem>{};
-    for (var item in yArray!.enumerateList()) {
-      YsBlock ysBlock;
-      if (itemMap.containsKey(item)) {
-        ysBlock = itemMap[item as YMap] as YsBlock;
-      } else {
-        ysBlock = YsBlock(
-          tree: this,
-          yMap: item as YMap,
-        );
-        ysBlock.init();
-        itemMap[item] = ysBlock;
+    transact((transaction) {
+      var buildBlocks = <YsBlock>[];
+      var items = yArray!.enumerateList();
+      for (var item in items) {
+        var yMap = item as YMap;
+        YsBlock ysBlock;
+        if (yMap.holder.containsKey(this)) {
+          ysBlock = yMap.holder[this] as YsBlock;
+        } else {
+          ysBlock = YsBlock(
+            tree: this,
+            yMap: yMap,
+          );
+          ysBlock.init();
+          yMap.holder[this] = ysBlock;
+        }
+        buildBlocks.add(ysBlock);
       }
-      // ysBlock.buildBlock();
-      buildItemMap[item] = ysBlock;
-      buildBlocks.add(ysBlock);
-    }
-    buildBlocks.removeWhere((element) => element.block == null);
-    blocks = buildBlocks;
-    itemMap = buildItemMap;
-    editController.setBlocks(buildBlocks.map((e) => e.block!).toList());
-    SchedulerBinding.instance.scheduleFrameCallback((timeStamp) {
-      editController.relayoutVision();
+      blocks = buildBlocks;
+      editController.setBlocks(buildBlocks.map((e) => e.block!).toList());
+      SchedulerBinding.instance.scheduleFrameCallback((timeStamp) {
+        editController.relayoutVision();
+      });
     });
   }
 
@@ -510,14 +502,14 @@ class YsTree {
   }
 
   DeleteFlag deleteBetweenCursorAndEnd(YsCursor cursor) {
-    AbsolutePosition? position =
-        AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[0], yDoc);
+    AbsolutePosition? position = AbsolutePosition.tryCreateFromRelativePosition(
+        cursor.positions[0], yDoc);
     if (position == null) {
       return DeleteFlag.skip;
     }
     if (cursor.blockType == BlockType.code) {
-      var codePs =
-          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[1], yDoc);
+      var codePs = AbsolutePosition.tryCreateFromRelativePosition(
+          cursor.positions[1], yDoc);
       if (codePs == null) {
         return DeleteFlag.skip;
       }
@@ -529,8 +521,8 @@ class YsTree {
       code.delete(codePs.index, code.length - codePs.index);
       return DeleteFlag.ok;
     } else if (cursor.blockType == BlockType.text) {
-      var textPos =
-          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[1], yDoc);
+      var textPos = AbsolutePosition.tryCreateFromRelativePosition(
+          cursor.positions[1], yDoc);
       if (textPos == null) {
         return DeleteFlag.skip;
       }
@@ -549,12 +541,12 @@ class YsTree {
     } else if (cursor.blockType == BlockType.table) {
       var block = yArray!.get(position.index) as YMap;
       //删除
-      var rowPs =
-          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[1], yDoc);
-      var colPs =
-          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[2], yDoc);
-      var cellPs =
-          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[3], yDoc);
+      var rowPs = AbsolutePosition.tryCreateFromRelativePosition(
+          cursor.positions[1], yDoc);
+      var colPs = AbsolutePosition.tryCreateFromRelativePosition(
+          cursor.positions[2], yDoc);
+      var cellPs = AbsolutePosition.tryCreateFromRelativePosition(
+          cursor.positions[3], yDoc);
       if (rowPs == null || colPs == null || cellPs == null) {
         return DeleteFlag.skip;
       }
@@ -593,14 +585,14 @@ class YsTree {
   }
 
   DeleteFlag deleteBetweenStartAndCursor(YsCursor cursor) {
-    AbsolutePosition? position =
-        AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[0], yDoc);
+    AbsolutePosition? position = AbsolutePosition.tryCreateFromRelativePosition(
+        cursor.positions[0], yDoc);
     if (position == null) {
       return DeleteFlag.skip;
     }
     if (cursor.blockType == BlockType.code) {
-      var codePs =
-          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[1], yDoc);
+      var codePs = AbsolutePosition.tryCreateFromRelativePosition(
+          cursor.positions[1], yDoc);
       if (codePs == null) {
         return DeleteFlag.skip;
       }
@@ -612,8 +604,8 @@ class YsTree {
       code.delete(0, codePs.index);
       return DeleteFlag.ok;
     } else if (cursor.blockType == BlockType.text) {
-      var textPos =
-          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[1], yDoc);
+      var textPos = AbsolutePosition.tryCreateFromRelativePosition(
+          cursor.positions[1], yDoc);
       if (textPos == null) {
         return DeleteFlag.skip;
       }
@@ -632,12 +624,12 @@ class YsTree {
     } else if (cursor.blockType == BlockType.table) {
       var block = yArray!.get(position.index) as YMap;
       //删除
-      var rowPs =
-          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[1], yDoc);
-      var colPs =
-          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[2], yDoc);
-      var cellPs =
-          AbsolutePosition.tryCreateFromRelativePosition(cursor.positions[3], yDoc);
+      var rowPs = AbsolutePosition.tryCreateFromRelativePosition(
+          cursor.positions[1], yDoc);
+      var colPs = AbsolutePosition.tryCreateFromRelativePosition(
+          cursor.positions[2], yDoc);
+      var cellPs = AbsolutePosition.tryCreateFromRelativePosition(
+          cursor.positions[3], yDoc);
       if (rowPs == null || colPs == null || cellPs == null) {
         return DeleteFlag.skip;
       }
@@ -1394,8 +1386,8 @@ class YsTree {
     if (undoManager?.canUndo() == true) {
       undoManager?.undo();
       try {
-        getEditCursorPosition(chagnedPosition);
-        setCursor(chagnedPosition);
+        getEditCursorPosition(changedPosition);
+        setCursor(changedPosition);
         applyCursorToEditor();
       } catch (e) {
         print(e);
@@ -1407,8 +1399,8 @@ class YsTree {
     if (undoManager?.canRedo() == true) {
       undoManager?.redo();
       try {
-        getEditCursorPosition(chagnedPosition);
-        setCursor(chagnedPosition);
+        getEditCursorPosition(changedPosition);
+        setCursor(changedPosition);
         applyCursorToEditor();
       } catch (e) {}
     }

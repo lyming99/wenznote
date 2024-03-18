@@ -17,6 +17,7 @@ import 'package:wenznote/editor/crdt/YsCode.dart';
 import 'package:wenznote/editor/crdt/YsText.dart';
 import 'package:wenznote/editor/edit_controller.dart';
 import 'package:ydart/ydart.dart';
+
 import 'YsItem.dart';
 import 'doc_utils.dart';
 
@@ -90,6 +91,12 @@ class YsBlock extends YsItem {
           tableElement: WenTableElement(),
           editController: editController);
       applyToTableBlock(map, block as TableBlock);
+    } else {
+      yMap.set("text", YText());
+      block = TextBlock(
+          context: context,
+          editController: editController,
+          textElement: WenTextElement());
     }
   }
 

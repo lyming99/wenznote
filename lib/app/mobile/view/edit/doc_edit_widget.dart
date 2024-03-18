@@ -894,7 +894,7 @@ class MobileDocEditWidget extends MvcView<MobileDocEditController> {
           ),
           onPress: (ctx) {
             hideDropMenu(ctx);
-            controller.sync(ctx);
+            controller.syncNow(ctx);
           },
         ),
         DropMenu(

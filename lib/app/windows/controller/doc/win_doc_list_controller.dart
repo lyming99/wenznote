@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:wenznote/app/windows/controller/doc/win_doc_page_controller.dart';
-import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
 import 'package:wenznote/app/windows/model/doc/win_doc_list_item_vo.dart';
 import 'package:wenznote/app/windows/model/today/search_result_vo.dart';
 import 'package:wenznote/app/windows/service/doc/win_doc_list_service.dart';
@@ -14,7 +14,6 @@ import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:wenznote/model/task/task.dart';
 import 'package:wenznote/service/edit/doc_edit_service.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:oktoast/oktoast.dart';
 
 class WinDocListController extends ServiceManagerController {
   String? docDirUuid;
@@ -126,7 +125,7 @@ class WinDocListController extends ServiceManagerController {
     if (uuid == null) {
       return;
     }
-    docPageController.openDoc(uuid,isCreateMode);
+    docPageController.openDoc(uuid, isCreateMode);
   }
 
   Future<DocPO> createDoc(BuildContext context, String text) async {
@@ -200,9 +199,13 @@ class WinDocListController extends ServiceManagerController {
           break;
         }
         //对doc进行搜索
-        var searchResult = await winTodayService.searchDocContent(doc, text);
-        if (task.cancel == false) {
-          searchResultList.addAll(searchResult);
+        try {
+          var searchResult = await winTodayService.searchDocContent(doc, text);
+          if (task.cancel == false) {
+            searchResultList.addAll(searchResult);
+          }
+        } catch (e, stack) {
+          print(stack);
         }
       }
     });

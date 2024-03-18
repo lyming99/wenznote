@@ -22,9 +22,9 @@ class DocService with IsarServiceMixin, ChangeNotifier {
     await documentIsar.writeTxn(() async {
       await documentIsar.docPOs.put(info);
     });
-    var yDoc = serviceManager.editService.createYDoc(info);
+    content ??= await serviceManager.editService.createYDoc(info);
     serviceManager.p2pService
-        .sendDocEditMessage(info.uuid!, yDoc.encodeStateAsUpdateV2(null));
+        .sendDocEditMessage(info.uuid!, content.encodeStateAsUpdateV2(null));
   }
 
   Future<void> deleteDoc(DocPO doc) async {

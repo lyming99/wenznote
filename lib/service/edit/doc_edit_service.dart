@@ -2,11 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:isar/isar.dart';
-import 'package:synchronized/extension.dart';
+import 'package:wenznote/commons/util/mehod_time_record.dart';
 import 'package:wenznote/editor/crdt/YsText.dart';
 import 'package:wenznote/editor/crdt/doc_utils.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
@@ -15,6 +14,8 @@ import 'package:wenznote/service/service_manager.dart';
 import 'package:ydart/ydart.dart';
 
 import '../../commons/util/log_util.dart';
+
+const checkDocSwitch = false;
 
 /// 读取数据 = 读取全量数据(离线)+读取合并数据(用户)+增量数据(用户)
 /// 写入数据 = 写入全量数据+写入增量数据
@@ -26,9 +27,8 @@ class DocEditService {
 
   final _fileCache = <String, Uint8List>{};
   final _docCache = <String, YDoc>{};
-  final _updateLock = Lock();
+  final _docLock = <String, Object>{};
   final _openedDocList = <String>{};
-  final _docUserEditMap = <String, bool>{};
 
   void openDocEditor(String id) {
     _openedDocList.add(id);
@@ -40,18 +40,6 @@ class DocEditService {
 
   bool hasOpenDocEditor(String id) {
     return _openedDocList.contains(id);
-  }
-
-  bool isNotEditUpdate(String docId) {
-    return _docUserEditMap[docId] ?? false;
-  }
-
-  void setNotEditUpdate(String docId, bool? state) {
-    if (state == null) {
-      _docUserEditMap.remove(docId);
-      return;
-    }
-    _docUserEditMap[docId] = state;
   }
 
   Future<Uint8List?> readDocBytes(String? docId) async {
@@ -80,6 +68,7 @@ class DocEditService {
         File(await serviceManager.fileManager.getNoteFilePath(docId));
     await noteFile.writeAsBytes(data);
     _fileCache[docId] = data;
+    printLog("writeDocBytes: $noteFile");
   }
 
   Future<YDoc?> readDoc(String? docId) async {
@@ -94,9 +83,9 @@ class DocEditService {
     var bytes = await readDocBytes(docId);
     if (bytes == null) {
       // 读取失败，应该触发1秒后从服务器下载文档数据
-      if (serviceManager.userService.hasLogin) {
-        serviceManager.docSnapshotService.downloadDocFile(docId);
-      }
+      // if (serviceManager.userService.hasLogin) {
+      //   serviceManager.docSnapshotService.downloadDocFile(docId);
+      // }
       return null;
     }
     var docItem = await serviceManager.docService.queryDoc(docId);
@@ -113,9 +102,14 @@ class DocEditService {
       return result;
     } catch (e, stack) {
       print(
-          "read doc file [${docItem?.type}/${docItem?.name}] lenth: ${bytes.length} create time:$dateTime error:${await serviceManager.fileManager.getNoteFilePath(docId)}");
+          "read doc file error [${docItem?.type}/${docItem?.name}] lenth: ${bytes.length} create time:$dateTime :${await serviceManager.fileManager.getNoteFilePath(docId)}");
       return null;
     }
+  }
+
+  Object getDocLock(String docId) {
+    _docLock[docId] ??= Object();
+    return _docLock[docId]!;
   }
 
   Future<void> writeDoc(
@@ -127,32 +121,48 @@ class DocEditService {
     if (docId == null) {
       return;
     }
-    await _updateLock.synchronized(() async {
-      var bytes = doc.encodeStateAsUpdateV2();
-      _docCache[docId] = doc;
-      await writeDocBytes(docId, bytes);
-      // 更新doc state
-      var isar = serviceManager.isarService.documentIsar;
-      var clientId = serviceManager.userService.clientId;
-      var state = await isar.docStatePOs
-          .filter()
-          .docIdEqualTo(docId)
-          .clientIdEqualTo(clientId)
-          .findFirst();
-      state ??= DocStatePO(docId: docId, clientId: clientId);
-      state.updateTime = DateTime.now().millisecondsSinceEpoch;
-      await isar.writeTxn(() async {
-        await isar.docStatePOs.put(state!);
-      });
-      // 增加上传快照任务
-      if (needUpload) {
-        if (uploadNow) {
-          await serviceManager.uploadTaskService.uploadDoc(docId, 0);
-        } else {
-          await serviceManager.uploadTaskService.uploadDoc(docId);
+    await getDocLock(docId).synchronizedWithLog(
+      () async {
+        printLog(
+            "write doc [$docId] need upload:[$needUpload] uploadNow:[$uploadNow]");
+        var bytes = await withLog(() => doc.encodeStateAsUpdateV2(),
+            logTitle: "encode");
+        _docCache[docId] = doc;
+        // 校验文档数据
+        if (checkDocSwitch) {
+          var checkDoc = YDoc();
+          checkDoc.applyUpdateV2(bytes);
+          if (doc.getArray("blocks").length !=
+              checkDoc.getArray("blocks").length) {
+            printLog("文件写入失败，文件格式损坏");
+            return;
+          }
         }
-      }
-    });
+        await writeDocBytes(docId, bytes);
+        // 更新doc state
+        var isar = serviceManager.isarService.documentIsar;
+        var clientId = serviceManager.userService.clientId;
+        var state = await isar.docStatePOs
+            .filter()
+            .docIdEqualTo(docId)
+            .clientIdEqualTo(clientId)
+            .findFirst();
+        state ??= DocStatePO(docId: docId, clientId: clientId);
+        state.updateTime = DateTime.now().millisecondsSinceEpoch;
+        await isar.writeTxn(() async {
+          await isar.docStatePOs.put(state!);
+        });
+        // 增加上传快照任务
+        if (needUpload) {
+          if (uploadNow) {
+            serviceManager.uploadTaskService.uploadDoc(docId, 0);
+          } else {
+            serviceManager.uploadTaskService.uploadDoc(docId);
+          }
+        }
+      },
+      logTitle: "writeDoc: $docId",
+    );
   }
 
   /// 收到数据，或者下载数据时，会促发这个方法
@@ -165,36 +175,48 @@ class DocEditService {
       return false;
     }
     // 提出问题，这个方法能否在 on update 里面直接调用？
-    return _updateLock.synchronized(() async {
-      try {
-        // 1.更新到编辑器
-        var doc = await readDoc(docId);
-        if (doc != null) {
-          // 将此次更新设置位不需要上传变化，也不需要写到文件
-          setNotEditUpdate(docId, true);
-          try {
+    return getDocLock(docId).synchronizedWithLog(
+      () async {
+        try {
+          // 1.更新到编辑器
+          var doc = await readDoc(docId);
+          var oldDocLength = -1;
+          if (doc != null) {
+            // 将此次更新设置位不需要上传变化，也不需要写到文件
+            try {
+              doc.applyUpdateV2(delta);
+            } catch (e) {
+              printLog("更新doc失败, applyUpdateV2 error: $e");
+            }
+            oldDocLength = doc.getArray("blocks").length;
+          } else {
+            doc = YDoc();
+            doc.clientId = serviceManager.userService.clientId;
             doc.applyUpdateV2(delta);
-          } catch (e) {
-            printLog("更新doc失败, applyUpdateV2 error: $e");
-          } finally {
-            setNotEditUpdate(docId, null);
           }
-        } else {
-          doc = YDoc();
-          doc.clientId = serviceManager.userService.clientId;
+          // 2.写到文件
+          var oldBytes = delta;
+          var newBytes = doc.encodeStateAsUpdateV2();
+          // 校验文档数据
+          if (checkDocSwitch) {
+            var checkDoc = YDoc();
+            checkDoc.applyUpdateV2(newBytes);
+            if (oldDocLength != checkDoc.getArray("blocks").length) {
+              printLog("文件写入失败，文件格式损坏");
+              return false;
+            }
+          }
+          await writeDocBytes(docId, newBytes);
+          // 3.上传到服务器(20秒后)
+          await serviceManager.uploadTaskService.uploadDoc(docId);
+          return !_equalsBytes(newBytes, oldBytes);
+        } catch (e) {
+          printLog("合并doc失败, error: $e");
+          return false;
         }
-        // 2.写到文件
-        var newBytes = delta;
-        var docBytes = doc.encodeStateAsUpdateV2();
-        await writeDocBytes(docId, newBytes);
-        // 3.上传到服务器(20秒后)
-        await serviceManager.uploadTaskService.uploadDoc(docId);
-        return !_equalsBytes(docBytes, newBytes);
-      } catch (e) {
-        printLog("合并doc失败, error: $e");
-        return false;
-      }
-    });
+      },
+      logTitle: "updateDocContent: $docId",
+    );
   }
 
   Future<void> deleteDocFile(String docId) async {
@@ -230,12 +252,12 @@ class DocEditService {
     return true;
   }
 
-  YDoc createYDoc(DocPO info) {
+  Future<YDoc> createYDoc(DocPO info) async {
     var doc = YDoc();
     doc.clientId = serviceManager.userService.clientId;
     var blocks = doc.getArray("blocks");
     blocks.insert(0, [createEmptyTextYMap()]);
-    writeDoc(info.uuid, doc, uploadNow: true);
+    await writeDoc(info.uuid, doc, uploadNow: true);
     return doc;
   }
 

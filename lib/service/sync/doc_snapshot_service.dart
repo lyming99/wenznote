@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:isar/isar.dart';
 import 'package:synchronized/extension.dart';
 import 'package:wenznote/commons/util/log_util.dart';
+import 'package:wenznote/commons/util/mehod_time_record.dart';
 import 'package:wenznote/config/app_constants.dart';
 import 'package:wenznote/model/note/po/doc_state_po.dart';
 import 'package:wenznote/service/service_manager.dart';
@@ -189,23 +190,17 @@ class DocSnapshotService {
     await downloadDocFile(dataId);
   }
 
-  Future<void> addDownloadDocFileTask(List<String> docList) async {
-    // 下载文档任务
-    // 下载文件任务
-    // 同步
-  }
-
   Future<void> downloadDocFile(String docId) async {
-    if (serviceManager.editService.hasOpenDocEditor(docId)) {
+    var doc = await serviceManager.docService.queryDoc(docId);
+    if (doc?.type == null) {
       return;
     }
-    return _downloadLock.synchronized(() async {
+    return _downloadLock.synchronizedWithLog(() async {
       var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;
       if (noteServerUrl == null) {
         return;
       }
       var isar = serviceManager.isarService.documentIsar;
-      var doc = await serviceManager.docService.queryDoc(docId);
       Response result;
       try {
         result = await Dio().post(
@@ -217,8 +212,16 @@ class DocSnapshotService {
             responseType: ResponseType.bytes,
           ),
         );
-      } catch (e) {
-        print("download doc file [${doc?.type}/${doc?.name}] error: $docId");
+      } catch (e, err) {
+        if (e is DioError) {
+          if (e.response?.statusCode == 401) {
+            // 文件不存在，为啥会被下载？
+            rethrow;
+          }
+        }
+        print(e);
+        // 如果是401错误，则说明文档不存在
+        print("download doc file net error: ${doc?.type}/${doc?.name}/$docId");
         return;
       }
       // result 返回的是数据+文件zip压缩包{state,file}
@@ -290,7 +293,7 @@ class DocSnapshotService {
           await isar.docStatePOs.putAll(saveStates);
         });
       }
-    });
+    },logTitle: "downloadDocFile");
   }
 
   /// 通过clientId,updateTime查询需要更新的文档
@@ -350,7 +353,7 @@ class DocSnapshotService {
       return;
     }
     for (var update in updateList) {
-      downloadDocFile(update);
+      await downloadDocFile(update);
     }
   }
 }
