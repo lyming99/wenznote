@@ -625,6 +625,7 @@ class EditController with ChangeNotifier {
     if (constrains.maxWidth < 0) {
       return [];
     }
+
     var blocks = blockManager.layout(
         context, scrollOffset, Size(blockMaxWidth, visionHeight), padding);
     var ret = <Widget>[];

@@ -44,7 +44,7 @@ class MobileCardEditController extends MobileDocEditController {
     editController.waitLayout(() {
       editController.requestFocus();
     });
-    doc.updateV2.add((data, origin, transaction) async {
+    doc.updateV2['update'] = ((data, origin, transaction) async {
       card.content = await getDocJson();
       await serviceManager.cardService.updateCard(card);
     });

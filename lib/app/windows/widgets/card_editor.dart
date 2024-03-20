@@ -34,7 +34,6 @@ class _CardEditorState extends State<CardEditor>
     readDoc();
   }
 
-
   @override
   void dispose() {
     super.dispose();
@@ -76,7 +75,7 @@ class _CardEditorState extends State<CardEditor>
       yDoc: doc,
     );
     ysTree!.init();
-    doc.updateV2.add((data, origin, transaction) async {
+    doc.updateV2['update'] = ((data, origin, transaction) async {
       var json = await getJson();
       widget.card.content = json;
       widget.onCardUpdate?.call(doc);

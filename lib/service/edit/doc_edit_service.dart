@@ -25,7 +25,6 @@ class DocEditService {
 
   DocEditService(this.serviceManager);
 
-  final _fileCache = <String, Uint8List>{};
   final _docCache = <String, YDoc>{};
   final _docLock = <String, Object>{};
   final _openedDocList = <String>{};
@@ -46,15 +45,10 @@ class DocEditService {
     if (docId == null || docId.isEmpty) {
       return null;
     }
-    var item = _fileCache[docId];
-    if (item != null) {
-      return item;
-    }
     var noteFile =
         File(await serviceManager.fileManager.getNoteFilePath(docId));
     if (noteFile.existsSync()) {
       var result = await noteFile.readAsBytes();
-      _fileCache[docId] = result;
       return result;
     }
     return null;
@@ -67,7 +61,6 @@ class DocEditService {
     var noteFile =
         File(await serviceManager.fileManager.getNoteFilePath(docId));
     await noteFile.writeAsBytes(data);
-    _fileCache[docId] = data;
     printLog("writeDocBytes: $noteFile");
   }
 
@@ -79,30 +72,14 @@ class DocEditService {
     if (doc != null) {
       return doc;
     }
-    // 如何将读取耗时控制在一定范围内？
-    var bytes = await readDocBytes(docId);
-    if (bytes == null) {
-      // 读取失败，应该触发1秒后从服务器下载文档数据
-      // if (serviceManager.userService.hasLogin) {
-      //   serviceManager.docSnapshotService.downloadDocFile(docId);
-      // }
-      return null;
-    }
-    var docItem = await serviceManager.docService.queryDoc(docId);
-    dynamic createTime = docItem?.createTime;
-    String? dateTime;
-    if (createTime != null) {
-      var date = DateTime.fromMillisecondsSinceEpoch(createTime);
-      dateTime = date.toString();
-    }
     try {
+      var path = await serviceManager.fileManager.getNoteFilePath(docId);
       var result = YDoc()..clientId = serviceManager.userService.clientId;
-      result.applyUpdateV2(bytes);
+      result.applyUpdateV2(File(path).readAsBytesSync());
+      FragmentDocFile(path: "$path.bak").readDoc(result);
       _docCache[docId] = result;
       return result;
     } catch (e, stack) {
-      print(
-          "read doc file error [${docItem?.type}/${docItem?.name}] lenth: ${bytes.length} create time:$dateTime :${await serviceManager.fileManager.getNoteFilePath(docId)}");
       return null;
     }
   }
@@ -221,7 +198,6 @@ class DocEditService {
 
   Future<void> deleteDocFile(String docId) async {
     _docCache.remove(docId);
-    _fileCache.remove(docId);
     var path = await serviceManager.fileManager.getNoteFilePath(docId);
     try {
       File(path).deleteSync();

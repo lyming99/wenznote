@@ -125,7 +125,7 @@ class MobileDocEditController extends ServiceManagerController {
       editController.waitLayout(() {
         editController.requestFocus();
       });
-      doc.updateV2.add((data, origin, transaction) {
+      doc.updateV2['update'] = ((data, origin, transaction) {
         if (transaction.local != true) {
           // 如果不是本地更新的话，就不需要写入文件了
           return;

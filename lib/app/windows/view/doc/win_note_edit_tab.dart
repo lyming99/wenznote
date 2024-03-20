@@ -96,7 +96,7 @@ class WinNoteEditTabController extends WinEditTabController {
         yDoc: doc,
       );
       ysTree!.init();
-      doc.updateV2.add((data, origin, transaction) {
+      doc.updateV2['update'] = ((data, origin, transaction) {
         if (transaction.local != true) {
           return;
         }
