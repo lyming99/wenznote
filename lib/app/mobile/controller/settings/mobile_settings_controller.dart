@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wenznote/commons/mvc/controller.dart';
@@ -10,6 +12,8 @@ const kMaximal = "maximal";
 class MobileSettingsController extends ServiceManagerController {
   var brightness = "system".obs;
   var fontSize = "medium".obs;
+  var savePath = "".obs;
+  var savePathEditController = TextEditingController();
 
   String get brightnessString {
     if (brightness.value == "dark") {
@@ -52,6 +56,9 @@ class MobileSettingsController extends ServiceManagerController {
         .readConfig("system.brightness", "system");
     fontSize.value = await serviceManager.configManager
         .readConfig("system.fontSize", "medium");
+    var rootPath = await serviceManager.fileManager.getSaveDir();
+    var path = File(rootPath).absolute.path;
+    savePath.value = path;
   }
 
   @override
@@ -61,5 +68,10 @@ class MobileSettingsController extends ServiceManagerController {
       brightness = oldController.brightness;
       fontSize = oldController.fontSize;
     }
+  }
+
+  Future<void> changeSavePath(String path) async{
+    await serviceManager.fileManager.setSaveDir(path);
+    savePath.value = path;
   }
 }

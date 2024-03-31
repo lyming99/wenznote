@@ -7,7 +7,7 @@ import 'window_button/decorated_button.dart';
 
 Widget buildMacWindowButton(BuildContext context) {
   return SizedBox(
-    height: 40,
+    height: Platform.isMacOS?40:28,
     child: Row(
       children: [
         if (Platform.isMacOS)

@@ -107,7 +107,7 @@ class ServiceManager with ChangeNotifier {
       if (isStart) {
         return;
       }
-      Hive.init("${await fileManager.getRootDir()}/hive");
+      Hive.init("${await fileManager.getSaveDir()}/hive");
       await Hive.openBox("settings");
       try {
         await userService.startUserService();
@@ -125,7 +125,8 @@ class ServiceManager with ChangeNotifier {
     });
     initTest();
   }
-  Future<void> initTest()async{
+
+  Future<void> initTest() async {
     // 740ce350-e412-11ee-9d7c-376fb7ca4329
     // var docId = "740ce350-e412-11ee-9d7c-376fb7ca4329";
     // docSnapshotService.downloadDocFile(docId);
@@ -156,5 +157,9 @@ class ServiceManager with ChangeNotifier {
 
   void setCanPopOnce() {
     _canPop = true;
+  }
+
+  void restartService(BuildContext context) {
+    ServiceManagerWidgetState.of(context).restart();
   }
 }

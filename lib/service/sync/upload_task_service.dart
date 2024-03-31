@@ -12,7 +12,6 @@ import 'package:wenznote/model/file/file_po.dart';
 import 'package:wenznote/model/note/po/doc_state_po.dart';
 import 'package:wenznote/model/note/po/upload_task_po.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:ydart/utils/y_doc.dart';
 
 import '../../commons/util/log_util.dart';
 
@@ -75,8 +74,8 @@ class UploadTaskService {
   void doUploadFirst() async {
     try {
       var uploadConfigKey = "first.upload1.${serviceManager.userService.uid}";
-      var result = await serviceManager.configManager
-          .readConfig(uploadConfigKey, "");
+      var result =
+          await serviceManager.configManager.readConfig(uploadConfigKey, "");
       if (result == "ok") {
         return;
       }
@@ -226,6 +225,9 @@ class UploadTaskService {
 
   Future<DocState?> _queryDocState(String docId) async {
     var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;
+    if (noteServerUrl == null) {
+      return null;
+    }
     var result = await Dio().post(
       "$noteServerUrl/doc/queryDocState/$docId",
       options: Options(
@@ -251,7 +253,7 @@ class UploadTaskService {
   Future<bool> _doUploadNote(UploadTaskPO task) async {
     try {
       var token = serviceManager.userService.token;
-      if (token == null) {
+      if (token == null || token.isEmpty) {
         return false;
       }
       var docId = task.dataId;

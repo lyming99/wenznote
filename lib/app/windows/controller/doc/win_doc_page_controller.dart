@@ -25,13 +25,13 @@ class WinDocPageController extends MvcController {
     docListControllerMap = old.docListControllerMap;
   }
 
-  void createDoc(BuildContext context, String text) async {
-    var doc = await docListController?.createDoc(context, text);
+  void createDoc(BuildContext context, String name) async {
+    var doc = await docListController?.createDoc(context, name);
     docListController?.selectItem.value = doc?.uuid;
   }
 
-  void createDirectory(BuildContext context, String text) async {
-    var dir = await docListController?.createDirectory(context, text);
+  void createDirectory(BuildContext context, String name) async {
+    var dir = await docListController?.createDirectory(context, name);
     docListController?.selectItem.value = dir?.uuid;
   }
 

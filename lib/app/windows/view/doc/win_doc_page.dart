@@ -16,8 +16,8 @@ class WinDocPage extends MvcView<WinDocPageController> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(
-        top: 30,
+      margin: const EdgeInsets.only(
+        top: 32,
       ),
       child: Column(
         children: [
@@ -115,7 +115,7 @@ class WinDocPage extends MvcView<WinDocPageController> {
           ),
           onPress: (ctx) {
             hideDropMenu(ctx);
-            controller.createDoc(context, "");
+            showCreateDialog(context, "新建笔记", "请输入笔记名称", true);
           },
         ),
         DropMenu(
@@ -131,7 +131,7 @@ class WinDocPage extends MvcView<WinDocPageController> {
           ),
           onPress: (ctx) {
             hideDropMenu(ctx);
-            showCreateDialog(context, "新建文件夹", "", false);
+            showCreateDialog(context, "新建文件夹", "请输入文件夹名称", false);
           },
         ),
       ],

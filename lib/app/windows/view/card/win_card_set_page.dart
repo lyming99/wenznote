@@ -13,7 +13,7 @@ class WinCardSetPage extends MvcView<WinCardSetController> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(top: 30),
+      padding: const EdgeInsets.only(top: 32),
       child: Column(
         children: [
           buildSearch(context),

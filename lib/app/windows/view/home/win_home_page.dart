@@ -429,7 +429,7 @@ class WinHomePage extends MvcView<WinHomeController> {
       color: theme.resources.solidBackgroundFillColorSecondary,
       child: Container(
         padding: controller.showNavPage.isTrue
-            ? EdgeInsets.only(top: Platform.isMacOS ? 26 : 32)
+            ? EdgeInsets.only(top: Platform.isMacOS ? 26 : 30)
             : null,
         child: WinTabView(
           controller: controller.tabController,

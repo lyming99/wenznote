@@ -32,7 +32,7 @@ class IsarService {
       if(_documentIsar!=null){
         return true;
       }
-      var dir = await serviceManager.fileManager.getRootDir();
+      var dir = await serviceManager.fileManager.getSaveDir();
       var databases =
           Directory("$dir/${serviceManager.userService.userPath}databases");
       if (!databases.existsSync()) {

@@ -30,11 +30,10 @@ var _colorMap = _defaultColorMap;
 void setColorMap(
     BuildContext context, Map<String, Map<String, Color>> colorMap) {
   _colorMap = colorMap;
-  ServiceManager.of(context).settingsManager.notifyChildrens();
 }
 
 Color systemColor(BuildContext context, String name) {
-  var brightness = ServiceManager.of(context).settingsManager.getBrightness();
+  var brightness = ServiceManager.of(context).themeManager.getBrightness();
   if (brightness == Brightness.dark) {
     return _colorMap["dark"]?[name] ?? Colors.black;
   }

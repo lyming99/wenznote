@@ -48,12 +48,12 @@ class CopyService {
       "copyContent": jsonEncode(copyContent),
     };
     var saveJson = jsonEncode(map);
-    var wenNoteDir = await serviceManager.fileManager.getWenNoteRootDir();
+    var wenNoteDir = await serviceManager.fileManager.getAndCreateSaveDir();
     File("$wenNoteDir/copyCache").writeAsString(saveJson);
   }
 
   Future<void> readCopyCache(BuildContext context) async {
-    var wenNoteDir = await serviceManager.fileManager.getWenNoteRootDir();
+    var wenNoteDir = await serviceManager.fileManager.getAndCreateSaveDir();
     if (File("$wenNoteDir/copyCache").existsSync()) {
       var saveJson = await File("$wenNoteDir/copyCache").readAsString();
       Map content = jsonDecode(saveJson);

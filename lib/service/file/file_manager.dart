@@ -12,6 +12,7 @@ import 'package:image_size_getter/image_size_getter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:wenznote/commons/util/file_utils.dart';
+import 'package:wenznote/commons/util/log_util.dart';
 import 'package:wenznote/model/file/file_po.dart';
 import 'package:wenznote/service/service_manager.dart';
 
@@ -166,45 +167,90 @@ class FileManager {
     return null;
   }
 
-  Future<String> getRootDir() async {
+  Future<String> _getRootDir() async {
     if (Platform.isWindows) {
-      var exePath = getExePath();
-      return "${exePath}local";
+      return getExePath();
     }
     return (await getApplicationDocumentsDirectory()).path;
   }
 
+  /// 获取软件数据存储路径，这个路径可以配置
+  Future<String> getSaveDir() async {
+    var defaultRootDir = await _getRootDir();
+    var configFile = "$defaultRootDir/config.json";
+    printLog(configFile);
+    if (File(configFile).existsSync()) {
+      var configContent = await File(configFile).readAsString();
+      if (configContent.isNotEmpty) {
+        var rootDir = jsonDecode(configContent)['rootDir'] as String?;
+        if (rootDir != null && rootDir.isNotEmpty) {
+          return rootDir;
+        }
+      }
+    }
+    if (Platform.isWindows) {
+      return "$defaultRootDir/local";
+    }
+    return defaultRootDir;
+  }
+
+  /// 设置软件数据存储路径
+  Future<void> setSaveDir(String path) async {
+    // 将rootDir中的文件全部转移过去
+    if (!Directory(path).existsSync()) {
+      return;
+    }
+    // 写入配置
+    var currentRootDir = await getSaveDir();
+    await copyDirectory(Directory(currentRootDir), Directory(path));
+    var defaultRootDir = await _getRootDir();
+    if (!Directory(defaultRootDir).existsSync()) {
+      Directory(defaultRootDir).createSync(recursive: true);
+    }
+    var configFile = "$defaultRootDir/config.json";
+    Map configMap = {};
+    if (File(configFile).existsSync()) {
+      var configContent = await File(configFile).readAsString();
+      if (configContent.isNotEmpty) {
+        configMap = jsonDecode(configContent) as Map;
+      }
+    }
+    configMap['rootDir'] = path;
+    var saveConfig = jsonEncode(configMap);
+    File(configFile).writeAsStringSync(saveConfig);
+  }
+
   String getExePath() {
-    var exe = Platform.executable.replaceAll("\\\\", "/");
+    var exe = Platform.executable.replaceAll("\\", "/").replaceAll("\\\\", "/");
     int i = exe.lastIndexOf("/");
     if (i == -1) {
-      return "./";
+      return ".";
     }
-    return "${exe.substring(0, i)}/";
+    return exe.substring(0, i);
   }
 
   Future<String> getDocDir() async {
-    var dir = await getRootDir();
+    var dir = await getSaveDir();
     return "$dir/${serviceManager.userService.userPath}notes";
   }
 
   Future<String> getImageDir() async {
-    var dir = await getRootDir();
+    var dir = await getSaveDir();
     return "$dir/${serviceManager.userService.userPath}images";
   }
 
   Future<String> getAssetsDir() async {
-    var dir = await getRootDir();
+    var dir = await getSaveDir();
     return "$dir/${serviceManager.userService.userPath}assets";
   }
 
   Future<String> getDownloadDir() async {
-    var dir = await getRootDir();
+    var dir = await getSaveDir();
     return "$dir/${serviceManager.userService.userPath}download";
   }
 
   Future<String> getConfigDir() async {
-    var dir = await getRootDir();
+    var dir = await getSaveDir();
     return "$dir/${serviceManager.userService.userPath}config";
   }
 
@@ -218,8 +264,8 @@ class FileManager {
     return Directory(dir).listSync();
   }
 
-  Future<String> getWenNoteRootDir() async {
-    var docDir = await getRootDir();
+  Future<String> getAndCreateSaveDir() async {
+    var docDir = await getSaveDir();
     if (!Directory(docDir).existsSync()) {
       Directory(docDir).createSync(recursive: true);
     }
@@ -370,7 +416,6 @@ class FileManager {
     }
     return "$noteDir/$docId.wnote";
   }
-
 }
 
 class JsonContent {

@@ -157,12 +157,6 @@ Future<String> exportWdocFile(
   return wdocFile;
 }
 
-Future<List<WenElement>> readDocElements(
-    FileManager fileManager, String uuid) async {
-  var json = await fileManager.readDocFileContent(uuid);
-  return json.map((e) => WenElement.parseJson(e)).toList();
-}
-
 List<WenElement> jsonStrToElements(String json) {
   var list = jsonDecode(json) as List;
   return list.map((e) => WenElement.parseJson(e)).toList();
@@ -170,11 +164,6 @@ List<WenElement> jsonStrToElements(String json) {
 
 List<WenElement> jsonListToElements(List list) {
   return list.map((e) => WenElement.parseJson(e)).toList();
-}
-
-Future<String> readDocJsonContent(FileManager fileManager, String uuid) async {
-  var list = await fileManager.readDocFileContent(uuid);
-  return jsonEncode(list);
 }
 
 List<WenElement> getDocFileList(List<WenElement> docContent) {

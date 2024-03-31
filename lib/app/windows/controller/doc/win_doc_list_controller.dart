@@ -128,8 +128,8 @@ class WinDocListController extends ServiceManagerController {
     docPageController.openDoc(uuid, isCreateMode);
   }
 
-  Future<DocPO> createDoc(BuildContext context, String text) async {
-    var doc = await docListService.createDoc(docDirUuid, text);
+  Future<DocPO> createDoc(BuildContext context, String name) async {
+    var doc = await docListService.createDoc(docDirUuid, name);
     SchedulerBinding.instance.scheduleFrameCallback((timeStamp) {
       openDoc(context, doc, true);
     });

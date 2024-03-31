@@ -33,13 +33,13 @@ class WinDocListService {
     return item;
   }
 
-  Future<DocPO> createDoc(String? pid, String text) async {
+  Future<DocPO> createDoc(String? pid, String name) async {
     var item = DocPO(
       pid: pid,
       uuid: Uuid().v1(),
       createTime: DateTime.now().millisecondsSinceEpoch,
       updateTime: DateTime.now().millisecondsSinceEpoch,
-      name: text,
+      name: name,
       type: "doc",
     );
     await serviceManager.docService.createDoc(item, null);

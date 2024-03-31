@@ -13,6 +13,7 @@ class SettingsManager with IsarServiceMixin implements ValueListenable {
   SettingsManager(this.serviceManager);
 
   String readConfig(String key, String defaultValue) {
+    serviceManager.configManager.readConfig(key, defaultValue);
     var config =
         documentIsar.settingsPOs.filter().keyEqualTo(key).findFirstSync();
     return config?.value ?? defaultValue;

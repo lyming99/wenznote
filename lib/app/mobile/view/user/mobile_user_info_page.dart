@@ -42,7 +42,7 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
                 tiles: [
                   ListTile(
                     tileColor: MobileTheme.of(context).mobileNavBgColor,
-                    title: Text("邮箱"),
+                    title: const Text("邮箱",style: TextStyle(fontSize: 14),),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -55,15 +55,16 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
                                 color: MobileTheme.of(context)
                                     .fontColor
                                     .withAlpha(200),
+                                fontSize: 14,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           );
                         }),
-                        SizedBox(
+                        const SizedBox(
                           width: 8,
                         ),
-                        Icon(Icons.arrow_forward_ios_outlined),
+                        const Icon(Icons.arrow_forward_ios_outlined),
                       ],
                     ),
                     onTap: () {
@@ -72,28 +73,29 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
                   ),
                   ListTile(
                     tileColor: MobileTheme.of(context).mobileNavBgColor,
-                    title: Text("昵称"),
+                    title: const Text("昵称",style: TextStyle(fontSize: 14),),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Obx(() {
-                          return fluent.Container(
-                            constraints: BoxConstraints(maxWidth: 180),
+                          return Container(
+                            constraints: const BoxConstraints(maxWidth: 180),
                             child: Text(
                               controller.username.value,
                               style: TextStyle(
                                 color: MobileTheme.of(context)
                                     .fontColor
                                     .withAlpha(200),
+                                fontSize: 14,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           );
                         }),
-                        SizedBox(
+                        const SizedBox(
                           width: 8,
                         ),
-                        Icon(Icons.arrow_forward_ios_outlined),
+                        const Icon(Icons.arrow_forward_ios_outlined),
                       ],
                     ),
                     onTap: () {
@@ -102,28 +104,29 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
                   ),
                   ListTile(
                     tileColor: MobileTheme.of(context).mobileNavBgColor,
-                    title: Text("个性签名"),
+                    title: const Text("个性签名",style: TextStyle(fontSize: 14),),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Obx(() {
-                          return fluent.Container(
-                            constraints: BoxConstraints(maxWidth: 180),
+                          return Container(
+                            constraints: const BoxConstraints(maxWidth: 180),
                             child: Text(
                               controller.sign.value,
                               style: TextStyle(
                                 color: MobileTheme.of(context)
                                     .fontColor
                                     .withAlpha(200),
+                                fontSize: 14,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           );
                         }),
-                        SizedBox(
+                        const SizedBox(
                           width: 8,
                         ),
-                        Icon(Icons.arrow_forward_ios_outlined),
+                        const Icon(Icons.arrow_forward_ios_outlined),
                       ],
                     ),
                     onTap: () {
@@ -133,28 +136,29 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
                   ),
                   ListTile(
                     tileColor: MobileTheme.of(context).mobileNavBgColor,
-                    title: Text("身份标识"),
+                    title: const Text("身份标识",style: TextStyle(fontSize: 14),),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Obx(() {
                           return fluent.Container(
-                            constraints: BoxConstraints(maxWidth: 180),
+                            constraints: const BoxConstraints(maxWidth: 180),
                             child: Text(
                               controller.userType.value,
                               style: TextStyle(
                                 color: MobileTheme.of(context)
                                     .fontColor
                                     .withAlpha(200),
+                                fontSize: 14,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           );
                         }),
-                        SizedBox(
+                        const SizedBox(
                           width: 8,
                         ),
-                        Icon(Icons.arrow_forward_ios_outlined),
+                        const Icon(Icons.arrow_forward_ios_outlined),
                       ],
                     ),
                     onTap: () {
@@ -173,7 +177,7 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
                     tileColor: MobileTheme.of(context).mobileNavBgColor,
                     title: Text(
                       "退出登录",
-                      style: TextStyle(color: Colors.red.shade400),
+                      style: TextStyle(color: Colors.red.shade400,fontSize: 14),
                     ),
                     trailing: Icon(Icons.arrow_forward_ios_outlined),
                     onTap: () {
