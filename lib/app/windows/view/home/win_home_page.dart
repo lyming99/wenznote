@@ -4,6 +4,7 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:wenznote/app/mobile/controller/user/mobile_user_info_controller.dart';
 import 'package:wenznote/app/mobile/controller/user/mobile_user_login_controller.dart';
 import 'package:wenznote/app/mobile/view/user/mobile_user_icon.dart';
@@ -20,7 +21,6 @@ import 'package:wenznote/commons/widget/split_pane.dart';
 import 'package:wenznote/commons/widget/window_buttons.dart';
 import 'package:wenznote/editor/widget/drop_menu.dart';
 import 'package:wenznote/editor/widget/toggle_item.dart';
-import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:wenznote/widgets/mac_window_button.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -116,14 +116,14 @@ class WinHomePage extends MvcView<WinHomeController> {
         },
         itemBuilder:
             (BuildContext context, bool checked, bool hover, bool pressed) {
-          return Stack(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                child: MobileUserIcon(),
-              ),
-              if (controller.isLogin)
+          return Obx(
+            () => Stack(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  child: MobileUserIcon(),
+                ),
                 Align(
                   alignment: Alignment.bottomRight,
                   child: Container(
@@ -131,12 +131,15 @@ class WinHomePage extends MvcView<WinHomeController> {
                     height: 10,
                     margin: EdgeInsets.only(right: 2),
                     decoration: BoxDecoration(
-                      color: Colors.greenAccent,
+                      color: controller.isConnected
+                          ? Colors.greenAccent
+                          : Colors.red,
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
-            ],
+              ],
+            ),
           );
         },
       ),
@@ -434,7 +437,6 @@ class WinHomePage extends MvcView<WinHomeController> {
       ),
     );
   }
-
 
   /// 侧边导航栏菜单按钮
   Widget buildNavMenu(BuildContext context) {

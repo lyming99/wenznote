@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/get_utils.dart';
 import 'package:octo_image/octo_image.dart';
@@ -126,6 +127,9 @@ class UserService with ChangeNotifier {
   }
 
   Future<ServerVO?> queryNoteServer() async {
+    if(kDebugMode){
+      return ServerVO(host: "127.0.0.1",port: 9898);
+    }
     var result = await Dio().post(
       "${AppConstants.apiUrl}/server/queryNoteServer",
       options: Options(

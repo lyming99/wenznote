@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:wenznote/commons/util/platform_util.dart';
 import 'package:wenznote/commons/util/string.dart';
 import 'package:wenznote/commons/util/wdoc/wdoc.dart';
@@ -17,7 +18,6 @@ import 'package:wenznote/editor/crdt/doc_utils.dart';
 import 'package:wenznote/model/note/po/doc_dir_po.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:oktoast/oktoast.dart';
 
 /// 导出笔记
 /// 流程1：选择导出文件
@@ -29,8 +29,8 @@ class ExportController extends ServiceManagerController {
 
   var isWdoc = false.obs;
 
-  var pathEditController = TextEditingController(text: "/output");
-  var nameEditController = TextEditingController(text: "output");
+  var pathEditController = TextEditingController(text: "./");
+  var nameEditController = TextEditingController(text: "未命名");
   var assetsEditController = TextEditingController(text: "assets");
 
   var isZip = false.obs;
@@ -52,7 +52,35 @@ class ExportController extends ServiceManagerController {
   @override
   void onInitState(BuildContext context) {
     super.onInitState(context);
-    fetchNote();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    await fetchConfig();
+    await fetchNote();
+  }
+
+  Future<void> fetchConfig() async {
+    pathEditController.text =
+        await serviceManager.configManager.readConfig("export.path", "./");
+    nameEditController.text =
+        await serviceManager.configManager.readConfig("export.name", "未命名");
+    assetsEditController.text =
+        await serviceManager.configManager.readConfig("export.assets", "assets");
+    pathEditController.addListener(() {
+      serviceManager.configManager.saveConfig("export.path", pathEditController.text);
+    });
+    nameEditController.addListener(() {
+      serviceManager.configManager.saveConfig("export.name", nameEditController.text);
+    });
+    assetsEditController.addListener(() {
+      serviceManager.configManager.saveConfig("export.assets", assetsEditController.text);
+    });
+  }
+
+  Future<void> fetchNote() async {
+    var root = await fetchRootNode();
+    treeController.value = SelectTreeController(rootNode: root);
   }
 
   Future<SelectTreeNode> fetchRootNode() async {
@@ -71,11 +99,6 @@ class ExportController extends ServiceManagerController {
         data: SelectData(object: e))));
     var rootNode = TreeNode.buildTree(nodes);
     return rootNode;
-  }
-
-  void fetchNote() async {
-    var root = await fetchRootNode();
-    treeController.value = SelectTreeController(rootNode: root);
   }
 
   void toggleExpanded(TreeNode node) {
@@ -112,7 +135,7 @@ class ExportController extends ServiceManagerController {
       if (!Directory(outputDir).existsSync() || !mode.contains("w")) {
         var isOk = await showSelectFileDialog();
         if (!isOk) {
-          Get.showSnackbar(GetSnackBar(
+          Get.showSnackbar(const GetSnackBar(
             message: "导出异常：文件夹不存在~",
             icon: Icon(
               Icons.close,

@@ -1415,6 +1415,17 @@ class YsTree {
     var block = blocks[blockIndex];
     YsCode.of(block).updateLanguage(language);
   }
+
+  void insertRow(int blockIndex, int rowIndex, int colIndex) {
+    var block = blocks[blockIndex];
+    YsTable.of(block).insertRow(rowIndex,colIndex);
+  }
+
+  void insertCol(int blockIndex, int rowIndex, int colIndex) {
+    var block = blocks[blockIndex];
+    YsTable.of(block).insertCol(rowIndex,colIndex);
+
+  }
 }
 //数据发生变化，要记录变化时的cursor
 

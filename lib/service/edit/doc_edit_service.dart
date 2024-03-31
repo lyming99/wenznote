@@ -29,11 +29,11 @@ class DocEditService {
   final _docLock = <String, Object>{};
   final _openedDocList = <String>{};
 
-  void openDocEditor(String id) {
+  void addOpenedDocEditor(String id) {
     _openedDocList.add(id);
   }
 
-  void closeDocEditor(String id) {
+  void removeOpendDocEditor(String id) {
     _openedDocList.remove(id);
   }
 
@@ -74,19 +74,35 @@ class DocEditService {
     }
     try {
       var path = await serviceManager.fileManager.getNoteFilePath(docId);
-      var result = YDoc()..clientId = serviceManager.userService.clientId;
-      result.applyUpdateV2(File(path).readAsBytesSync());
-      FragmentDocFile(path: "$path.bak").readDoc(result);
-      _docCache[docId] = result;
-      return result;
+      if (!File(path).existsSync()) {
+        await serviceManager.docSnapshotService.downloadDocFile(docId,timeout: const Duration(milliseconds: 10));
+      }
+      // 下载了之后发现还是没有，则返回空
+      if (!File(path).existsSync()) {
+        return null;
+      }
+      var historyFile = "$path.history1";
+      var fragmentDocFile = FragmentDocFile(path: historyFile);
+      if (!File(historyFile).existsSync() ||
+          File(historyFile).lengthSync() == 0) {
+        fragmentDocFile.loadDoc(File(path).readAsBytesSync());
+      } else {
+        fragmentDocFile.readFragmentDoc();
+      }
+      var doc = fragmentDocFile.doc;
+      if (doc == null) {
+        return null;
+      }
+      _docCache[docId] = doc;
+      return doc;
     } catch (e, stack) {
+      print(stack);
       return null;
     }
   }
 
   Object getDocLock(String docId) {
-    _docLock[docId] ??= Object();
-    return _docLock[docId]!;
+    return _docLock.putIfAbsent(docId, () => Object());
   }
 
   Future<void> writeDoc(
@@ -187,8 +203,9 @@ class DocEditService {
           // 3.上传到服务器(20秒后)
           await serviceManager.uploadTaskService.uploadDoc(docId);
           return !_equalsBytes(newBytes, oldBytes);
-        } catch (e) {
+        } catch (e,stack) {
           printLog("合并doc失败, error: $e");
+          print(stack);
           return false;
         }
       },

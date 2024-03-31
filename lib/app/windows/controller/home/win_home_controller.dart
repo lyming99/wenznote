@@ -43,6 +43,8 @@ class WinHomeController extends ServiceManagerController {
 
   bool get isLogin => serviceManager.userService.hasLogin;
 
+  bool get isConnected => serviceManager.p2pService.connected.isTrue;
+
   @override
   void onInitState(BuildContext context) {
     super.onInitState(context);

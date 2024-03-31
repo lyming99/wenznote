@@ -1178,6 +1178,14 @@ class YsTable {
       block.updateBlock();
     });
   }
+
+  void insertRow(int rowIndex, int colIndex) {
+    addRows(rowIndex, 1);
+  }
+
+  void insertCol(int rowIndex, int colIndex) {
+    addCols(colIndex, 1);
+  }
 }
 
 class TableCellCount {

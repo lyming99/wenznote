@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:wenznote/app/mobile/controller/settings/mobile_settings_controller.dart';
 import 'package:wenznote/app/windows/outline/outline_controller.dart';
 import 'package:wenznote/app/windows/outline/outline_tree.dart';
 import 'package:wenznote/app/windows/theme/colors.dart';
@@ -40,6 +41,7 @@ class WinNoteEditTabController extends WinEditTabController {
 
   var outlineController = OutlineController();
   var showOutline = false.obs;
+  var editScale = 1.0;
 
   WinNoteEditTabController({
     required super.homeController,
@@ -74,15 +76,45 @@ class WinNoteEditTabController extends WinEditTabController {
   @override
   void onInitState(BuildContext context) {
     super.onInitState(context);
-    homeController.serviceManager.editService.openDocEditor(doc.uuid ?? "");
-    title.value = getDocTitle();
-    readDoc();
+    homeController.serviceManager.editService
+        .addOpenedDocEditor(doc.uuid ?? "");
+    homeController.serviceManager.configManager.addListener(onConfigChanged);
+    fetchData();
   }
 
   @override
   void onDispose() {
-    homeController.serviceManager.editService.closeDocEditor(doc.uuid ?? "");
+    homeController.serviceManager.configManager.removeListener(onConfigChanged);
+    homeController.serviceManager.editService
+        .removeOpendDocEditor(doc.uuid ?? "");
     ysTree?.dispose();
+  }
+
+  void onConfigChanged() {
+    readEditScale();
+  }
+
+  Future<void> fetchData() async {
+    title.value = getDocTitle();
+    await readEditScale();
+    await readDoc();
+  }
+
+  Future<void> readEditScale() async {
+    var fontSize = await homeController.serviceManager.configManager
+        .readConfig("system.fontSize", kMedium);
+    switch (fontSize) {
+      case kMinimal:
+        editScale = 1.4;
+        break;
+      case kMedium:
+        editScale = 1.2;
+        break;
+      case kMaximal:
+        editScale = 1.0;
+        break;
+    }
+    notifyListeners();
   }
 
   Future<void> readDoc() async {
@@ -279,8 +311,8 @@ class WinNoteEditTab extends MvcView<WinNoteEditTabController> with Focusable {
             },
             child: Obx(() {
               var showOutline = controller.showOutline.value;
-              var editWidget = EditWidget(
-                controller: controller.editController,
+              var editWidget = _EditContent(
+                controller: controller,
               );
               return Stack(
                 children: [
@@ -312,9 +344,9 @@ class WinNoteEditTab extends MvcView<WinNoteEditTabController> with Focusable {
                           ),
                         ),
                         primaryIndex: PaneIndex.two,
-                        primaryMinSize: 300,
+                        primaryMinSize: 100,
                         subMinSize: 300,
-                        primarySize: 300,
+                        primarySize: 240,
                       );
                     }
                     return editWidget;
@@ -629,6 +661,28 @@ class WinNoteEditTab extends MvcView<WinNoteEditTabController> with Focusable {
             ),
           );
         },
+      );
+    });
+  }
+}
+
+class _EditContent extends StatelessWidget {
+  final WinNoteEditTabController controller;
+
+  const _EditContent({Key? key, required this.controller}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, cons) {
+      var scale = controller.editScale;
+      return FittedBox(
+        child: SizedBox(
+          width: cons.maxWidth * scale,
+          height: cons.maxHeight * scale,
+          child: EditWidget(
+            controller: controller.editController,
+          ),
+        ),
       );
     });
   }

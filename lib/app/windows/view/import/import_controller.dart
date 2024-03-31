@@ -4,12 +4,12 @@ import 'package:archive/archive_io.dart';
 import 'package:flutter/material.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
 import 'package:get/get.dart';
-import 'package:wenznote/commons/mvc/controller.dart';
+import 'package:go_router/go_router.dart';
+import 'package:oktoast/oktoast.dart';
+import 'package:path/path.dart';
 import 'package:wenznote/commons/service/document_manager.dart';
 import 'package:wenznote/commons/util/string.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:oktoast/oktoast.dart';
-import 'package:path/path.dart';
 
 class ImportController extends ServiceManagerController {
   var processNodeIndex = 0.obs;
@@ -26,14 +26,17 @@ class ImportController extends ServiceManagerController {
   }
 
   void showImportDialog(BuildContext context) async {
+    var future = () async {
+      await doImport(importPaths: importPaths);
+    }();
     await showDialog(
         useSafeArea: true,
         context: context,
         builder: (context) => FutureProgressDialog(
-              doImport(importPaths: importPaths),
+              future,
               message: const Text("正在导入..."),
             ));
-    Get.back();
+    context.pop();
     showToast(
       "导入完成！",
       position: ToastPosition.bottom,

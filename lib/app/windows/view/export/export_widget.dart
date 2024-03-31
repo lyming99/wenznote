@@ -21,15 +21,25 @@ class ExportWidget extends MvcView<ExportController> {
     return Material(
       child: Column(
         children: [
-          buildTitleBar(context),
-          Expanded(child: buildContent(context)),
-          buildBottomBar(context),
+          _TitleWidget(controller: controller),
+          Expanded(
+              child: _ContentWidget(
+            controller: controller,
+          )),
+          _BottomWidget(controller: controller),
         ],
       ),
     );
   }
+}
 
-  Widget buildTitleBar(BuildContext context) {
+class _TitleWidget extends StatelessWidget {
+  final ExportController controller;
+
+  const _TitleWidget({Key? key, required this.controller}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       height: 32,
       // color: Colors.white,
@@ -82,21 +92,95 @@ class ExportWidget extends MvcView<ExportController> {
       ),
     );
   }
+}
 
-  Widget buildContent(BuildContext context) {
+class _ContentWidget extends StatelessWidget {
+  final ExportController controller;
+
+  const _ContentWidget({Key? key, required this.controller}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Obx(
       () => IndexedStack(
         index: controller.processNodeIndex.value,
         children: [
-          buildNode1Widget(context),
-          buildNode2Widget(context),
+          _Node1Widget(controller: controller),
+          _Node2Widget(controller: controller),
         ],
       ),
     );
   }
+}
 
-  /// 返回一个选择文件树
-  Widget buildNode1Widget(BuildContext context) {
+class _BottomWidget extends StatelessWidget {
+  final ExportController controller;
+
+  const _BottomWidget({Key? key, required this.controller}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () => Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          if (controller.processNodeIndex.value == 1)
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10),
+              child: fluent.Button(
+                child: const Text("上一步"),
+                onPressed: () {
+                  controller.processNodeIndex.value = 0;
+                },
+              ),
+            ),
+          if (controller.processNodeIndex.value == 0)
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10),
+              child: fluent.FilledButton(
+                onPressed: controller.hasSelectDoc
+                    ? () {
+                        controller.processNodeIndex.value = 1;
+                      }
+                    : null,
+                child: const Text("下一步"),
+              ),
+            ),
+          if (controller.processNodeIndex.value == 1)
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10),
+              child: fluent.FilledButton(
+                child: const Text("导  出"),
+                onPressed: () {
+                  controller.showExportDialog(context);
+                },
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10),
+            child: fluent.Button(
+              child: const Text("取  消"),
+              onPressed: () {
+                context.pop();
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Node1Widget extends StatelessWidget {
+  final ExportController controller;
+
+  const _Node1Widget({Key? key, required this.controller}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Obx(
       () => SelectTreeView(
         padding: const EdgeInsets.symmetric(
@@ -105,13 +189,28 @@ class ExportWidget extends MvcView<ExportController> {
         ),
         controller: controller.treeController.value,
         nodeBuilder: (ctx, node) {
-          return buildDocNodeItem(context, node);
+          return _DocNodeItemWidget(
+            controller: controller,
+            node: node,
+          );
         },
       ),
     );
   }
+}
 
-  Widget buildDocNodeItem(BuildContext context, SelectTreeNode node) {
+class _DocNodeItemWidget extends StatelessWidget {
+  final ExportController controller;
+  final SelectTreeNode node;
+
+  const _DocNodeItemWidget({
+    Key? key,
+    required this.controller,
+    required this.node,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     bool isFolder = node.data?.object is! DocPO;
     return ToggleItem(itemBuilder:
         (BuildContext context, bool checked, bool hover, bool pressed) {
@@ -153,9 +252,9 @@ class ExportWidget extends MvcView<ExportController> {
                     },
                   ),
                   if (!isFolder)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: const Icon(
+                    const Padding(
+                      padding: EdgeInsets.only(left: 8.0),
+                      child: Icon(
                         fluent.FluentIcons.text_document_edit,
                         size: 16,
                       ),
@@ -189,9 +288,16 @@ class ExportWidget extends MvcView<ExportController> {
       );
     });
   }
+}
 
-  /// 返回一个form：
-  Widget buildNode2Widget(BuildContext context) {
+class _Node2Widget extends StatelessWidget {
+  final ExportController controller;
+
+  const _Node2Widget({Key? key, required this.controller}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    /// 返回一个form：
     return Obx(
       () => Column(
         children: [
@@ -201,15 +307,15 @@ class ExportWidget extends MvcView<ExportController> {
             alignment: Alignment.centerLeft,
             child: Row(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: const Text("导出类型: "),
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text("导出类型: "),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: fluent.RadioButton(
                     checked: controller.isWdoc.value,
-                    content: Text("wdoc"),
+                    content: const Text("wdoc"),
                     onChanged: (v) {
                       controller.isWdoc.value = v;
                     },
@@ -277,12 +383,12 @@ class ExportWidget extends MvcView<ExportController> {
                       fluent.TextBox(
                         controller: controller.pathEditController,
                         placeholder: "d:/output",
-                        padding: EdgeInsets.only(right: 40),
+                        padding: const EdgeInsets.only(right: 40),
                       ),
                       Align(
                         alignment: Alignment.centerRight,
                         child: fluent.IconButton(
-                          icon: Icon(fluent.FluentIcons.more),
+                          icon: const Icon(fluent.FluentIcons.more),
                           onPressed: () {
                             controller.getSystemDirectory();
                           },
@@ -351,61 +457,6 @@ class ExportWidget extends MvcView<ExportController> {
                 ],
               ),
             ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildBottomBar(BuildContext context) {
-    return Obx(
-      () => Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          if (controller.processNodeIndex.value == 1)
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10),
-              child: fluent.Button(
-                child: Text("上一步"),
-                onPressed: () {
-                  controller.processNodeIndex.value = 0;
-                },
-              ),
-            ),
-          if (controller.processNodeIndex.value == 0)
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10),
-              child: fluent.FilledButton(
-                child: Text("下一步"),
-                onPressed: controller.hasSelectDoc
-                    ? () {
-                        controller.processNodeIndex.value = 1;
-                      }
-                    : null,
-              ),
-            ),
-          if (controller.processNodeIndex.value == 1)
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10),
-              child: fluent.FilledButton(
-                child: Text("导  出"),
-                onPressed: () {
-                  controller.showExportDialog(context);
-                },
-              ),
-            ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10),
-            child: fluent.Button(
-              style: fluent.ButtonStyle(),
-              child: Text("取  消"),
-              onPressed: () {
-                context.pop();
-              },
-            ),
-          ),
         ],
       ),
     );

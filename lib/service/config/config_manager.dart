@@ -1,8 +1,8 @@
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:hive/hive.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class ConfigManager {
+class ConfigManager with ChangeNotifier{
   ServiceManager serviceManager;
 
   ConfigManager(this.serviceManager);
@@ -13,7 +13,11 @@ class ConfigManager {
   }
 
   Future<void> saveConfig(String key, String value) async {
-    var box = await Hive.openBox("settings");
-    return box.put(key, value);
+    try {
+      var box = await Hive.openBox("settings");
+      return box.put(key, value);
+    } finally {
+      notifyListeners();
+    }
   }
 }

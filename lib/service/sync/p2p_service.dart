@@ -43,6 +43,7 @@ class P2pService {
   bool isUserClosed = false;
   Timer? heartTimer;
   SendDeltaQueue? verifyDocMessageQueue;
+  var connected = false.obs;
 
   P2pService(this.serviceManager);
 
@@ -56,6 +57,7 @@ class P2pService {
   }
 
   void _reconnect() {
+    connected.value = false;
     heartTimer?.cancel();
     heartTimer = null;
     socket?.sink.close();
@@ -79,6 +81,7 @@ class P2pService {
     socket = IOWebSocketChannel.connect(uri, headers: {'token': token});
     socket!.stream.listen(
       (data) {
+        connected.value = true;
         _onReceive(data);
       },
       onDone: () {
@@ -133,14 +136,6 @@ class P2pService {
       case MessageType.downloadDoc:
         // 下载文档消息
         serviceManager.docSnapshotService.downloadDoc(pkt);
-        break;
-      case MessageType.queryDocState:
-        // 查询 docState 消息
-        serviceManager.docSnapshotService.queryDocState(pkt);
-        break;
-      case MessageType.docState:
-        // 收到 docState 消息
-        serviceManager.docSnapshotService.receiveDocState(pkt);
         break;
     }
   }

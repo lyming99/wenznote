@@ -1708,6 +1708,7 @@ class EditController with ChangeNotifier {
     }
     mouseKeyboardState.onKey(node, event);
     if (event is RawKeyDownEvent) {
+      // tab键
       if (event.physicalKey == PhysicalKeyboardKey.tab) {
         if (event.isShiftPressed) {
           removeIndent();
@@ -4993,5 +4994,13 @@ class EditController with ChangeNotifier {
       result.add(block);
     }
     return result;
+  }
+
+  bool insertCol(TableBlock tableBlock, int rowIndex, int colIndex) {
+    return false;
+  }
+
+  bool insertRow(TableBlock tableBlock, int rowIndex, int colIndex) {
+    return false;
   }
 }

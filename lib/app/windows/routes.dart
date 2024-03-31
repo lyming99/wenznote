@@ -40,7 +40,9 @@ class WindowsAppRoutes {
       transition: Transition.rightToLeft,
       transitionDuration: const Duration(milliseconds: 200),
       page: () {
-        return   ExportWidget(controller: ExportController(),);
+        return ExportWidget(
+          controller: ExportController(),
+        );
       },
     ),
     GetPage(

@@ -109,8 +109,7 @@ class TableBlock extends WenBlock {
                 element: elementCell,
                 tableBlock: this,
                 editController: editController,
-              )
-                ..tableBlock = this,
+              )..tableBlock = this,
             );
           } else {
             row.add(
@@ -260,8 +259,7 @@ class TableBlock extends WenBlock {
         double cellWidth = 0;
         try {
           cellWidth = ((rows[i][j] as TableBaseCell).originWidth ?? 0);
-        } catch (e) {
-        }
+        } catch (e) {}
         var a = max(cellWidth + cellPadding * 2, minCellWidth);
         var b = min(maxCellWidth, a);
         maxOriginWidths[j] = max(b, maxOriginWidths[j]);
@@ -281,10 +279,9 @@ class TableBlock extends WenBlock {
     for (int i = 0; i < rows.length; i++) {
       for (int j = 0; j < columnWidths.length; j++) {
         try {
-          rows[i][j].layout(
-                      context, Size(columnWidths[j] - cellPadding * 2, double.infinity));
-        } catch (e) {
-        }
+          rows[i][j].layout(context,
+              Size(columnWidths[j] - cellPadding * 2, double.infinity));
+        } catch (e) {}
       }
     }
     var rowHeights = List.filled(rows.length, 0.0);
@@ -320,9 +317,7 @@ class TableBlock extends WenBlock {
     if (cell == null) {
       return;
     }
-    var cellOffset = TableBaseCell
-        .of(cell)
-        .offset;
+    var cellOffset = TableBaseCell.of(cell).offset;
     cell.hoverPosition = TextPosition(offset: position.offset - cellOffset);
     cell.relayoutFlag = true;
   }
@@ -351,9 +346,9 @@ class TableBlock extends WenBlock {
           left: editController.padding.left,
           right: editController.padding.right,
           top:
-          (top - editController.scrollOffset + editController.padding.top) +
-              padding.top +
-              toolButtonTop,
+              (top - editController.scrollOffset + editController.padding.top) +
+                  padding.top +
+                  toolButtonTop,
           height: toolButtonBottom - toolButtonTop,
           child: Row(
             children: [
@@ -562,9 +557,7 @@ class TableBlock extends WenBlock {
     var endRow = getRowIndex(end.offset);
     var endCol = getColIndex(endRow, end.offset);
     if (startRow == endRow && startCol == endCol) {
-      var offset = TableBaseCell
-          .of(rows[startRow][startCol])
-          .offset;
+      var offset = TableBaseCell.of(rows[startRow][startCol]).offset;
       return rows[startRow][startCol].copyElement(
         TextPosition(offset: start.offset - offset, affinity: start.affinity),
         TextPosition(offset: end.offset - offset, affinity: end.affinity),
@@ -585,9 +578,7 @@ class TableBlock extends WenBlock {
         },
         visit: (rowIndex, colIndex) {
           var cell = rows[rowIndex][colIndex];
-          var cellStartOffset = TableBaseCell
-              .of(cell)
-              .offset;
+          var cellStartOffset = TableBaseCell.of(cell).offset;
           var cellEndOffset = cellStartOffset + cell.length;
           var mixStart = max(cellStartOffset, startOffset);
           var mixEnd = min(cellEndOffset, endOffset);
@@ -751,10 +742,10 @@ class TableBlock extends WenBlock {
 
   double get tableRealWidth =>
       padding.left +
-          padding.right +
-          (columnWidths.isEmpty
-              ? 0
-              : columnWidths.reduce((value, element) => value + element));
+      padding.right +
+      (columnWidths.isEmpty
+          ? 0
+          : columnWidths.reduce((value, element) => value + element));
 
   double getCellColLeftOffset(int row, int col) {
     return cellPadding;
@@ -816,7 +807,7 @@ class TableBlock extends WenBlock {
     var ret = curCell.getPositionForOffset(clickOffset
         .translate(-cellLeft, -cellTop)
         .translate(-getCellColLeftOffset(rowIndex, colIndex),
-        -getCellRowTopOffset(rowIndex, colIndex)));
+            -getCellRowTopOffset(rowIndex, colIndex)));
     if (ret != null) {
       return TextPosition(
         offset: ret.offset + cellOffset,
@@ -1012,14 +1003,13 @@ class TableBlock extends WenBlock {
           var leftOffset = getCellColLeftOffset(row, col);
           ret.addAll(
             boxes
-                .map((e) =>
-                TextBox.fromLTRBD(
-                  e.left + colOffset + leftOffset - horizontalOffset,
-                  e.top + rowOffset + topOffset,
-                  e.right + colOffset + leftOffset - horizontalOffset,
-                  e.bottom + rowOffset + topOffset,
-                  TextDirection.ltr,
-                ))
+                .map((e) => TextBox.fromLTRBD(
+                      e.left + colOffset + leftOffset - horizontalOffset,
+                      e.top + rowOffset + topOffset,
+                      e.right + colOffset + leftOffset - horizontalOffset,
+                      e.bottom + rowOffset + topOffset,
+                      TextDirection.ltr,
+                    ))
                 .toList(),
           );
         }
@@ -1050,9 +1040,7 @@ class TableBlock extends WenBlock {
     if (selectState.selectLength >= cellBlock.length) {
       return false;
     }
-    var cellOffset = TableBaseCell
-        .of(cellBlock)
-        .offset;
+    var cellOffset = TableBaseCell.of(cellBlock).offset;
     editController
         .recordSelectStart(getCursorPosition(TextPosition(offset: cellOffset)));
     editController.recordSelectEnd(
@@ -1081,11 +1069,9 @@ class TableBlock extends WenBlock {
     var rowIndex = getRowIndex(textPos.offset);
     var colIndex = getColIndex(rowIndex, textPos.offset);
     var cell = rows[rowIndex][colIndex];
-    var cellOffset = TableBaseCell
-        .of(cell)
-        .offset;
+    var cellOffset = TableBaseCell.of(cell).offset;
     var range =
-    cell.getLineBoundary(TextPosition(offset: textPos.offset - cellOffset));
+        cell.getLineBoundary(TextPosition(offset: textPos.offset - cellOffset));
     if (range == null) {
       return true;
     }
@@ -1094,9 +1080,7 @@ class TableBlock extends WenBlock {
         //进入上一个block
         if (blockIndex > 0) {
           var preBlock = editController.blockManager.blocks[blockIndex - 1];
-          var start = preBlock
-              .getLineBoundary(preBlock.endPosition)
-              ?.start;
+          var start = preBlock.getLineBoundary(preBlock.endPosition)?.start;
           if (start != null) {
             if (start == -1) {
               start = 0;
@@ -1104,10 +1088,7 @@ class TableBlock extends WenBlock {
             //1.得到上一个行的 lineBoundary centerY
             //2.重新计算心的 position
             var centerY =
-                preBlock
-                    .getCursorRect(TextPosition(offset: start))
-                    ?.center
-                    .dy;
+                preBlock.getCursorRect(TextPosition(offset: start))?.center.dy;
             if (centerY != null) {
               centerY += preBlock.top - editController.scrollOffset;
               var x = editController.cursorRecord.recordWindowX;
@@ -1121,9 +1102,7 @@ class TableBlock extends WenBlock {
       } else {
         //进入上一个cell
         var upCell = rows[rowIndex - 1][colIndex];
-        var start = upCell
-            .getLineBoundary(upCell.endPosition)
-            ?.start;
+        var start = upCell.getLineBoundary(upCell.endPosition)?.start;
         if (start != null) {
           if (start == -1) {
             start = 0;
@@ -1131,9 +1110,7 @@ class TableBlock extends WenBlock {
           //1.得到上一个行的 lineBoundary centerY
           //2.重新计算心的 position
           var centerY = getCursorRect(
-              TextPosition(offset: start + TableBaseCell
-                  .of(upCell)
-                  .offset))
+                  TextPosition(offset: start + TableBaseCell.of(upCell).offset))
               ?.center
               .dy;
           if (centerY != null) {
@@ -1147,9 +1124,7 @@ class TableBlock extends WenBlock {
       }
     } else {
       var start =
-          cell
-              .getLineBoundary(TextPosition(offset: range.start - 1))
-              ?.start;
+          cell.getLineBoundary(TextPosition(offset: range.start - 1))?.start;
       if (start != null) {
         if (start == -1) {
           start = 0;
@@ -1180,11 +1155,9 @@ class TableBlock extends WenBlock {
     var rowIndex = getRowIndex(textPos.offset);
     var colIndex = getColIndex(rowIndex, textPos.offset);
     var cell = rows[rowIndex][colIndex];
-    var cellOffset = TableBaseCell
-        .of(cell)
-        .offset;
+    var cellOffset = TableBaseCell.of(cell).offset;
     var range =
-    cell.getLineBoundary(TextPosition(offset: textPos.offset - cellOffset));
+        cell.getLineBoundary(TextPosition(offset: textPos.offset - cellOffset));
     if (range == null) {
       return true;
     }
@@ -1195,9 +1168,7 @@ class TableBlock extends WenBlock {
         //进入下一个block
         if (blockIndex < editController.blockManager.blocks.length - 1) {
           var nextBlock = editController.blockManager.blocks[blockIndex + 1];
-          var start = nextBlock
-              .getLineBoundary(nextBlock.startPosition)
-              ?.start;
+          var start = nextBlock.getLineBoundary(nextBlock.startPosition)?.start;
           if (start != null) {
             if (start == -1) {
               start = 0;
@@ -1205,10 +1176,7 @@ class TableBlock extends WenBlock {
             //1.得到上一个行的 lineBoundary centerY
             //2.重新计算心的 position
             var centerY =
-                nextBlock
-                    .getCursorRect(TextPosition(offset: start))
-                    ?.center
-                    .dy;
+                nextBlock.getCursorRect(TextPosition(offset: start))?.center.dy;
             if (centerY != null) {
               centerY += nextBlock.top - editController.scrollOffset;
               var x = editController.cursorRecord.recordWindowX;
@@ -1220,9 +1188,7 @@ class TableBlock extends WenBlock {
       } else {
         //进入下一个cell
         var downCell = rows[rowIndex + 1][colIndex];
-        var start = downCell
-            .getLineBoundary(downCell.startPosition)
-            ?.start;
+        var start = downCell.getLineBoundary(downCell.startPosition)?.start;
         if (start != null) {
           if (start == -1) {
             start = 0;
@@ -1230,9 +1196,7 @@ class TableBlock extends WenBlock {
           //1.得到上一个行的 lineBoundary centerY
           //2.重新计算心的 position
           var centerY = getCursorRect(TextPosition(
-              offset: start + TableBaseCell
-                  .of(downCell)
-                  .offset))
+                  offset: start + TableBaseCell.of(downCell).offset))
               ?.center
               .dy;
           if (centerY != null) {
@@ -1245,9 +1209,7 @@ class TableBlock extends WenBlock {
       }
     } else {
       var start =
-          cell
-              .getLineBoundary(TextPosition(offset: range.end + 1))
-              ?.start;
+          cell.getLineBoundary(TextPosition(offset: range.end + 1))?.start;
       if (start != null) {
         if (start == -1) {
           start = 0;
@@ -1275,6 +1237,9 @@ class TableBlock extends WenBlock {
   }
 
   void insertRow(int rowIndex, int colIndex) {
+    if (editController.insertRow(this, rowIndex, colIndex)) {
+      return;
+    }
     if (rowIndex >= 0 && rowIndex <= rows.length) {
       var insertRow = <WenBlock>[];
       for (int i = 0; i < colCount; i++) {
@@ -1340,6 +1305,9 @@ class TableBlock extends WenBlock {
   }
 
   void insertCol(int rowIndex, int colIndex) {
+    if (editController.insertCol(this, rowIndex, colIndex)) {
+      return;
+    }
     if (rowIndex >= 0 && rowIndex <= rows.length) {
       for (int i = 0; i < rowCount; i++) {
         rows[i].insert(
@@ -1446,8 +1414,7 @@ class TableBlock extends WenBlock {
       context: context,
       textElement: WenTextElement(),
       editController: editController,
-    )
-      ..top = top;
+    )..top = top;
     editController.blockManager.blocks[index] = textBlock;
     editController
         .layoutCurrentBlock(editController.blockManager.blocks[index]);
@@ -1513,8 +1480,8 @@ class TableBlock extends WenBlock {
     var selectRange = getSelectCellRange();
     if (selectRange != null) {
       for (int i = selectRange.startColIndex;
-      i <= selectRange.endColIndex;
-      i++) {
+          i <= selectRange.endColIndex;
+          i++) {
         setColAlignment(alignment, i);
       }
       relayoutFlag = true;
@@ -1565,8 +1532,8 @@ class TableBlock extends WenBlock {
     }
   }
 
-  List<List<WenBlock>> addJustRows(int newRowCount, int newColCount,
-      BuildContext context) {
+  List<List<WenBlock>> addJustRows(
+      int newRowCount, int newColCount, BuildContext context) {
     var newRows = <List<WenBlock>>[];
     for (int i = 0; i < newRowCount; i++) {
       if (i < rows.length) {
@@ -1650,16 +1617,14 @@ class TableBlock extends WenBlock {
   }
 
   @override
-  void visitElement(TextPosition start, TextPosition end,
-      WenElementVisitor visit) {
+  void visitElement(
+      TextPosition start, TextPosition end, WenElementVisitor visit) {
     var startOffset = start.offset;
     var endOffset = end.offset;
     for (int i = 0; i < rowCount; i++) {
       for (int j = 0; j < colCount; j++) {
         var cell = rows[i][j];
-        var cellOffset = TableBaseCell
-            .of(cell)
-            .offset;
+        var cellOffset = TableBaseCell.of(cell).offset;
         var cellLength = cell.length;
         //交集：max left, min right
         int selectLeft = max(startOffset - cellOffset, 0);
@@ -1680,9 +1645,7 @@ class TableBlock extends WenBlock {
     var colIndex = getColIndex(rowIndex, offset);
     var cell = rows[rowIndex][colIndex];
     if (cell is TextTableCell) {
-      int cellOffset = TableBaseCell
-          .of(cell)
-          .offset;
+      int cellOffset = TableBaseCell.of(cell).offset;
       cell.textElement.splitElementInterior(
           TextPosition(
               offset: offset - cellOffset, affinity: position.affinity),
@@ -1698,9 +1661,7 @@ class TableBlock extends WenBlock {
     var cell = rows[rowIndex][colIndex];
     if (cell is TextTableCell) {
       return cell.textElement.getElement(
-          TextPosition(offset: position.offset - TableBaseCell
-              .of(cell)
-              .offset),
+          TextPosition(offset: position.offset - TableBaseCell.of(cell).offset),
           checkUrl: checkUrl);
     }
     return null;
@@ -1765,7 +1726,7 @@ class TableBlock extends WenBlock {
     // 跳转到新位置
     var jumpLength = tempRows[0][0].length;
     var newCursorPosition =
-    getCursorPosition(TextPosition(offset: cursorOffset + jumpLength));
+        getCursorPosition(TextPosition(offset: cursorOffset + jumpLength));
     editController.toPosition(newCursorPosition, true);
   }
 
@@ -1829,18 +1790,14 @@ class TableBlock extends WenBlock {
     if (cell is TextTableCell) {
       var element = cell.textElement.getElement(
           TextPosition(
-              offset: textPosition.offset - TableBaseCell
-                  .of(cell)
-                  .offset),
+              offset: textPosition.offset - TableBaseCell.of(cell).offset),
           checkUrl: true);
       if (element == null) {
         return null;
       }
       return BlockLink(
           textElement: element,
-          textOffset: element.offset + TableBaseCell
-              .of(cell)
-              .offset);
+          textOffset: element.offset + TableBaseCell.of(cell).offset);
     }
     return null;
   }
@@ -1875,9 +1832,7 @@ class TableBlock extends WenBlock {
       record = true;
     }
     var cell = rows[newRowIndex][newColIndex];
-    var cellOffset = TableBaseCell
-        .of(cell)
-        .offset;
+    var cellOffset = TableBaseCell.of(cell).offset;
     editController.toPosition(
         getCursorPosition(TextPosition(offset: cellOffset + cell.length)),
         true);
@@ -1935,41 +1890,47 @@ class TableBlock extends WenBlock {
     TableCellVisitInit? init,
     required TableCellVisit visit,
   }) {
-    var startRowIndex = getRowIndex(startOffset);
-    var startColIndex = getColIndex(startRowIndex, startOffset);
-    var endRowIndex = getRowIndex(endOffset);
-    var endColIndex = getColIndex(endRowIndex, endOffset);
-    if (startColIndex > endColIndex) {
-      var temp = startColIndex;
-      startColIndex = endColIndex;
-      endColIndex = temp;
-    }
-    if (startRowIndex > endRowIndex) {
-      var temp = startRowIndex;
-      startRowIndex = endRowIndex;
-      endRowIndex = temp;
-    }
-    init?.call(startRowIndex, startColIndex, endRowIndex, endColIndex);
-    for (int i = startRowIndex; i <= endRowIndex; i++) {
-      var startCol = 0;
-      var endCol = 0;
-      if (tableSelectMode) {
-        startCol = startColIndex;
-        endCol = endColIndex;
-      } else {
-        endCol = rows[i].length - 1;
-        if (i == startRowIndex) {
+    try {
+      var startRowIndex = getRowIndex(startOffset);
+      var startColIndex = getColIndex(startRowIndex, startOffset);
+      var endRowIndex = getRowIndex(endOffset);
+      var endColIndex = getColIndex(endRowIndex, endOffset);
+      if (startColIndex > endColIndex) {
+        var temp = startColIndex;
+        startColIndex = endColIndex;
+        endColIndex = temp;
+      }
+      if (startRowIndex > endRowIndex) {
+        var temp = startRowIndex;
+        startRowIndex = endRowIndex;
+        endRowIndex = temp;
+      }
+      init?.call(startRowIndex, startColIndex, endRowIndex, endColIndex);
+      for (int i = startRowIndex; i <= endRowIndex; i++) {
+        var startCol = 0;
+        var endCol = 0;
+        if (tableSelectMode) {
           startCol = startColIndex;
-        }
-        if (i == endRowIndex) {
           endCol = endColIndex;
+        } else {
+          endCol = rows[i].length - 1;
+          if (i == startRowIndex) {
+            startCol = startColIndex;
+          }
+          if (i == endRowIndex) {
+            endCol = endColIndex;
+          }
+        }
+        for (int j = startCol; j <= endCol; j++) {
+          if (!visit.call(i, j)) {
+            return;
+          }
         }
       }
-      for (int j = startCol; j <= endCol; j++) {
-        if (!visit.call(i, j)) {
-          return;
-        }
-      }
+    } catch (e, stack) {
+      // todo 由于表格内部数据有时会存在数据列数不一致导致的bug
+      // 后续完善表格组件的时候去解决
+      print(stack);
     }
   }
 

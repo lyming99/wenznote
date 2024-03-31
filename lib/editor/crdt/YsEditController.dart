@@ -626,4 +626,16 @@ class YsEditController extends EditController {
     ysTree?.setUnderline(underline);
     record();
   }
+  @override
+  bool insertRow(TableBlock tableBlock, int rowIndex, int colIndex) {
+    ysTree?.insertRow(tableBlock.blockIndex,rowIndex,colIndex);
+    record();
+    return true;
+  }
+  @override
+  bool insertCol(TableBlock tableBlock, int rowIndex, int colIndex) {
+    ysTree?.insertCol(tableBlock.blockIndex,rowIndex,colIndex);
+    record();
+    return true;
+  }
 }

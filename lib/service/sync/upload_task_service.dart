@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:isar/isar.dart';
@@ -11,11 +12,44 @@ import 'package:wenznote/model/file/file_po.dart';
 import 'package:wenznote/model/note/po/doc_state_po.dart';
 import 'package:wenznote/model/note/po/upload_task_po.dart';
 import 'package:wenznote/service/service_manager.dart';
+import 'package:ydart/utils/y_doc.dart';
 
 import '../../commons/util/log_util.dart';
 
 /// 上传定时任务间隔设置为10分钟，每10分钟都会再次执行上传失败的任务
 const uploadTimerMinutes = 10;
+
+class DocState {
+  int? id;
+  String? dataId;
+  String? docState;
+  int? updateTime;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': this.id,
+      'dataId': this.dataId,
+      'docState': this.docState,
+      'updateTime': this.updateTime,
+    };
+  }
+
+  factory DocState.fromMap(Map<String, dynamic> map) {
+    return DocState(
+      id: map['id'] as int,
+      dataId: map['dataId'] as String,
+      docState: map['docState'] as String,
+      updateTime: map['updateTime'] as int,
+    );
+  }
+
+  DocState({
+    this.id,
+    this.dataId,
+    this.docState,
+    this.updateTime,
+  });
+}
 
 class UploadTaskService {
   ServiceManager serviceManager;
@@ -34,7 +68,26 @@ class UploadTaskService {
         Timer.periodic(const Duration(minutes: uploadTimerMinutes), (timer) {
       doUpload();
     });
-    doUpload();
+    // 启动马上上传
+    doUploadFirst();
+  }
+
+  void doUploadFirst() async {
+    try {
+      var uploadConfigKey = "first.upload1.${serviceManager.userService.uid}";
+      var result = await serviceManager.configManager
+          .readConfig(uploadConfigKey, "");
+      if (result == "ok") {
+        return;
+      }
+      var docList = await serviceManager.docService.queryDocAndNoteList();
+      for (var doc in docList.where((element) => element.uuid != null)) {
+        await uploadDoc(doc.uuid!);
+      }
+      serviceManager.configManager.saveConfig(uploadConfigKey, "ok");
+    } finally {
+      doUpload();
+    }
   }
 
   void stopUploadTimer() {
@@ -171,6 +224,29 @@ class UploadTaskService {
     return false;
   }
 
+  Future<DocState?> _queryDocState(String docId) async {
+    var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;
+    var result = await Dio().post(
+      "$noteServerUrl/doc/queryDocState/$docId",
+      options: Options(
+        headers: {
+          "token": serviceManager.userService.token,
+        },
+        responseType: ResponseType.json,
+      ),
+    );
+    if (result.statusCode != 200) {
+      return null;
+    }
+    if (result.data['msg'] == AppConstants.success) {
+      var json = result.data['data'];
+      if (json != null) {
+        return DocState.fromMap(json);
+      }
+    }
+    return null;
+  }
+
   /// 上传笔记快照
   Future<bool> _doUploadNote(UploadTaskPO task) async {
     try {
@@ -182,19 +258,23 @@ class UploadTaskService {
       // 1.读取文件
       // 2.读取state
       // 3.上传文件
-      var data = await serviceManager.editService.readDocBytes(docId);
-      if (data == null) {
+      var doc = await serviceManager.editService.readDoc(docId);
+      if (docId == null || doc == null) {
         return false;
       }
-      if (data.length > 10 * 1000 * 1000) {
-        return false;
+      var docState = await _queryDocState(docId);
+      Uint8List? uploadBytes;
+      if (docState != null) {
+        var state = docState.docState;
+        if (state != null) {
+          var vector = base64Decode(state);
+          uploadBytes = doc.encodeStateAsUpdateV2(vector);
+        }
       }
+      uploadBytes ??= doc.encodeStateAsUpdateV2();
       var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;
-      var states =
-          await isar.docStatePOs.filter().docIdEqualTo(docId).findAll();
-      Map<String, int> state = getClientStates(states);
       var result = await Dio().post(
-        "$noteServerUrl/snapshot/upload/$docId",
+        "$noteServerUrl/doc/uploadDoc/$docId",
         options: Options(
           headers: {
             "token": serviceManager.userService.token,
@@ -203,9 +283,8 @@ class UploadTaskService {
           responseType: ResponseType.json,
         ),
         data: FormData.fromMap({
-          "state": jsonEncode(state),
           "file": MultipartFile.fromBytes(
-              serviceManager.cryptService.encode(data),
+              serviceManager.cryptService.encode(uploadBytes),
               filename: "doc.wnote"),
         }),
       );

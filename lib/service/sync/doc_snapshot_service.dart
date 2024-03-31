@@ -5,10 +5,8 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:isar/isar.dart';
-import 'package:synchronized/extension.dart';
 import 'package:wenznote/commons/util/log_util.dart';
 import 'package:wenznote/commons/util/mehod_time_record.dart';
-import 'package:wenznote/config/app_constants.dart';
 import 'package:wenznote/model/note/po/doc_state_po.dart';
 import 'package:wenznote/service/service_manager.dart';
 import 'package:wenznote/service/sync/p2p_packet.pb.dart';
@@ -19,16 +17,16 @@ class DocSnapshotService {
   Map<String, int> downloadDocFileTimeRecord = {};
   Timer? _downloadTimer;
 
-  final _downloadLock = Object();
+  final _downloadLock = <String, Object>{};
 
   DocSnapshotService(this.serviceManager);
 
   void startDownloadTimer() {
     stopDownloadTimer();
-    _downloadTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
-      _downloadUpdateSnapshot();
+    _downloadTimer = Timer.periodic(const Duration(minutes: 20), (timer) {
+      _downloadDocTask();
     });
-    _downloadUpdateSnapshot();
+    _downloadDocTask();
   }
 
   void stopDownloadTimer() {
@@ -116,56 +114,6 @@ class DocSnapshotService {
     );
   }
 
-  /// 查询文档状态数据
-  Future<void> queryDocState(P2pPacket pkt) async {
-    var isar = serviceManager.isarService.documentIsar;
-    var states = await isar.docStatePOs.where().findAll();
-    var clientStates = jsonDecode(utf8.decode(pkt.content));
-    var result = <DocStatePO>[];
-    for (var state in states) {
-      var time = clientStates[state.clientId];
-      if (time == null) {
-        result.add(state);
-        continue;
-      }
-      if (time < state.updateTime) {
-        result.add(state);
-      }
-    }
-    if (result.isEmpty) {
-      return;
-    }
-    var stateJson = jsonEncode(result.map((e) => e.toMap()).toList());
-    serviceManager.p2pService
-        .sendDocStateMessage(pkt.clientId.toInt(), stateJson);
-  }
-
-  /// 接受到文档状态数据
-  Future<void> receiveDocState(P2pPacket pkt) async {
-    var stateJson = jsonDecode(utf8.decode(pkt.content)) as List;
-    var states = stateJson.map((e) => DocStatePO.fromMap(e)).toList();
-    for (var state in states) {
-      var docId = state.docId;
-      if (docId == null) {
-        continue;
-      }
-      var lastQueryTime = queryDeltaTimeRecord[docId];
-      if (lastQueryTime != null &&
-          lastQueryTime < DateTime.now().millisecondsSinceEpoch) {
-        continue;
-      }
-      // 因为服务器会限制p2p网络速度
-      // 所有创建8秒查询锁：一个文档的查询间隔调大，避免无限查询，导致查询量剧增，造成网络阻塞
-      queryDeltaTimeRecord[docId] =
-          DateTime.now().millisecondsSinceEpoch + 8000;
-      var snap = await serviceManager.editService.queryDocSnap(docId);
-      if (snap == null || snap.isEmpty) {
-        continue;
-      }
-      serviceManager.p2pService.sendQueryDocMessage(docId, snap);
-    }
-  }
-
   Future<void> verifyDoc(List<String> docList) async {
     for (var docId in docList) {
       var snap = await serviceManager.editService.queryDocSnap(docId);
@@ -190,12 +138,13 @@ class DocSnapshotService {
     await downloadDocFile(dataId);
   }
 
-  Future<void> downloadDocFile(String docId) async {
+  Future<void> downloadDocFile1(String docId) async {
     var doc = await serviceManager.docService.queryDoc(docId);
     if (doc?.type == null) {
       return;
     }
-    return _downloadLock.synchronizedWithLog(() async {
+    var docDownloadLock = _downloadLock.putIfAbsent(docId, () => Object());
+    return docDownloadLock.synchronizedWithLog(() async {
       var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;
       if (noteServerUrl == null) {
         return;
@@ -293,7 +242,67 @@ class DocSnapshotService {
           await isar.docStatePOs.putAll(saveStates);
         });
       }
-    },logTitle: "downloadDocFile");
+    }, logTitle: "downloadDocFile");
+  }
+
+  Future<void> downloadDocFile(String docId, {Duration? timeout}) async {
+    var doc = await serviceManager.docService.queryDoc(docId);
+    if (doc?.type == null) {
+      return;
+    }
+    var docDownloadLock = _downloadLock.putIfAbsent(docId, () => Object());
+    return docDownloadLock.synchronizedWithLog(() async {
+      var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;
+      if (noteServerUrl == null) {
+        return;
+      }
+      var doc = await serviceManager.editService.readDoc(docId);
+      String? docState;
+      if (doc != null) {
+        docState = base64Encode(doc.encodeStateVectorV2());
+      }
+      Response result;
+      try {
+        result = await Dio().post(
+          "$noteServerUrl/doc/download/$docId",
+          options: Options(
+            headers: {
+              "token": serviceManager.userService.token,
+            },
+            responseType: ResponseType.bytes,
+          ),
+          data: FormData.fromMap({
+            "docState": docState,
+          }),
+        );
+      } catch (e) {
+        print(e);
+        if (e is DioError) {
+          if (e.response?.statusCode == 401) {
+            // 文件不存在，为啥会被下载？
+            rethrow;
+          }
+        }
+        return;
+      }
+      // result 返回的是数据+文件zip压缩包{state,file}
+      if (result.statusCode == 200) {
+        var fileBytes = result.data;
+
+        // 写入文件,并且通知upload
+        try {
+          // 更新文档，并且检测文档是否需要更新
+          await serviceManager.editService.updateDocContent(
+            docId,
+            fileBytes,
+          );
+        } catch (e) {
+          // 可能存在yjs合并失败的bug，需要处理yjs类型转换问题
+          // type 'ContentDeleted' is not a subtype of type 'ContentType' in type cast
+          printLog("下载文档时，更新ydoc失败: $e");
+        }
+      }
+    }, logTitle: "downloadDocFile", timeout: timeout);
   }
 
   /// 通过clientId,updateTime查询需要更新的文档
@@ -302,30 +311,13 @@ class DocSnapshotService {
   /// 所以，需要将查询到的需要更新的文档，存到任务队列，直到该文档下载成功
   /// 需要注意的时，如果下载文档任务为定时任务，那么在文档编辑过程中不要执行该任务，直到编辑器关闭
   /// 编辑过程，用户可以手动下载文档进行更新，或者编辑器会自动触发p2p更新，无需下载文档
-  Future<List<String>?> queryUpdateList() async {
-    var token = serviceManager.userService.token;
-    if (token == null) {
-      return null;
-    }
-    Map<String, int> clients = await getClientStates();
-    var noteServer = serviceManager.recordSyncService.noteServerUrl;
-    var result = await Dio().post("$noteServer/snapshot/queryUpdateList",
-        options: Options(
-          headers: {"token": token},
-        ),
-        data: {
-          "clients": clients,
-        });
-    if (result.statusCode != 200) {
-      return null;
-    }
-    if (result.data['msg'] == AppConstants.success) {
-      var data = result.data['data'];
-      if (data != null) {
-        return (data as List).map((e) => e.toString()).toList();
-      }
-    }
-    return null;
+  Future<List<String>> queryUpdateList() async {
+    var list = await serviceManager.docService.queryDocAndNoteList();
+    return list
+        .map((e) => e.uuid)
+        .where((element) => element != null)
+        .map((e) => e!)
+        .toList();
   }
 
   /// 返回文档状态的最大时间点 clientId,updateTime
@@ -347,11 +339,8 @@ class DocSnapshotService {
     return clients;
   }
 
-  Future<void> _downloadUpdateSnapshot() async {
+  Future<void> _downloadDocTask() async {
     var updateList = await queryUpdateList();
-    if (updateList == null) {
-      return;
-    }
     for (var update in updateList) {
       await downloadDocFile(update);
     }
