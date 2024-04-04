@@ -128,12 +128,11 @@ class MobileDocPageController extends ServiceManagerController {
 
   void openSearchItem(SearchResultVO searchItem) {}
 
-  void copySearchItem(BuildContext context, int index) {}
+  void copySearchItem(BuildContext context, SearchResultVO item) {}
 
-  void moveSearchItem(BuildContext context, int index) {}
+  void moveSearchItem(BuildContext context, SearchResultVO index) {}
 
-  void deleteSearchItem(BuildContext context, int index) async {
-    var searchItem = searchList[index];
+  void deleteSearchItem(BuildContext context, SearchResultVO searchItem) async {
     await serviceManager.todayService.deleteNote(searchItem.doc);
     await serviceManager.editService.deleteDocFile(searchItem.doc.uuid!);
     fetchData();

@@ -12,39 +12,27 @@ import 'package:wenznote/editor/widget/toggle_item.dart';
 import '../user/mobile_user_icon.dart';
 import 'mobile_card_page_controller.dart';
 
-class MobileCardPage extends MvcView<MobileCardPageController> {
-  const MobileCardPage({super.key, required super.controller});
+class _AppBar extends StatelessWidget {
+  final MobileCardPageController controller;
+  final appbarHeight = 48.0;
+  final searchBarHeight = 56.0;
+
+  const _AppBar({Key? key, required this.controller}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: MobileTheme.of(context).mobileBgColor,
-      child: CustomScrollView(
-        controller: controller.scrollController,
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          buildSliverAppBar(context),
-          buildFilterWidget(context),
-          buildContent(context),
-        ],
-      ),
-    );
-  }
-
-  SliverAppBar buildSliverAppBar(BuildContext context) {
-    const appbarHeight = 48.0;
-    const searchBarHeight = 56.0;
     return SliverAppBar(
       surfaceTintColor: Colors.transparent,
       title: Text(
         "卡片",
-        style: TextStyle(color: MobileTheme.of(context).fontColor,fontSize: 18),
+        style:
+            TextStyle(color: MobileTheme.of(context).fontColor, fontSize: 18),
       ),
       leading: IconButton(
         onPressed: () {
           Scaffold.of(context).openDrawer();
         },
-        icon: MobileUserIcon(),
+        icon: const MobileUserIcon(),
       ),
       actions: [
         IconButton(
@@ -84,7 +72,9 @@ class MobileCardPage extends MvcView<MobileCardPageController> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: buildSearchEdit(context),
+                      child: _SearchEditor(
+                        controller: controller,
+                      ),
                     ),
                   ],
                 ),
@@ -96,7 +86,75 @@ class MobileCardPage extends MvcView<MobileCardPageController> {
     );
   }
 
-  Widget buildSearchEdit(BuildContext context) {
+  void showCreateCardDialog(BuildContext context) {
+    showCreateDialog(context, "创建卡片集", "请输入卡片集合名称");
+  }
+
+  void showCreateDialog(
+      BuildContext context, String title, String placeHolder) {
+    var textController = fluent.TextEditingController(text: "");
+    void doCreate() {
+      var name = textController.text.trim();
+      if (name.isEmpty) {
+        return;
+      }
+      controller.createCardSet(name);
+    }
+
+    showDialog(
+        useSafeArea: true,
+        context: context,
+        builder: (context) {
+          return Padding(
+            padding: MediaQuery.of(context).viewInsets,
+            child: fluent.ContentDialog(
+              title: fluent.Text(title),
+              constraints: BoxConstraints(maxWidth: 300),
+              content: fluent.Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  fluent.Container(
+                    margin: const EdgeInsets.only(bottom: 10, top: 10),
+                    child: fluent.TextBox(
+                      placeholder: placeHolder,
+                      controller: textController,
+                      autofocus: true,
+                      onSubmitted: (e) {
+                        Navigator.pop(context, '确定');
+                        doCreate();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                fluent.Button(
+                  child: const Text('取消'),
+                  onPressed: () {
+                    Navigator.pop(context, '取消');
+                    // Delete file here
+                  },
+                ),
+                fluent.FilledButton(
+                    onPressed: () {
+                      Navigator.pop(context, '确定');
+                      doCreate();
+                    },
+                    child: const Text("确定")),
+              ],
+            ),
+          );
+        });
+  }
+}
+
+class _SearchEditor extends StatelessWidget {
+  final MobileCardPageController controller;
+
+  const _SearchEditor({Key? key, required this.controller}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Obx(
       () => TextField(
         cursorColor: MobileTheme.of(context).cursorColor,
@@ -143,8 +201,15 @@ class MobileCardPage extends MvcView<MobileCardPageController> {
       ),
     );
   }
+}
 
-  Widget buildFilterWidget(BuildContext context) {
+class _FilterWidget extends StatelessWidget {
+  final MobileCardPageController controller;
+
+  const _FilterWidget({Key? key, required this.controller}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return SliverPersistentHeader(
       pinned: true,
       delegate: StickyDelegate(
@@ -248,10 +313,17 @@ class MobileCardPage extends MvcView<MobileCardPageController> {
       )),
     );
   }
+}
 
-  SliverPadding buildContent(BuildContext context) {
+class _ContentWidget extends StatelessWidget {
+  final MobileCardPageController controller;
+
+  const _ContentWidget({Key? key, required this.controller}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return SliverPadding(
-      padding: EdgeInsets.only(
+      padding: const EdgeInsets.only(
         left: 16,
         right: 16,
         bottom: 16,
@@ -262,11 +334,8 @@ class MobileCardPage extends MvcView<MobileCardPageController> {
           return SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
-                return buildCardItem(
-                  context,
-                  modelList,
-                  index,
-                );
+                return _CardItemWidget(
+                    controller: controller, cardModel: modelList[index]);
               },
               childCount: modelList.length,
             ),
@@ -275,181 +344,124 @@ class MobileCardPage extends MvcView<MobileCardPageController> {
       ),
     );
   }
+}
 
-  Widget buildCardItem(
-    BuildContext context,
-    List<MobileCardModel> modelList,
-    int index,
-  ) {
-    return Obx(() {
-      var cardSetItem = modelList[index];
-      var color = cardSetItem.color.withOpacity(0.8);
-      if (Theme.of(context).brightness == Brightness.dark) {
-        var trans = 0.5;
-        var blue = (color.blue * trans).toInt();
-        var red = (color.red * trans).toInt();
-        var green = (color.green * trans).toInt();
-        color = Color.fromARGB(color.alpha, red, green, blue);
-      }
-      return ToggleItem(
-        onTap: (context) {
-          controller.openCardSet(context, cardSetItem);
-        },
-        onSecondaryTap: (context, event) {
-          showCardSetItemMenu(context, event.globalPosition, cardSetItem);
-        },
-        onLongPress: (context, event) {
-          showCardSetItemMenu(context, event.globalPosition, cardSetItem);
-        },
-        itemBuilder:
-            (BuildContext context, bool checked, bool hover, bool pressed) {
-          return Container(
-            height: 240,
-            margin: EdgeInsets.symmetric(
-              vertical: 5,
-            ),
-            decoration: BoxDecoration(
-              color: hover ? color.withOpacity(1) : color,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Stack(
-              children: [
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      "${cardSetItem.title}",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontFamily: "微软雅黑",
-                      ),
-                    ),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      children: [
-                        Text(
-                          "今日学习",
-                          style: TextStyle(
-                            fontFamily: "微软雅黑",
-                            fontSize: 12,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 4,
-                        ),
-                        Text(
-                          "${cardSetItem.todayStudyCount}",
-                          style: TextStyle(
-                            color: Colors.redAccent,
-                            fontFamily: "微软雅黑",
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          "/${cardSetItem.todayStudyQueueCount}",
-                          style: TextStyle(
-                            fontFamily: "微软雅黑",
-                            fontSize: 12,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Text(
-                          "待复习",
-                          style: TextStyle(
-                            fontFamily: "微软雅黑",
-                            fontSize: 12,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 4,
-                        ),
-                        Text(
-                          "${cardSetItem.reviewCount}",
-                          style: TextStyle(
-                            color: Colors.green,
-                            fontFamily: "微软雅黑",
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    });
-  }
+class _CardItemWidget extends StatelessWidget {
+  final MobileCardPageController controller;
+  final MobileCardModel cardModel;
 
-  void showCreateCardDialog(BuildContext context) {
-    showCreateDialog(context, "创建卡片集", "请输入卡片集合名称");
-  }
+  const _CardItemWidget(
+      {Key? key, required this.controller, required this.cardModel})
+      : super(key: key);
 
-  void showCreateDialog(
-      BuildContext context, String title, String placeHolder) {
-    var textController = fluent.TextEditingController(text: "");
-    void doCreate() {
-      var name = textController.text.trim();
-      if (name.isEmpty) {
-        return;
-      }
-      controller.createCardSet(name);
+  @override
+  Widget build(BuildContext context) {
+    var cardSetItem = cardModel;
+    var color = cardSetItem.color.withOpacity(0.8);
+    if (Theme.of(context).brightness == Brightness.dark) {
+      var trans = 0.5;
+      var blue = (color.blue * trans).toInt();
+      var red = (color.red * trans).toInt();
+      var green = (color.green * trans).toInt();
+      color = Color.fromARGB(color.alpha, red, green, blue);
     }
-
-    showDialog(
-        useSafeArea: true,
-        context: context,
-        builder: (context) {
-          return Padding(
-            padding: MediaQuery.of(context).viewInsets,
-            child: fluent.ContentDialog(
-              title: fluent.Text(title),
-              constraints: BoxConstraints(maxWidth: 300),
-              content: fluent.Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  fluent.Container(
-                    margin: const EdgeInsets.only(bottom: 10, top: 10),
-                    child: fluent.TextBox(
-                      placeholder: placeHolder,
-                      controller: textController,
-                      autofocus: true,
-                      onSubmitted: (e) {
-                        Navigator.pop(context, '确定');
-                        doCreate();
-                      },
+    return ToggleItem(
+      onTap: (context) {
+        controller.openCardSet(context, cardSetItem);
+      },
+      onSecondaryTap: (context, event) {
+        showCardSetItemMenu(context, event.globalPosition, cardSetItem);
+      },
+      onLongPress: (context, event) {
+        showCardSetItemMenu(context, event.globalPosition, cardSetItem);
+      },
+      itemBuilder:
+          (BuildContext context, bool checked, bool hover, bool pressed) {
+        return Container(
+          height: 240,
+          margin: EdgeInsets.symmetric(
+            vertical: 5,
+          ),
+          decoration: BoxDecoration(
+            color: hover ? color.withOpacity(1) : color,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Stack(
+            children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    "${cardSetItem.title}",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontFamily: "微软雅黑",
                     ),
                   ),
-                ],
-              ),
-              actions: [
-                fluent.Button(
-                  child: const Text('取消'),
-                  onPressed: () {
-                    Navigator.pop(context, '取消');
-                    // Delete file here
-                  },
                 ),
-                fluent.FilledButton(
-                    onPressed: () {
-                      Navigator.pop(context, '确定');
-                      doCreate();
-                    },
-                    child: const Text("确定")),
-              ],
-            ),
-          );
-        });
+              ),
+              Align(
+                alignment: Alignment.bottomLeft,
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    children: [
+                      Text(
+                        "今日学习",
+                        style: TextStyle(
+                          fontFamily: "微软雅黑",
+                          fontSize: 12,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 4,
+                      ),
+                      Text(
+                        "${cardSetItem.todayStudyCount}",
+                        style: TextStyle(
+                          color: Colors.redAccent,
+                          fontFamily: "微软雅黑",
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        "/${cardSetItem.todayStudyQueueCount}",
+                        style: TextStyle(
+                          fontFamily: "微软雅黑",
+                          fontSize: 12,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Text(
+                        "待复习",
+                        style: TextStyle(
+                          fontFamily: "微软雅黑",
+                          fontSize: 12,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 4,
+                      ),
+                      Text(
+                        "${cardSetItem.reviewCount}",
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontFamily: "微软雅黑",
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   void showCardSetItemMenu(BuildContext context, Offset globalPosition,
@@ -540,5 +552,25 @@ class MobileCardPage extends MvcView<MobileCardPageController> {
             ),
           );
         });
+  }
+}
+
+class MobileCardPage extends MvcView<MobileCardPageController> {
+  const MobileCardPage({super.key, required super.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: MobileTheme.of(context).mobileBgColor,
+      child: CustomScrollView(
+        controller: controller.scrollController,
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          _AppBar(controller: controller),
+          _FilterWidget(controller: controller),
+          _ContentWidget(controller: controller),
+        ],
+      ),
+    );
   }
 }
