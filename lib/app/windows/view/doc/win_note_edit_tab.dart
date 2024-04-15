@@ -31,6 +31,7 @@ import 'package:ydart/ydart.dart';
 
 class WinNoteEditTabController extends WinEditTabController {
   bool isCreateMode;
+  bool isCreated = false;
   DocPO doc;
   var title = "".obs;
   String firstCreatTitle = "";
@@ -120,6 +121,10 @@ class WinNoteEditTabController extends WinEditTabController {
   Future<void> readDoc() async {
     var doc =
         await homeController.serviceManager.editService.readDoc(this.doc.uuid);
+    if (doc == null && isCreateMode) {
+      doc =
+          await homeController.serviceManager.editService.createYDoc(this.doc);
+    }
     if (doc != null) {
       editController.viewContext = context;
       ysTree = YsTree(
@@ -132,8 +137,12 @@ class WinNoteEditTabController extends WinEditTabController {
         if (transaction.local != true) {
           return;
         }
+        if (isCreateMode && !isCreated) {
+          homeController.serviceManager.docService.createDoc(this.doc, doc);
+          isCreated = true;
+        }
         var editService = homeController.serviceManager.editService;
-        onContentChanged(doc);
+        onContentChanged(doc!);
         var deltaData = data;
         editService.writeDoc(this.doc.uuid, doc);
         homeController.serviceManager.p2pService
@@ -271,7 +280,7 @@ class WinNoteEditTabController extends WinEditTabController {
   void syncNow(BuildContext ctx) async {
     printLog("手动同步笔记：${doc.uuid},${doc.name}");
     var serviceManager = homeController.serviceManager;
-    await serviceManager.docSnapshotService.downloadDocFile(doc.uuid ?? "");
+    await serviceManager.docSyncService.downloadDocFile(doc.uuid ?? "");
     await serviceManager.uploadTaskService.uploadDoc(doc.uuid ?? "", 0);
   }
 

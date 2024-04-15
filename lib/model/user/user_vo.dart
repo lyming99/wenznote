@@ -10,7 +10,8 @@ class UserVO {
   String? mobile;
   String? note;
   String? address;
-  String?sign;
+  String? sign;
+  List<VipInfoVO>? vipInfoList;
 
   UserVO({
     this.id,
@@ -25,22 +26,24 @@ class UserVO {
     this.note,
     this.address,
     this.sign,
+    this.vipInfoList,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'id': this.id,
-      'username': this.username,
-      'email': this.email,
-      'avatar': this.avatar,
-      'nickname': this.nickname,
-      'sex': this.sex,
-      'age': this.age,
-      'concat': this.concat,
-      'mobile': this.mobile,
-      'note': this.note,
-      'address': this.address,
-      'sign':this.sign,
+      'id': id,
+      'username': username,
+      'email': email,
+      'avatar': avatar,
+      'nickname': nickname,
+      'sex': sex,
+      'age': age,
+      'concat': concat,
+      'mobile': mobile,
+      'note': note,
+      'address': address,
+      'sign': sign,
+      'vipInfoList': vipInfoList?.map((v) => v.toMap()).toList(),
     };
   }
 
@@ -58,6 +61,50 @@ class UserVO {
       note: map['note'] as String?,
       address: map['address'] as String?,
       sign: map['sign'] as String?,
+      vipInfoList: map['vipInfoList'] != null
+          ? List<VipInfoVO>.from(
+              (map['vipInfoList'] as List<dynamic>).map<VipInfoVO?>(
+                (x) => VipInfoVO.fromMap(x as Map<String, dynamic>),
+              ),
+            )
+          : null,
     );
+  }
+}
+
+class VipInfoVO {
+  String? userId;
+  String? vipType;
+  String? limitTimeType;
+  DateTime? startTime;
+  DateTime? endTime;
+
+  VipInfoVO({
+    this.userId,
+    this.vipType,
+    this.limitTimeType,
+    this.startTime,
+    this.endTime,
+  });
+
+  factory VipInfoVO.fromMap(Map<String, dynamic> map) {
+    return VipInfoVO(
+      userId: map['userId'] as String?,
+      vipType: map['vipType'] as String?,
+      limitTimeType: map['limitTimeType'] as String?,
+      startTime:
+          map['startTime'] == null ? null : DateTime.parse(map['startTime']),
+      endTime: map['endTime'] == null ? null : DateTime.parse(map['endTime']),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'userId': userId,
+      'vipType': vipType,
+      'limitTimeType': limitTimeType,
+      'startTime': startTime?.toIso8601String(),
+      'endTime': endTime?.toIso8601String(),
+    };
   }
 }

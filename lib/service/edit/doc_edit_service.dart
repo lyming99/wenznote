@@ -75,7 +75,7 @@ class DocEditService {
     try {
       var path = await serviceManager.fileManager.getNoteFilePath(docId);
       if (!File(path).existsSync()) {
-        await serviceManager.docSnapshotService.downloadDocFile(docId,timeout: const Duration(milliseconds: 10));
+        await serviceManager.docSyncService.downloadDocFile(docId,timeout: const Duration(milliseconds: 10));
       }
       // 下载了之后发现还是没有，则返回空
       if (!File(path).existsSync()) {

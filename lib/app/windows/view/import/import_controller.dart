@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:path/path.dart';
-import 'package:wenznote/commons/service/document_manager.dart';
+import 'package:wenznote/commons/service/import_service.dart';
 import 'package:wenznote/commons/util/string.dart';
 import 'package:wenznote/service/service_manager.dart';
 

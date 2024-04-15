@@ -14,21 +14,23 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
 
   @override
   Widget build(BuildContext context) {
+    var backgroundColor = MobileTheme.of(context).mobileNavBgColor;
+    var fontColor = MobileTheme.of(context).fontColor;
     return Scaffold(
       appBar: AppBar(
-        title: Text("用户信息"),
+        title: const Text("用户信息"),
         leading: IconButton(
           onPressed: () {
             context.pop();
           },
-          icon: Icon(
+          icon: const Icon(
             Icons.arrow_back,
             size: 24,
           ),
         ),
         titleSpacing: 0,
-        backgroundColor: MobileTheme.of(context).mobileNavBgColor,
-        foregroundColor: MobileTheme.of(context).fontColor,
+        backgroundColor: backgroundColor,
+        foregroundColor: fontColor,
         shadowColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
@@ -40,129 +42,38 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
               ListTile.divideTiles(
                 context: context,
                 tiles: [
-                  ListTile(
-                    tileColor: MobileTheme.of(context).mobileNavBgColor,
-                    title: const Text("邮箱",style: TextStyle(fontSize: 14),),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Obx(() {
-                          return fluent.Container(
-                            constraints: BoxConstraints(maxWidth: 180),
-                            child: Text(
-                              controller.email.value,
-                              style: TextStyle(
-                                color: MobileTheme.of(context)
-                                    .fontColor
-                                    .withAlpha(200),
-                                fontSize: 14,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          );
-                        }),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        const Icon(Icons.arrow_forward_ios_outlined),
-                      ],
-                    ),
-                    onTap: () {
-                      // showWarningDialog(context);
-                    },
+                  buildUserInfoTile(
+                    context,
+                    "邮箱",
+                    controller.email,
+                    Icons.arrow_forward_ios_outlined,
+                    () {},
                   ),
-                  ListTile(
-                    tileColor: MobileTheme.of(context).mobileNavBgColor,
-                    title: const Text("昵称",style: TextStyle(fontSize: 14),),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Obx(() {
-                          return Container(
-                            constraints: const BoxConstraints(maxWidth: 180),
-                            child: Text(
-                              controller.username.value,
-                              style: TextStyle(
-                                color: MobileTheme.of(context)
-                                    .fontColor
-                                    .withAlpha(200),
-                                fontSize: 14,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          );
-                        }),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        const Icon(Icons.arrow_forward_ios_outlined),
-                      ],
-                    ),
-                    onTap: () {
+                  buildUserInfoTile(
+                    context,
+                    "昵称",
+                    controller.username,
+                    Icons.arrow_forward_ios_outlined,
+                    () {
                       showUpdateNicknameDialog(context);
                     },
                   ),
-                  ListTile(
-                    tileColor: MobileTheme.of(context).mobileNavBgColor,
-                    title: const Text("个性签名",style: TextStyle(fontSize: 14),),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Obx(() {
-                          return Container(
-                            constraints: const BoxConstraints(maxWidth: 180),
-                            child: Text(
-                              controller.sign.value,
-                              style: TextStyle(
-                                color: MobileTheme.of(context)
-                                    .fontColor
-                                    .withAlpha(200),
-                                fontSize: 14,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          );
-                        }),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        const Icon(Icons.arrow_forward_ios_outlined),
-                      ],
-                    ),
-                    onTap: () {
-                      // controller.openBakView(context);
+                  buildUserInfoTile(
+                    context,
+                    "个性签名",
+                    controller.sign,
+                    Icons.arrow_forward_ios_outlined,
+                    () {
                       showUpdateSignDialog(context);
                     },
                   ),
-                  ListTile(
-                    tileColor: MobileTheme.of(context).mobileNavBgColor,
-                    title: const Text("身份标识",style: TextStyle(fontSize: 14),),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Obx(() {
-                          return fluent.Container(
-                            constraints: const BoxConstraints(maxWidth: 180),
-                            child: Text(
-                              controller.userType.value,
-                              style: TextStyle(
-                                color: MobileTheme.of(context)
-                                    .fontColor
-                                    .withAlpha(200),
-                                fontSize: 14,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          );
-                        }),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        const Icon(Icons.arrow_forward_ios_outlined),
-                      ],
-                    ),
-                    onTap: () {
-                      // controller.openBakView(context);
+                  buildUserInfoTile(
+                    context,
+                    "会员订阅",
+                    controller.vipLimitTime,
+                    Icons.arrow_forward_ios_outlined,
+                    () {
+                      showRechargeDialog(context);
                     },
                   ),
                 ],
@@ -174,12 +85,13 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
                 context: context,
                 tiles: [
                   ListTile(
-                    tileColor: MobileTheme.of(context).mobileNavBgColor,
+                    tileColor: backgroundColor,
                     title: Text(
                       "退出登录",
-                      style: TextStyle(color: Colors.red.shade400,fontSize: 14),
+                      style:
+                          TextStyle(color: Colors.red.shade400, fontSize: 14),
                     ),
-                    trailing: Icon(Icons.arrow_forward_ios_outlined),
+                    trailing: const Icon(Icons.arrow_forward_ios_outlined),
                     onTap: () {
                       controller.logout();
                     },
@@ -202,14 +114,10 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
         child: Container(
           width: 80,
           height: 80,
-          margin: const EdgeInsets.symmetric(
-            vertical: 40,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(100),
-          ),
+          margin: const EdgeInsets.symmetric(vertical: 40),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(100)),
           clipBehavior: Clip.antiAlias,
-          child: MobileUserIcon(size: 80,),
+          child: const MobileUserIcon(size: 80),
         ),
       ),
     );
@@ -222,12 +130,9 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
           return Container(
             padding: MediaQuery.of(context).viewInsets,
             child: fluent.ContentDialog(
-              constraints: BoxConstraints(
-                minWidth: 320,
-                maxWidth: 320,
-              ),
-              title: Text("修改签名"),
-              content: Column(
+              constraints: BoxConstraints(minWidth: 320, maxWidth: 320),
+              title: const Text("修改签名"),
+              content: const Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   fluent.TextBox(
@@ -235,7 +140,6 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
                     placeholder: "请输入个性签名",
                     maxLines: 2,
                     maxLength: 255,
-                    controller: controller.signInfoController,
                   ),
                 ],
               ),
@@ -244,14 +148,14 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text("取消"),
+                  child: const Text("取消"),
                 ),
                 fluent.FilledButton(
                   onPressed: () {
                     Navigator.pop(context);
                     controller.updateSign();
                   },
-                  child: Text("确定"),
+                  child: const Text("确定"),
                 ),
               ],
             ),
@@ -266,12 +170,9 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
           return Container(
             padding: MediaQuery.of(context).viewInsets,
             child: fluent.ContentDialog(
-              constraints: BoxConstraints(
-                minWidth: 320,
-                maxWidth: 320,
-              ),
-              title: Text("修改昵称"),
-              content: Column(
+              constraints: BoxConstraints(minWidth: 320, maxWidth: 320),
+              title: const Text("修改昵称"),
+              content: const Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   fluent.TextBox(
@@ -279,7 +180,6 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
                     placeholder: "请输入昵称",
                     maxLines: 1,
                     maxLength: 16,
-                    controller: controller.nicknameController,
                   ),
                 ],
               ),
@@ -288,14 +188,123 @@ class MobileUserInfoPage extends MvcView<MobileUserInfoController> {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text("取消"),
+                  child: const Text("取消"),
                 ),
                 fluent.FilledButton(
                   onPressed: () {
                     Navigator.pop(context);
                     controller.updateNickname();
                   },
-                  child: Text("确定"),
+                  child: const Text("确定"),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  Widget buildUserInfoTile(BuildContext context, String title, RxString value,
+      IconData? trailingIcon, VoidCallback? onTap) {
+    var backgroundColor = MobileTheme.of(context).mobileNavBgColor;
+    var fontColor = MobileTheme.of(context).fontColor;
+    return ListTile(
+      tileColor: backgroundColor,
+      title: Text(title, style: const TextStyle(fontSize: 14)),
+      trailing: trailingIcon != null
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Obx(
+                  () => Container(
+                    constraints: const BoxConstraints(maxWidth: 180),
+                    child: Text(
+                      value.value,
+                      style: TextStyle(
+                        color: fontColor.withAlpha(200),
+                        fontSize: 14,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(trailingIcon),
+              ],
+            )
+          : null,
+      onTap: onTap,
+    );
+  }
+
+  void showRechargeDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (ctx) {
+          return Container(
+            padding: MediaQuery.of(context).viewInsets,
+            child: fluent.ContentDialog(
+              constraints: const BoxConstraints(minWidth: 320, maxWidth: 320),
+              title: const Text("会员订阅"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                      "订阅会员后，您可以享受更多云存储空间，目前仅支持CKEY码兑换，兑换后CKEY码将失效，请妥善保存。\n"),
+                  fluent.TextBox(
+                    autofocus: true,
+                    placeholder: "请输入CKEY码进行兑换",
+                    maxLines: 1,
+                    maxLength: 255,
+                    controller: controller.ckeyEditController,
+                  ),
+                ],
+              ),
+              actions: [
+                fluent.OutlinedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("取消"),
+                ),
+                fluent.FilledButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    var result = await controller.recharge();
+                    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                      showResultDialog(context, result);
+                    });
+                  },
+                  child: const Text("确定"),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  void showResultDialog(BuildContext context, bool result) {
+    showDialog(
+        context: context,
+        builder: (ctx) {
+          return Container(
+            padding: MediaQuery.of(context).viewInsets,
+            child: fluent.ContentDialog(
+              constraints: const BoxConstraints(minWidth: 320, maxWidth: 320),
+              title: const Text("会员订阅"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    result ? "订阅成功" : "订阅失败",
+                  ),
+                ],
+              ),
+              actions: [
+                fluent.FilledButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("确定"),
                 ),
               ],
             ),

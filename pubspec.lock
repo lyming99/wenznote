@@ -1902,11 +1902,9 @@ packages:
   ydart:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "76ec6818779e8d83e4572ca98dda6e8cf9874dd9"
-      url: "https://github.com/lyming99/ydart"
-    source: git
+      path: "D:/GitHub/ydart"
+      relative: false
+    source: path
     version: "1.0.0+1"
 sdks:
   dart: ">=3.2.5 <4.0.0"

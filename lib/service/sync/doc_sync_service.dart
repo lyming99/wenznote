@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:archive/archive.dart';
 import 'package:dio/dio.dart';
 import 'package:isar/isar.dart';
 import 'package:wenznote/commons/util/log_util.dart';
@@ -11,7 +10,7 @@ import 'package:wenznote/model/note/po/doc_state_po.dart';
 import 'package:wenznote/service/service_manager.dart';
 import 'package:wenznote/service/sync/p2p_packet.pb.dart';
 
-class DocSnapshotService {
+class DocSyncService {
   ServiceManager serviceManager;
   Map<String, int> queryDeltaTimeRecord = {};
   Map<String, int> downloadDocFileTimeRecord = {};
@@ -19,7 +18,7 @@ class DocSnapshotService {
 
   final _downloadLock = <String, Object>{};
 
-  DocSnapshotService(this.serviceManager);
+  DocSyncService(this.serviceManager);
 
   void startDownloadTimer() {
     stopDownloadTimer();
@@ -136,113 +135,6 @@ class DocSnapshotService {
     }
     var dataId = pkt.dataIdList.first;
     await downloadDocFile(dataId);
-  }
-
-  Future<void> downloadDocFile1(String docId) async {
-    var doc = await serviceManager.docService.queryDoc(docId);
-    if (doc?.type == null) {
-      return;
-    }
-    var docDownloadLock = _downloadLock.putIfAbsent(docId, () => Object());
-    return docDownloadLock.synchronizedWithLog(() async {
-      var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;
-      if (noteServerUrl == null) {
-        return;
-      }
-      var isar = serviceManager.isarService.documentIsar;
-      Response result;
-      try {
-        result = await Dio().post(
-          "$noteServerUrl/snapshot/download/$docId",
-          options: Options(
-            headers: {
-              "token": serviceManager.userService.token,
-            },
-            responseType: ResponseType.bytes,
-          ),
-        );
-      } catch (e, err) {
-        if (e is DioError) {
-          if (e.response?.statusCode == 401) {
-            // 文件不存在，为啥会被下载？
-            rethrow;
-          }
-        }
-        print(e);
-        // 如果是401错误，则说明文档不存在
-        print("download doc file net error: ${doc?.type}/${doc?.name}/$docId");
-        return;
-      }
-      // result 返回的是数据+文件zip压缩包{state,file}
-      if (result.statusCode == 200) {
-        var data = result.data;
-        var entries = ZipDecoder().decodeBytes(data);
-        Uint8List? stateBytes;
-        Uint8List? fileBytes;
-        for (var entry in entries) {
-          if (!entry.isFile) {
-            continue;
-          }
-          if (entry.name.endsWith("state")) {
-            stateBytes = entry.content as Uint8List;
-          }
-          if (entry.name.endsWith("file")) {
-            fileBytes = entry.content as Uint8List;
-          }
-        }
-        if (stateBytes == null || fileBytes == null) {
-          return;
-        }
-        print("download doc file [${doc?.type}/${doc?.name}] success: $docId");
-        // 读取状态
-        var stateMap = (jsonDecode(utf8.decode(stateBytes)) as Map)
-            .map((key, value) => MapEntry(key.toString(), value as int));
-        List<DocStatePO> saveStates = [];
-        bool needUpload = false;
-        for (var entry in stateMap.entries) {
-          var clientId = int.parse(entry.key);
-          var time = entry.value;
-          var isar = serviceManager.isarService.documentIsar;
-          var saveState = await isar.docStatePOs
-              .filter()
-              .docIdEqualTo(docId)
-              .clientIdEqualTo(clientId)
-              .findFirst();
-          saveState ??= DocStatePO(
-            docId: docId,
-            clientId: clientId,
-          );
-          // 判断是否需要upload本地数据
-          if (clientId == serviceManager.userService.clientId) {
-            var localTime = saveState.updateTime;
-            if (localTime != null && localTime > time) {
-              needUpload = true;
-            }
-            // 下载数据后，本client的状态不必更新
-            // 避免state回滚，其他客户端无法知道本client状态，导致其他客户端无法下载本client数据
-            continue;
-          }
-          saveState.updateTime = time;
-          saveStates.add(saveState);
-        }
-        // 写入文件,并且通知upload
-        try {
-          // 更新文档，并且检测文档是否需要更新
-          await serviceManager.editService.updateDocContent(
-            docId,
-            fileBytes,
-          );
-        } catch (e) {
-          // 可能存在yjs合并失败的bug，需要处理yjs类型转换问题
-          // type 'ContentDeleted' is not a subtype of type 'ContentType' in type cast
-          printLog("下载文档时，更新ydoc失败: $e");
-        }
-        // 写入状态
-        await isar.writeTxn(() async {
-          await isar.docStatePOs.putAll(saveStates);
-        });
-      }
-    }, logTitle: "downloadDocFile");
   }
 
   Future<void> downloadDocFile(String docId, {Duration? timeout}) async {

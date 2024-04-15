@@ -3,12 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_cropping/image_cropping.dart' as cropping;
 import 'package:image_picker/image_picker.dart';
-import 'package:wenznote/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
+import 'package:wenznote/service/service_manager.dart';
 import 'package:wenznote/widgets/root_widget.dart';
 
 // Import package
@@ -16,7 +15,7 @@ import 'package:wenznote/widgets/root_widget.dart';
 class MobileUserInfoController extends ServiceManagerController {
   var signInfoController = TextEditingController();
   var nicknameController = TextEditingController();
-
+  var ckeyEditController = TextEditingController();
   var sign = "".obs;
 
   var username = "".obs;
@@ -26,6 +25,8 @@ class MobileUserInfoController extends ServiceManagerController {
   var userType = "普通用户".obs;
 
   var avatar = "".obs;
+
+  var vipLimitTime = "已到期".obs;
 
   @override
   void onInitState(BuildContext context) {
@@ -48,6 +49,7 @@ class MobileUserInfoController extends ServiceManagerController {
         user?.nickname ?? user?.username ?? user?.email ?? "";
     email.value = user?.email ?? "";
     avatar.value = await serviceManager.userService.getAvatarFile();
+    vipLimitTime.value = serviceManager.userService.getVipInfo();
   }
 
   Widget getUserIcon() {
@@ -79,7 +81,8 @@ class MobileUserInfoController extends ServiceManagerController {
         onImageDoneListener: (data) {},
         visibleOtherAspectRatios: false,
         squareBorderWidth: 2,
-        selectedImageRatio:cropping.CropAspectRatio(ratioX: 1, ratioY: 1),
+        selectedImageRatio:
+            const cropping.CropAspectRatio(ratioX: 1, ratioY: 1),
         squareCircleColor: Colors.black,
         defaultTextColor: Colors.orange,
         selectedTextColor: Colors.black,
@@ -134,5 +137,14 @@ class MobileUserInfoController extends ServiceManagerController {
   void updateNickname() async {
     await serviceManager.userService.updateNickname(nicknameController.text);
     username.value = nicknameController.text;
+  }
+
+  Future<bool> recharge() async {
+    try {
+      return await serviceManager.userService
+          .cKeyRecharge(ckeyEditController.text);
+    } finally {
+      vipLimitTime.value = serviceManager.userService.getVipInfo();
+    }
   }
 }

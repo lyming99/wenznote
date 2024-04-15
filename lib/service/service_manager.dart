@@ -5,7 +5,7 @@ import 'package:wenznote/app/windows/service/doc/win_doc_list_service.dart';
 import 'package:wenznote/app/windows/service/today/win_today_service.dart';
 import 'package:wenznote/commons/mvc/controller.dart';
 import 'package:wenznote/commons/service/copy_service.dart';
-import 'package:wenznote/commons/service/document_manager.dart';
+import 'package:wenznote/commons/service/import_service.dart';
 import 'package:wenznote/commons/service/settings_manager.dart';
 import 'package:wenznote/service/card/card_service.dart';
 import 'package:wenznote/service/card/card_study_service.dart';
@@ -15,7 +15,7 @@ import 'package:wenznote/service/edit/doc_edit_service.dart';
 import 'package:wenznote/service/file/file_manager.dart';
 import 'package:wenznote/service/isar/isar_service.dart';
 import 'package:wenznote/service/search/search_service.dart';
-import 'package:wenznote/service/sync/doc_snapshot_service.dart';
+import 'package:wenznote/service/sync/doc_sync_service.dart';
 import 'package:wenznote/service/sync/file_sync_service.dart';
 import 'package:wenznote/service/sync/impl/record_sync_service_impl.dart';
 import 'package:wenznote/service/sync/p2p_service.dart';
@@ -67,7 +67,7 @@ class ServiceManager with ChangeNotifier {
   late RecordSyncService recordSyncService;
   late CryptService cryptService;
   late P2pService p2pService;
-  late DocSnapshotService docSnapshotService;
+  late DocSyncService docSyncService;
   late UploadTaskService uploadTaskService;
   late FileSyncService fileSyncService;
   late SearchService searchService;
@@ -95,7 +95,7 @@ class ServiceManager with ChangeNotifier {
     recordSyncService = RecordSyncServiceImpl(this);
     cryptService = CryptService(this);
     p2pService = P2pService(this);
-    docSnapshotService = DocSnapshotService(this);
+    docSyncService = DocSyncService(this);
     uploadTaskService = UploadTaskService(this);
     fileSyncService = FileSyncService(this);
     searchService = SearchService(this);
@@ -114,12 +114,13 @@ class ServiceManager with ChangeNotifier {
       } catch (e) {
         print(e);
       }
+      await cryptService.init();
       await isarService.open();
       await themeManager.readConfig();
       p2pService.connect();
       recordSyncService.startPullTimer();
       uploadTaskService.startUploadTimer();
-      docSnapshotService.startDownloadTimer();
+      docSyncService.startDownloadTimer();
       isStart = true;
       notifyListeners();
     });
@@ -142,7 +143,7 @@ class ServiceManager with ChangeNotifier {
       p2pService.close();
       recordSyncService.stopPullTimer();
       uploadTaskService.stopUploadTimer();
-      docSnapshotService.stopDownloadTimer();
+      docSyncService.stopDownloadTimer();
       isStart = false;
     });
   }

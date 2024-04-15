@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/get_utils.dart';
 import 'package:octo_image/octo_image.dart';
@@ -127,9 +126,6 @@ class UserService with ChangeNotifier {
   }
 
   Future<ServerVO?> queryNoteServer() async {
-    if(kDebugMode){
-      return ServerVO(host: "127.0.0.1",port: 9898);
-    }
     var result = await Dio().post(
       "${AppConstants.apiUrl}/server/queryNoteServer",
       options: Options(
@@ -413,7 +409,12 @@ class UserService with ChangeNotifier {
     try {
       var result = await Dio().post(
         "${AppConstants.apiUrl}/user/logout",
-        options: Options(contentType: "application/json"),
+        options: Options(
+          contentType: "application/json",
+          headers: {
+            "token": token,
+          },
+        ),
       );
       var data = result.data;
       if (data["msg"] == AppConstants.success) {
@@ -423,5 +424,70 @@ class UserService with ChangeNotifier {
       e.printError();
     }
     return false;
+  }
+
+  Future<bool> cKeyRecharge(String cKey) async {
+    try {
+      var result = await Dio().post(
+        "${AppConstants.apiUrl}/ckey/rechargeVip",
+        data: {
+          "cKey": cKey,
+        },
+        options: Options(
+          contentType: "application/json",
+          headers: {
+            "token": token,
+          },
+        ),
+      );
+      var data = result.data;
+      if (data["msg"] == AppConstants.success) {
+        await fetchUserInfo();
+        return true;
+      }
+    } catch (e) {
+      e.printError();
+    }
+    return false;
+  }
+
+  String getVipInfo() {
+    var infoList = currentUser?.vipInfoList;
+    if (infoList == null || infoList.isEmpty) {
+      return "已过期";
+    }
+    var isForever = infoList
+        .where((element) =>
+            element.vipType == 'vip' && element.limitTimeType == 'no_limit')
+        .isNotEmpty;
+    if (isForever) {
+      return "终身学习";
+    }
+    var maxTime = DateTime.now();
+    for (var info in infoList.where((element) => element.vipType == "vip")) {
+      var startTime = info.startTime;
+      var endTime = info.endTime;
+      if (startTime == null || endTime == null) {
+        continue;
+      }
+      if (maxTime.isBefore(endTime)) {
+        maxTime = endTime;
+      }
+    }
+    var now = DateTime.now();
+    if (now.isBefore(maxTime)) {
+      var diff = maxTime.difference(now);
+      var days = diff.inDays;
+      var hours = diff.inHours;
+      var minutes = diff.inMinutes;
+      if (days > 0) {
+        return "剩余 $days 天";
+      } else if (hours > 0) {
+        return "剩余 $hours 小时";
+      } else if (minutes > 0) {
+        return "剩余 $minutes 分钟";
+      }
+    }
+    return "已过期";
   }
 }

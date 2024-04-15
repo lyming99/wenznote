@@ -96,6 +96,7 @@ class P2pService {
     heartTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
       sendHeartMessage();
     });
+    sendHeartMessage();
   }
 
   void _onReceive(data) {
@@ -120,22 +121,22 @@ class P2pService {
         break;
       case MessageType.docEditEvent:
         // 编辑文档消息
-        serviceManager.docSnapshotService.receiveDocEditEvent(pkt);
+        serviceManager.docSyncService.receiveDocEditEvent(pkt);
         break;
       case MessageType.verifyDoc:
-        serviceManager.docSnapshotService.verifyDoc(pkt.dataIdList);
+        serviceManager.docSyncService.verifyDoc(pkt.dataIdList);
         break;
       case MessageType.queryDocDelta:
         // 查询文档增量消息
-        serviceManager.docSnapshotService.queryDocDelta(pkt);
+        serviceManager.docSyncService.queryDocDelta(pkt);
         break;
       case MessageType.docDelta:
         // 文档增量更新消息
-        serviceManager.docSnapshotService.receiveDocDelta(pkt);
+        serviceManager.docSyncService.receiveDocDelta(pkt);
         break;
       case MessageType.downloadDoc:
         // 下载文档消息
-        serviceManager.docSnapshotService.downloadDoc(pkt);
+        serviceManager.docSyncService.downloadDoc(pkt);
         break;
     }
   }

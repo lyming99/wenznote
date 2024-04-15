@@ -112,8 +112,7 @@ class WinTodayController extends ServiceManagerController {
       createTime: DateTime.now().millisecondsSinceEpoch,
       updateTime: DateTime.now().millisecondsSinceEpoch,
     );
-    await serviceManager.docService.createDoc(doc,null);
-    homeController.openDoc(doc);
+    homeController.openDoc(doc,true);
     startSearchTask();
   }
 

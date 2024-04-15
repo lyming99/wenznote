@@ -238,9 +238,7 @@ class RecordSyncServiceImpl extends RecordSyncService {
     if (noteServer == null) {
       return null;
     }
-    return kDebugMode
-        ? "http://127.0.0.1:9898"
-        : ("http://${noteServer.host}:${noteServer.port}");
+    return "http://${noteServer.host}:${noteServer.port}";
   }
 
   @override

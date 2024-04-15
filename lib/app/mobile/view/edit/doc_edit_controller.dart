@@ -194,7 +194,7 @@ class MobileDocEditController extends ServiceManagerController {
 
   void syncNow(BuildContext ctx) async {
     printLog("手动同步笔记：${doc?.uuid},${doc?.name}");
-    await serviceManager.docSnapshotService.downloadDocFile(doc?.uuid ?? "");
+    await serviceManager.docSyncService.downloadDocFile(doc?.uuid ?? "");
     await serviceManager.uploadTaskService.uploadDoc(doc?.uuid ?? "", 0);
   }
 }
