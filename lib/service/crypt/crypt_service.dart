@@ -5,8 +5,14 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:encrypt/encrypt.dart';
+import 'package:wenznote/commons/util/encrypt.dart';
 import 'package:wenznote/config/app_constants.dart';
 import 'package:wenznote/service/service_manager.dart';
+import 'package:ydart/lib0/byte_input_stream.dart';
+import 'package:ydart/lib0/byte_output_stream.dart';
+import 'package:ydart/utils/encoding_utils.dart';
+import 'package:ydart/utils/update_decoder_v2.dart';
+import 'package:ydart/utils/update_encoder_v2.dart';
 
 class PasswordInfo {
   int version;
@@ -74,6 +80,14 @@ class CryptService {
     await savePassword();
   }
 
+  PasswordInfo? getCurrentPassword() {
+    if (passwordMap.isEmpty) {
+      return null;
+    }
+    return passwordMap[
+        passwordMap.keys.reduce((value, element) => max(value, element))];
+  }
+
   Uint8List encode(Uint8List data, [int version = -1]) {
     if (version == -1 && passwordMap.isNotEmpty) {
       version =
@@ -85,7 +99,8 @@ class CryptService {
     }
     var key = Key.fromBase64(pwd);
     var encrypt = Encrypter(AES(key));
-    var result = encrypt.encryptBytes(data, iv: IV.fromLength(16));
+    var result =
+        encrypt.encryptBytes(data, iv: IV.fromUtf8("1234567890123456"));
     return result.bytes;
   }
 
@@ -96,12 +111,16 @@ class CryptService {
     }
     var pwd = passwordMap[version]?.password;
     if (pwd == null) {
+      if (version != -1) {
+        throw Exception("no password");
+      }
       return data;
     }
     var key = Key.fromBase64(pwd);
     var encrypt = Encrypter(AES(key));
-    var result = encrypt.decryptBytes(Encrypted(data), iv: IV.fromLength(16));
-    return result as Uint8List;
+    var result = encrypt.decryptBytes(Encrypted(data),
+        iv: IV.fromUtf8("1234567890123456"));
+    return Uint8List.fromList(result);
   }
 
   // 根据字符串生成密码
@@ -116,13 +135,26 @@ class CryptService {
     return generatePassword(text);
   }
 
+  bool hasPassword() {
+    return passwordMap.isNotEmpty;
+  }
+
   String getPasswordSha256(String password) {
     return generatePassword(password);
   }
 
   Future<bool> changeServerPassword(String password) async {
+    if (password.isEmpty) {
+      return false;
+    }
+    try {
+      if (base64Decode(password).length != 32) {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
     // 调用用户服务器接口修改密码
-    var uid = serviceManager.userService.currentUser?.id;
     var passwordInfo = PasswordInfo(
       version: passwordMap.length + 1,
       password: password,
@@ -130,7 +162,7 @@ class CryptService {
     );
     var dio = serviceManager.userService.dio;
     var result = await dio.post(
-      '/security/update',
+      '${AppConstants.apiUrl}/security/update',
       data: {
         'md5': passwordInfo.sha256,
       },
@@ -144,6 +176,47 @@ class CryptService {
       return true;
     }
     return false;
+  }
+
+  String? encodeString(String? input, [int version = -1]) {
+    if (input == null || input.isEmpty) {
+      return input;
+    }
+    var bytes = utf8.encode(input);
+    var ret = encode(bytes);
+    return base64Encode(ret);
+  }
+
+  String? decodeString(String? input, [int version = -1]) {
+    if (input == null || input.isEmpty) {
+      return input;
+    }
+    var bytes = base64Decode(input);
+    var ret = decode(bytes, version);
+    return utf8.decode(ret);
+  }
+
+  Uint8List decodeDoc(Uint8List fileBytes, [int version = -1]) {
+    var encryptInputStream = EncryptByteArrayInputStream(fileBytes, (bytes) {
+      return decode(bytes, version);
+    });
+    var encoder = UpdateEncoderV2(ByteArrayOutputStream(fileBytes.length));
+    EncodingUtils.encrypt(UpdateDecoderV2(encryptInputStream), encoder);
+    return encoder.toArray();
+  }
+
+  Uint8List encodeDoc(Uint8List fileBytes, [int version = -1]) {
+    var encryptOutputStream = EncryptByteArrayOutputStream((bytes) {
+      return encode(bytes);
+    });
+    var encoder = UpdateEncoderV2(encryptOutputStream);
+    EncodingUtils.encrypt(
+        UpdateDecoderV2(ByteArrayInputStream(fileBytes)), encoder);
+    return encoder.toArray();
+  }
+
+  List<int> getPasswordVersions() {
+    return passwordMap.keys.toList();
   }
 }
 

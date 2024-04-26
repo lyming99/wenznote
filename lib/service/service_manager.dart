@@ -17,6 +17,7 @@ import 'package:wenznote/service/isar/isar_service.dart';
 import 'package:wenznote/service/search/search_service.dart';
 import 'package:wenznote/service/sync/doc_sync_service.dart';
 import 'package:wenznote/service/sync/file_sync_service.dart';
+import 'package:wenznote/service/sync/impl/doc_sync_service_impl.dart';
 import 'package:wenznote/service/sync/impl/record_sync_service_impl.dart';
 import 'package:wenznote/service/sync/p2p_service.dart';
 import 'package:wenznote/service/sync/record_sync_service.dart';
@@ -95,7 +96,7 @@ class ServiceManager with ChangeNotifier {
     recordSyncService = RecordSyncServiceImpl(this);
     cryptService = CryptService(this);
     p2pService = P2pService(this);
-    docSyncService = DocSyncService(this);
+    docSyncService = DocSyncServiceImpl(this);
     uploadTaskService = UploadTaskService(this);
     fileSyncService = FileSyncService(this);
     searchService = SearchService(this);

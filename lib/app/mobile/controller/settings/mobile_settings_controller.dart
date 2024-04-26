@@ -67,6 +67,8 @@ class MobileSettingsController extends ServiceManagerController {
     if (oldController is MobileSettingsController) {
       brightness = oldController.brightness;
       fontSize = oldController.fontSize;
+      savePath = oldController.savePath;
+      savePathEditController = oldController.savePathEditController;
     }
   }
 

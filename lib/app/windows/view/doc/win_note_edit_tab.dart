@@ -280,7 +280,6 @@ class WinNoteEditTabController extends WinEditTabController {
   void syncNow(BuildContext ctx) async {
     printLog("手动同步笔记：${doc.uuid},${doc.name}");
     var serviceManager = homeController.serviceManager;
-    await serviceManager.docSyncService.downloadDocFile(doc.uuid ?? "");
     await serviceManager.uploadTaskService.uploadDoc(doc.uuid ?? "", 0);
   }
 

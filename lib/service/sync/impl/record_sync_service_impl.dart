@@ -16,8 +16,8 @@ import 'package:wenznote/model/card/po/card_study_record_po.dart';
 import 'package:wenznote/model/delta/db_delta.dart';
 import 'package:wenznote/model/note/po/doc_dir_po.dart';
 import 'package:wenznote/model/note/po/doc_po.dart';
+import 'package:wenznote/service/api/delta_api.dart';
 
-import '../../../config/app_constants.dart';
 import '../../service_manager.dart';
 import '../record_sync_service.dart';
 
@@ -187,6 +187,14 @@ class RecordSyncServiceImpl extends RecordSyncService {
     }
   }
 
+  DeltaApi get api => DeltaApi(
+        baseUrl: serviceManager.userService.noteServerUrl ?? "",
+        token: serviceManager.userService.token,
+        clientId: serviceManager.userService.clientId.toString(),
+        securityVersion:
+            serviceManager.cryptService.getCurrentPassword()?.version,
+      );
+
   Future<bool> _pushDbDelta() async {
     return pushLock.synchronized(() async {
       try {
@@ -202,17 +210,14 @@ class RecordSyncServiceImpl extends RecordSyncService {
         for (var dbDelta in dbDeltas) {
           dbDelta.updateTime ??= DateTime.now().millisecondsSinceEpoch;
         }
-        var result = await Dio().post("$noteServerUrl/db/uploadDbDelta",
-            options: Options(
-              headers: {
-                "token": serviceManager.userService.token,
-              },
-            ),
-            data: {
-              "clientId": clientId,
-              "items": dbDeltas.map((e) => e.toMap()).toList(),
-            });
-        if (result.data['msg'] == AppConstants.success) {
+        var result = await api.uploadDbDelta(DbUploadVO(
+          clientId: clientId,
+          items: encryptDbDelta(dbDeltas),
+          securityVersion:
+              serviceManager.cryptService.getCurrentPassword()?.version ?? 0,
+        ));
+
+        if (result) {
           for (var value in dbDeltas) {
             value.hasUpload = true;
           }
@@ -230,6 +235,21 @@ class RecordSyncServiceImpl extends RecordSyncService {
         return false;
       }
     });
+  }
+
+  List<DbDelta> encryptDbDelta(List<DbDelta> dbDeltas) {
+    return dbDeltas
+        .map((e) => DbDelta(
+              id: e.id,
+              clientId: e.clientId,
+              dataType: e.dataType,
+              dataId: e.dataId,
+              content: serviceManager.cryptService.encodeString(e.content),
+              updateTime: e.updateTime,
+              deleted: e.deleted,
+              hasUpload: e.hasUpload,
+            ))
+        .toList();
   }
 
   @override
@@ -280,9 +300,9 @@ class RecordSyncServiceImpl extends RecordSyncService {
             clientMap[clientId] = newValue;
           }
         }
-        var clientStates = [];
+        var clientStates = <ClientDbStateVO>[];
         clientMap.forEach((key, value) {
-          clientStates.add({'clientId': key, 'clientTime': value});
+          clientStates.add(ClientDbStateVO(clientId: key, clientTime: value));
         });
         var token = serviceManager.userService.token;
         if (token == null) {
@@ -343,41 +363,24 @@ class RecordSyncServiceImpl extends RecordSyncService {
   Future<void> _pullDbData({
     required String token,
     required bool pullAll,
-    Object? clientStates,
+    List<ClientDbStateVO>? clientStates,
     List<String>? dataIdList,
     String? dataType,
   }) async {
-    /**
-     * 2.查询 db 数据
-     */
-    var result = await Dio().post("$noteServerUrl/db/queryDbDeltaList",
-        options: Options(
-          headers: {
-            "token": token,
-          },
-        ),
-        data: {
-          "queryAll": pullAll,
-          "clientStates": clientStates,
-          "dataIdList": dataIdList,
-          "dataType": dataType,
-        });
-    if (result.statusCode != 200) {
+    var updateList = await api.queryDbDeltaList(DbQueryVO(
+        queryAll: pullAll,
+        clientStates: clientStates,
+        dataIdList: dataIdList,
+        dataType: dataType));
+    if (updateList == null) {
       return;
     }
-    /**
-     * 3.将查询的数据解析，并且存入数据库
-     */
-    var data = result.data;
-    List<DbDelta> updateList = [];
-    if (data["msg"] == AppConstants.success) {
-      List list = data["data"];
-      for (var value in list) {
-        var item = DbDelta.fromMap(value);
-        updateList.add(item);
-      }
+    // 解密
+    for (var element in updateList) {
+      element.content = serviceManager.cryptService
+          .decodeString(element.content, element.securityVersion ?? 0);
     }
-    // 4.对记录进行分组
+    // 对记录进行分组
     var groupMap = updateList.groupBy((item) {
       return item.dataId ?? "";
     });
@@ -762,6 +765,44 @@ class RecordSyncServiceImpl extends RecordSyncService {
       }
     }
     return [propMap, ...pidList];
+  }
+
+  @override
+  Future<void> reUploadDbData() async {
+    await reUploadAllDbData();
+    await reUploadOldPwdDbData();
+  }
+
+  // 重新上传所有本地数据，一般在密码修改之后或者服务器修改之后执行
+  Future<bool> reUploadAllDbData() async {
+    var clientId = serviceManager.userService.client?.id;
+    var dbDeltas = await documentIsar.dbDeltas.where().findAll();
+    var result = await api.uploadDbDelta(DbUploadVO(
+      clientId: clientId,
+      items: encryptDbDelta(dbDeltas),
+      securityVersion:
+          serviceManager.cryptService.getCurrentPassword()?.version ?? 0,
+    ));
+    return result;
+  }
+
+  // 重新上传旧密码部分数据，通过服务器查询存在的旧密码版本数据
+  Future<void> reUploadOldPwdDbData() async {
+    // 1.读取本地密码版本
+    // 2.从服务下载密码版本对于的数据
+    // 3.重新上传服务器下载的数据
+    var versions = serviceManager.cryptService.getPasswordVersions();
+    var oldVersionDbDeltas = await api.queryOldPwdVersionDbDelta(versions);
+    if (oldVersionDbDeltas == null || oldVersionDbDeltas.isEmpty) {
+      return;
+    }
+    var clientId = serviceManager.userService.client?.id;
+    await api.uploadDbDelta(DbUploadVO(
+      clientId: clientId,
+      items: encryptDbDelta(oldVersionDbDeltas),
+      securityVersion:
+          serviceManager.cryptService.getCurrentPassword()?.version ?? 0,
+    ));
   }
 }
 

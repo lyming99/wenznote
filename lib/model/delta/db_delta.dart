@@ -12,6 +12,7 @@ class DbDelta {
   int? updateTime;
   bool? deleted;
   bool? hasUpload;
+  int? securityVersion;
 
   DbDelta({
     this.id = Isar.autoIncrement,
@@ -22,6 +23,7 @@ class DbDelta {
     this.updateTime,
     this.deleted,
     this.hasUpload,
+    this.securityVersion,
   });
 
   Map<String, dynamic> toMap() {
@@ -34,6 +36,7 @@ class DbDelta {
       'updateTime': updateTime,
       'deleted': deleted,
       'hasUpload': hasUpload,
+      'securityVersion': securityVersion,
     };
   }
 
@@ -63,6 +66,7 @@ class DbDelta {
               : (temp is num
                   ? 0 != temp.toInt()
                   : ('true' == temp.toString()))),
+      securityVersion: map['securityVersion'],
     );
   }
 }

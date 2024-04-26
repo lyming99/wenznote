@@ -47,6 +47,14 @@ class UserService with ChangeNotifier {
 
   int get clientId => client?.id ?? YDoc.generateNewClientId();
 
+  String? get noteServerUrl {
+    var noteServer = this.noteServer;
+    if (noteServer == null) {
+      return null;
+    }
+    return "http://${noteServer.host}:${noteServer.port}";
+  }
+
   Future<bool> login({
     required String email,
     required String password,

@@ -25,4 +25,6 @@ abstract class RecordSyncService with IsarServiceMixin {
   });
 
   Future<void> removeDbDelta(List<String> dataIdList);
+
+  Future<void> reUploadDbData();
 }

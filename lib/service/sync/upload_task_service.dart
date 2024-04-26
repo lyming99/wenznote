@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:isar/isar.dart';
@@ -174,7 +172,7 @@ class UploadTaskService {
       case "doc":
       case "note":
         return await _uploadNoteLock.synchronizedWithLog(
-            () => _doUploadNote(task),
+            () => _doUploadDoc(task),
             logTitle: "doUploadNote");
       case "file":
         return await _uploadFileLock.synchronizedWithLog(
@@ -250,57 +248,12 @@ class UploadTaskService {
   }
 
   /// 上传笔记快照
-  Future<bool> _doUploadNote(UploadTaskPO task) async {
-    try {
-      var token = serviceManager.userService.token;
-      if (token == null || token.isEmpty) {
-        return false;
-      }
-      var docId = task.dataId;
-      // 1.读取文件
-      // 2.读取state
-      // 3.上传文件
-      var doc = await serviceManager.editService.readDoc(docId);
-      if (docId == null || doc == null) {
-        return false;
-      }
-      var docState = await _queryDocState(docId);
-      Uint8List? uploadBytes;
-      if (docState != null) {
-        var state = docState.docState;
-        if (state != null) {
-          var vector = base64Decode(state);
-          uploadBytes = doc.encodeStateAsUpdateV2(vector);
-        }
-      }
-      uploadBytes ??= doc.encodeStateAsUpdateV2();
-      var noteServerUrl = serviceManager.recordSyncService.noteServerUrl;
-      var result = await Dio().post(
-        "$noteServerUrl/doc/uploadDoc/$docId",
-        options: Options(
-          headers: {
-            "token": serviceManager.userService.token,
-            "Content-Type": "multipart/form-data;"
-          },
-          responseType: ResponseType.json,
-        ),
-        data: FormData.fromMap({
-          "file": MultipartFile.fromBytes(
-              serviceManager.cryptService.encode(uploadBytes),
-              filename: "doc.wnote"),
-        }),
-      );
-      if (result.statusCode != 200) {
-        return false;
-      }
-      if (result.data['msg'] == AppConstants.success) {
-        return true;
-      }
-      // 版本较旧导致更新失败，放弃这次上传？
-    } catch (e) {
-      printLog("上传笔记任务失败, error: $e");
+  Future<bool> _doUploadDoc(UploadTaskPO task) async {
+    var dataId = task.dataId;
+    if (dataId == null || dataId.isEmpty) {
+      return true;
     }
-    return false;
+    return serviceManager.docSyncService.uploadDocFile(dataId);
   }
 
   Map<String, int> getClientStates(List<DocStatePO> states) {

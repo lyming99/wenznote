@@ -82,6 +82,16 @@ class MobileSettingsPage extends MvcView<MobileSettingsController> {
                     },
                   ),
                 ),
+                _SimpleItemWidget(
+                  icon: const Icon(
+                    fluent.FluentIcons.text_field,
+                    size: 24,
+                  ),
+                  title: "同步密钥",
+                  onTap: (context) {
+                    openSyncPasswordPage(context);
+                  },
+                )
               ]),
             ),
           ],
@@ -234,6 +244,10 @@ class MobileSettingsPage extends MvcView<MobileSettingsController> {
       ),
     );
   }
+
+  void openSyncPasswordPage(BuildContext context) {
+    context.push("/mobile/settings/sync/password");
+  }
 }
 
 class _SimpleItemWidget extends StatelessWidget {
@@ -251,32 +265,35 @@ class _SimpleItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Builder(builder: (context) {
-      return ListTile(
-        tileColor: MobileTheme.of(context).mobileNavBgColor,
-        leading: icon,
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
+    return ListTile(
+      tileColor: MobileTheme.of(context).mobileNavBgColor,
+      leading: icon,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            constraints: const BoxConstraints(maxWidth: 240),
+            child: Text(
               content ?? "",
               style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Colors.grey),
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.grey,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-            const SizedBox(
-              width: 8,
-            ),
-            const Icon(Icons.arrow_forward_ios_outlined),
-          ],
-        ),
-        title: Text(title ?? ""),
-        onTap: () {
-          onTap?.call(context);
-        },
-      );
-    });
+          ),
+          const SizedBox(
+            width: 8,
+          ),
+          const Icon(Icons.arrow_forward_ios_outlined),
+        ],
+      ),
+      title: Text(title ?? ""),
+      onTap: () {
+        onTap?.call(context);
+      },
+    );
   }
 }
 
