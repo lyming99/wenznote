@@ -24,7 +24,9 @@ class AppController extends MvcController {
   void onInitState(fluent.BuildContext context) {
     super.onInitState(context);
     try {
-      FlutterDisplayMode.setHighRefreshRate();
+      if(Platform.isAndroid) {
+        FlutterDisplayMode.setHighRefreshRate();
+      }
     } catch (e) {
       print(e);
     }

@@ -48,6 +48,8 @@ class MobileSyncPasswordSettingsController extends ServiceManagerController {
   }
 
   Future<bool> changePwd(String pwd) async{
-    return serviceManager.cryptService.changeServerPassword(pwd);
+    var ret = serviceManager.cryptService.changeServerPassword(pwd);
+    await serviceManager.recordSyncService.reUploadDbData();
+    return ret;
   }
 }

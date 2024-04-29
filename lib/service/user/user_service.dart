@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/get_utils.dart';
 import 'package:octo_image/octo_image.dart';
@@ -51,6 +52,9 @@ class UserService with ChangeNotifier {
     var noteServer = this.noteServer;
     if (noteServer == null) {
       return null;
+    }
+    if(kDebugMode){
+      return "http://127.0.0.1:9898";
     }
     return "http://${noteServer.host}:${noteServer.port}";
   }

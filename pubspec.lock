@@ -1902,7 +1902,7 @@ packages:
   ydart:
     dependency: "direct main"
     description:
-      path: "D:/GitHub/ydart"
+      path: "/Users/liyuanming/Documents/GitHub/ydart"
       relative: false
     source: path
     version: "1.0.0+1"

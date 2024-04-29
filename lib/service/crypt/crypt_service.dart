@@ -88,6 +88,18 @@ class CryptService {
         passwordMap.keys.reduce((value, element) => max(value, element))];
   }
 
+  bool hasPwd(int version) {
+    if (version == -1 && passwordMap.isNotEmpty) {
+      version =
+          passwordMap.keys.reduce((value, element) => max(value, element));
+    }
+    var pwd = passwordMap[version]?.password;
+    if (pwd == null) {
+      return false;
+    }
+    return true;
+  }
+
   Uint8List encode(Uint8List data, [int version = -1]) {
     if (version == -1 && passwordMap.isNotEmpty) {
       version =
@@ -182,6 +194,9 @@ class CryptService {
     if (input == null || input.isEmpty) {
       return input;
     }
+    if (!hasPwd(version)) {
+      return input;
+    }
     var bytes = utf8.encode(input);
     var ret = encode(bytes);
     return base64Encode(ret);
@@ -189,6 +204,9 @@ class CryptService {
 
   String? decodeString(String? input, [int version = -1]) {
     if (input == null || input.isEmpty) {
+      return input;
+    }
+    if (!hasPwd(version)) {
       return input;
     }
     var bytes = base64Decode(input);

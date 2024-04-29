@@ -73,7 +73,7 @@ class DbUploadVO<T> {
   Map<String, dynamic> toJson() {
     return {
       'clientId': clientId,
-      'items': items?.map((e) => e.toMap()),
+      'items': items?.map((e) => e.toMap()).toList(),
       'securityVersion': securityVersion,
     };
   }

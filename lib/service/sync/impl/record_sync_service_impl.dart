@@ -248,6 +248,8 @@ class RecordSyncServiceImpl extends RecordSyncService {
               updateTime: e.updateTime,
               deleted: e.deleted,
               hasUpload: e.hasUpload,
+              securityVersion:
+                  serviceManager.cryptService.getCurrentPassword()?.version,
             ))
         .toList();
   }

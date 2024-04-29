@@ -103,9 +103,9 @@ class DocApi {
       var docState = data["data"];
       return LockResult()
         ..dataId = docId
-        ..docState = docState['docState']
-        ..securityVersion = docState['securityVersion']
-        ..updateTime = docState['updateTime'];
+        ..docState = docState?['docState']
+        ..securityVersion = docState?['securityVersion']
+        ..updateTime = docState?['updateTime'];
     }
     return null;
   }
