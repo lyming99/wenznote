@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_utils/get_utils.dart';
 import 'package:octo_image/octo_image.dart';
@@ -27,9 +28,20 @@ class UserService with ChangeNotifier {
   UserVO? currentUser;
   String? token;
   ClientVO? client;
-  ServerVO? noteServer;
+  ServerVO? _noteServer;
 
   UserService(this.serviceManager);
+
+  ServerVO? get noteServer {
+    if (kDebugMode) {
+      return hasLogin
+          ? ServerVO(
+              host: AppConstants.debugNoteHost,
+              port: AppConstants.debugNotePort)
+          : null;
+    }
+    return _noteServer;
+  }
 
   bool get hasLogin => currentUser != null;
 
@@ -127,7 +139,7 @@ class UserService with ChangeNotifier {
     if (data["msg"] == AppConstants.success) {
       currentUser = UserVO.fromMap(data["data"] ?? "{}");
       client = await createClient("${currentUser?.id}", token ?? "");
-      noteServer = await queryNoteServer();
+      _noteServer = await queryNoteServer();
       await saveUserInfo();
       notifyListeners();
     }
@@ -174,7 +186,7 @@ class UserService with ChangeNotifier {
     if ((token ?? "").isEmpty) {
       currentUser = null;
       client = null;
-      noteServer = null;
+      _noteServer = null;
       return;
     }
     var info = await serviceManager.configManager.readConfig("currentUser", "");
@@ -182,7 +194,7 @@ class UserService with ChangeNotifier {
       currentUser = UserVO.fromMap(jsonDecode(info));
     }
     client = await readClientInfo("${currentUser?.id}");
-    noteServer = await queryNoteServer();
+    _noteServer = await queryNoteServer();
     notifyListeners();
   }
 

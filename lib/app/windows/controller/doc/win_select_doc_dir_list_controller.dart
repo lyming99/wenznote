@@ -33,13 +33,13 @@ class WinSelectDocDirListController extends MvcController {
     docListService = ServiceManager.of(context).docListService;
     docService = ServiceManager.of(context).docService;
     fetchData();
-    subscription =
-        docService.documentIsar.docDirPOs.watchLazy().listen((event) {
-      queryDirList();
-    });
-    subscription = docService.documentIsar.docPOs.watchLazy().listen((event) {
-      queryDirList();
-    });
+    // subscription =
+    //     docService.documentIsar.docDirPOs.watchLazy().listen((event) {
+    //   queryDirList();
+    // });
+    // subscription = docService.documentIsar.docPOs.watchLazy().listen((event) {
+    //   queryDirList();
+    // });
   }
 
   void fetchData() async {

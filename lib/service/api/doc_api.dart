@@ -21,11 +21,25 @@ class UpdateDocStateInfo {
       };
 }
 
-class LockResult{
-    String? dataId;
-    String? docState;
-    int? securityVersion;
-    int? updateTime;
+class DocStateInfo {
+  String? dataId;
+
+  DocStateInfo({
+    this.dataId,
+  });
+
+  DocStateInfo.fromJson(Map<String, dynamic> json) : dataId = json['dataId'];
+
+  Map<String, dynamic> toJson() => {
+        'dataId': dataId,
+      };
+}
+
+class LockResult {
+  String? dataId;
+  String? docState;
+  int? securityVersion;
+  int? updateTime;
 }
 
 class DocApi {
@@ -103,9 +117,9 @@ class DocApi {
       var docState = data["data"];
       return LockResult()
         ..dataId = docId
-        ..docState = docState['docState']
-        ..securityVersion = docState['securityVersion']
-        ..updateTime = docState['updateTime'];
+        ..docState = docState?['docState']
+        ..securityVersion = docState?['securityVersion']
+        ..updateTime = docState?['updateTime'];
     }
     return null;
   }
@@ -128,5 +142,33 @@ class DocApi {
         "file": MultipartFile.fromBytes(docContent, filename: "doc.wnote"),
       }),
     );
+  }
+
+  Future<List<DocStateInfo>?> queryOldPwdDocList(
+      List<int> versions) async {
+    var response = await Dio().post(
+      "$baseUrl/doc/queryOldPwdDocList",
+      options: Options(
+        headers: {
+          "token": token,
+          "clientId": clientId,
+          "securityVersion": securityVersion,
+        },
+        responseType: ResponseType.json,
+      ),
+      data: {
+        "oldSecurityVersionList": versions,
+      },
+    );
+    if (response.statusCode == 200) {
+      var data = response.data;
+      var docList = data["data"];
+      var docIdList = <DocStateInfo>[];
+      for (var doc in docList) {
+        docIdList.add(DocStateInfo.fromJson(doc));
+      }
+      return docIdList;
+    }
+    return null;
   }
 }

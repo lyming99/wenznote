@@ -5,14 +5,8 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:encrypt/encrypt.dart';
-import 'package:wenznote/commons/util/encrypt.dart';
 import 'package:wenznote/config/app_constants.dart';
 import 'package:wenznote/service/service_manager.dart';
-import 'package:ydart/lib0/byte_input_stream.dart';
-import 'package:ydart/lib0/byte_output_stream.dart';
-import 'package:ydart/utils/encoding_utils.dart';
-import 'package:ydart/utils/update_decoder_v2.dart';
-import 'package:ydart/utils/update_encoder_v2.dart';
 
 class PasswordInfo {
   int version;
@@ -88,14 +82,17 @@ class CryptService {
         passwordMap.keys.reduce((value, element) => max(value, element))];
   }
 
-  Uint8List encode(Uint8List data, [int version = -1]) {
-    if (version == -1 && passwordMap.isNotEmpty) {
-      version =
-          passwordMap.keys.reduce((value, element) => max(value, element));
+  Uint8List encodeByCurrentPwd(Uint8List data) {
+    return encode(data, getCurrentPasswordVersion());
+  }
+
+  Uint8List encode(Uint8List data, int? version) {
+    if (version == null || version <= 0) {
+      return data;
     }
     var pwd = passwordMap[version]?.password;
     if (pwd == null) {
-      return data;
+      throw Exception("no password!");
     }
     var key = Key.fromBase64(pwd);
     var encrypt = Encrypter(AES(key));
@@ -104,16 +101,16 @@ class CryptService {
     return result.bytes;
   }
 
-  Uint8List decode(Uint8List data, [int version = -1]) {
-    if (version == -1 && passwordMap.isNotEmpty) {
-      version =
-          passwordMap.keys.reduce((value, element) => max(value, element));
+  Uint8List decodeByCurrentPwd(Uint8List data) {
+    return decode(data, getCurrentPasswordVersion());
+  }
+
+  Uint8List decode(Uint8List data, int? version) {
+    if (version == null || version <= 0) {
+      return data;
     }
     var pwd = passwordMap[version]?.password;
     if (pwd == null) {
-      if (version != -1) {
-        throw Exception("no password");
-      }
       return data;
     }
     var key = Key.fromBase64(pwd);
@@ -178,17 +175,27 @@ class CryptService {
     return false;
   }
 
-  String? encodeString(String? input, [int version = -1]) {
+  String? encodeStringByCurrentPwd(String? input) {
+    return encodeString(input, getCurrentPasswordVersion());
+  }
+
+  String? encodeString(String? input, int? version) {
     if (input == null || input.isEmpty) {
       return input;
     }
+    if (version == null || version <= 0) {
+      return input;
+    }
     var bytes = utf8.encode(input);
-    var ret = encode(bytes);
+    var ret = encode(bytes, version);
     return base64Encode(ret);
   }
 
-  String? decodeString(String? input, [int version = -1]) {
+  String? decodeString(String? input, int? version) {
     if (input == null || input.isEmpty) {
+      return input;
+    }
+    if (version == null || version <= 0) {
       return input;
     }
     var bytes = base64Decode(input);
@@ -196,27 +203,15 @@ class CryptService {
     return utf8.decode(ret);
   }
 
-  Uint8List decodeDoc(Uint8List fileBytes, [int version = -1]) {
-    var encryptInputStream = EncryptByteArrayInputStream(fileBytes, (bytes) {
-      return decode(bytes, version);
-    });
-    var encoder = UpdateEncoderV2(ByteArrayOutputStream(fileBytes.length));
-    EncodingUtils.encrypt(UpdateDecoderV2(encryptInputStream), encoder);
-    return encoder.toArray();
-  }
-
-  Uint8List encodeDoc(Uint8List fileBytes, [int version = -1]) {
-    var encryptOutputStream = EncryptByteArrayOutputStream((bytes) {
-      return encode(bytes);
-    });
-    var encoder = UpdateEncoderV2(encryptOutputStream);
-    EncodingUtils.encrypt(
-        UpdateDecoderV2(ByteArrayInputStream(fileBytes)), encoder);
-    return encoder.toArray();
-  }
-
   List<int> getPasswordVersions() {
     return passwordMap.keys.toList();
+  }
+
+  int? getCurrentPasswordVersion() {
+    if (passwordMap.isEmpty) {
+      return null;
+    }
+    return passwordMap.keys.reduce((value, element) => max(value, element));
   }
 }
 

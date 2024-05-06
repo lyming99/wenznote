@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:isar/isar.dart';
 import 'package:synchronized/extension.dart';
 import 'package:wenznote/commons/util/log_util.dart';
+import 'package:wenznote/commons/util/mehod_time_record.dart';
 import 'package:wenznote/model/card/po/card_po.dart';
 import 'package:wenznote/model/card/po/card_set_po.dart';
 import 'package:wenznote/model/card/po/card_study_config_po.dart';
@@ -173,7 +174,7 @@ class RecordSyncServiceImpl extends RecordSyncService {
   }
 
   Future<void> pushDbDelta() async {
-    printLog("pushDbDelta");
+    printLog("pushDbDelta start");
     var result = await _pushDbDelta();
     if (!result) {
       Timer.periodic(const Duration(seconds: 5), (timer) {
@@ -244,7 +245,8 @@ class RecordSyncServiceImpl extends RecordSyncService {
               clientId: e.clientId,
               dataType: e.dataType,
               dataId: e.dataId,
-              content: serviceManager.cryptService.encodeString(e.content),
+              content: serviceManager.cryptService
+                  .encodeStringByCurrentPwd(e.content),
               updateTime: e.updateTime,
               deleted: e.deleted,
               hasUpload: e.hasUpload,
@@ -278,7 +280,7 @@ class RecordSyncServiceImpl extends RecordSyncService {
     if (pullAll) {
       pullLock = pullAllLock;
     }
-    return pullLock.synchronized(() async {
+    return pullLock.synchronizedWithLog(() async {
       try {
         /**
          * 1.获取 client states 数据
@@ -323,6 +325,7 @@ class RecordSyncServiceImpl extends RecordSyncService {
               clientStates: clientStates,
               dataIdList: dataIdList,
               dataType: dataType,
+              localDbList: dataList,
             );
           } catch (e, stack) {
             if (kDebugMode) {
@@ -338,6 +341,7 @@ class RecordSyncServiceImpl extends RecordSyncService {
             await _pullDbData(
               token: token,
               pullAll: pullAll,
+              localDbList: dataList,
               clientStates: clientStates,
               dataIdList: dataIdList,
               dataType: "card-${cardSet.uuid}",
@@ -357,12 +361,13 @@ class RecordSyncServiceImpl extends RecordSyncService {
       } catch (e) {
         printLog("同步时下载记录数据失败，$e");
       }
-    });
+    }, logTitle: 'pull db delta');
   }
 
   Future<void> _pullDbData({
     required String token,
     required bool pullAll,
+    required List<DbDelta> localDbList,
     List<ClientDbStateVO>? clientStates,
     List<String>? dataIdList,
     String? dataType,
@@ -375,10 +380,11 @@ class RecordSyncServiceImpl extends RecordSyncService {
     if (updateList == null) {
       return;
     }
+    printLog("pull db delta size:${updateList.length}");
     // 解密
     for (var element in updateList) {
       element.content = serviceManager.cryptService
-          .decodeString(element.content, element.securityVersion ?? 0);
+          .decodeString(element.content, element.securityVersion);
     }
     // 对记录进行分组
     var groupMap = updateList.groupBy((item) {
@@ -386,23 +392,18 @@ class RecordSyncServiceImpl extends RecordSyncService {
     });
     // 5.对每个分组地记录进行分析，得到最终数据
     for (var entry in groupMap.entries) {
-      // 保障数据合并原子性能，避免数据时间错位
-      await mergeLock.synchronized(() async {
-        var dataId = entry.key;
-        var value = entry.value;
-        // 6.从本地查询出dataId对应的数据
-        var localList = await documentIsar.dbDeltas
-            .filter()
-            .dataIdEqualTo(dataId)
-            .findAll();
-        var mergeList = <DbDelta>[];
-        mergeList.addAll(localList);
-        mergeList.addAll(value);
-        // 7.将所有的dbDelta数据合并起来计算出对应的数据
-        await dbDeltaToLocalData(dataId, mergeList);
-        // 8.将下载的数据存到本地数据库
-        await saveDbDelta(localList, value);
-      });
+      var dataId = entry.key;
+      var value = entry.value;
+      // 6.从本地查询出dataId对应的数据
+      var localList =
+          localDbList.where((element) => element.dataId == dataId).toList();
+      var mergeList = <DbDelta>[];
+      mergeList.addAll(localList);
+      mergeList.addAll(value);
+      // 7.将所有的dbDelta数据合并起来计算出对应的数据
+      await dbDeltaToLocalData(dataId, mergeList);
+      // 8.将下载的数据存到本地数据库
+      await saveDbDelta(localList, value);
     }
     var hasDirItem = updateList.any((element) => element.dataType == "dir");
     if (hasDirItem) {

@@ -8,11 +8,11 @@ extension MethodTimeRecord on Object {
     FutureOr<T> Function() computation, {
     Duration? timeout,
     String? logTitle,
-  }) {
+  }) async{
     printLog("[$logTitle] start.");
     var dateStart = DateTime.now();
     try {
-      return synchronized(computation, timeout: timeout);
+      return await synchronized(computation, timeout: timeout);
     } finally {
       var dateEnd = DateTime.now();
       printLog(

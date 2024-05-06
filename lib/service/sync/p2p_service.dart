@@ -78,7 +78,11 @@ class P2pService {
     var clientId = serviceManager.userService.clientId;
     var uri = Uri.parse(
         "ws://${noteServer.host}:${noteServer.port}/client/websocket/$clientId");
-    socket = IOWebSocketChannel.connect(uri, headers: {'token': token});
+    socket = IOWebSocketChannel.connect(uri, headers: {
+      'token': token,
+      'securityVersion':
+          serviceManager.cryptService.getCurrentPassword()?.version
+    });
     socket!.stream.listen(
       (data) {
         connected.value = true;
@@ -112,7 +116,7 @@ class P2pService {
   }
 
   void dealMessage(Uint8List data, int offset) {
-    var decode = serviceManager.cryptService.decode(data.sublist(offset));
+    var decode = serviceManager.cryptService.decodeByCurrentPwd(data.sublist(offset));
     var pkt = P2pPacket.fromBuffer(decode);
     switch (pkt.type) {
       case MessageType.updateRecordEvent:
@@ -178,7 +182,7 @@ class P2pService {
     } else {
       data = writeInt32(0);
     }
-    var pktContent = serviceManager.cryptService.encode(pkt.writeToBuffer());
+    var pktContent = serviceManager.cryptService.encodeByCurrentPwd(pkt.writeToBuffer());
     data.addAll(pktContent);
     socket?.sink.add(Uint8List.fromList(data));
   }

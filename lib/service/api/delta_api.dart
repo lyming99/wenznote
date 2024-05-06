@@ -42,7 +42,7 @@ class DbQueryVO {
   Map<String, dynamic> toJson() {
     return {
       'queryAll': queryAll,
-      'clientStates': clientStates,
+      'clientStates': clientStates?.map((e) => e.toJson()).toList(),
       'dataIdList': dataIdList,
       'dataType': dataType,
       'securityVersion': securityVersion,
@@ -52,7 +52,7 @@ class DbQueryVO {
   DbQueryVO.fromJson(Map<String, dynamic> json) {
     queryAll = json['queryAll'];
     clientStates =
-        json['clientStates']?.map((e) => ClientDbStateVO.fromJson(e));
+        json['clientStates']?.map((e) => ClientDbStateVO.fromJson(e)).toList();
     dataIdList = json['dataIdList'];
     dataType = json['dataType'];
     securityVersion = json['securityVersion'];
@@ -73,7 +73,7 @@ class DbUploadVO<T> {
   Map<String, dynamic> toJson() {
     return {
       'clientId': clientId,
-      'items': items?.map((e) => e.toMap()),
+      'items': items?.map((e) => e.toMap()).toList(),
       'securityVersion': securityVersion,
     };
   }

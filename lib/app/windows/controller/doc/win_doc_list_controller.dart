@@ -43,16 +43,16 @@ class WinDocListController extends ServiceManagerController {
     winTodayService = serviceManager.todayService;
     docListService = serviceManager.docListService;
     fetchData();
-    subscription = serviceManager.docService.documentIsar.docDirPOs
-        .watchLazy()
-        .listen((event) {
-      queryDocList();
-    });
-    subscription = serviceManager.docService.documentIsar.docPOs
-        .watchLazy()
-        .listen((event) {
-      queryDocList();
-    });
+    // subscription = serviceManager.docService.documentIsar.docDirPOs
+    //     .watchLazy()
+    //     .listen((event) {
+    //   queryDocList();
+    // });
+    // subscription = serviceManager.docService.documentIsar.docPOs
+    //     .watchLazy()
+    //     .listen((event) {
+    //   queryDocList();
+    // });
     searchListener =
         docPageController.searchContent.listen(onSearchContentChanged);
   }

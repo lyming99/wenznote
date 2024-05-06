@@ -125,13 +125,6 @@ class ServiceManager with ChangeNotifier {
       isStart = true;
       notifyListeners();
     });
-    initTest();
-  }
-
-  Future<void> initTest() async {
-    // 740ce350-e412-11ee-9d7c-376fb7ca4329
-    // var docId = "740ce350-e412-11ee-9d7c-376fb7ca4329";
-    // docSnapshotService.downloadDocFile(docId);
   }
 
   Future<void> stopService() async {

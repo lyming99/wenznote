@@ -1,4 +1,4 @@
-package com.example.wenznote
+package com.wenznote.app
 
 import io.flutter.embedding.android.FlutterActivity
 

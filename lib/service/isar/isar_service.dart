@@ -23,7 +23,9 @@ class IsarService {
 
   Isar? _documentIsar;
 
-  Isar get documentIsar => _documentIsar!;
+  Isar get documentIsar{
+    return _documentIsar!;
+  }
 
   IsarService(this.serviceManager);
 

@@ -200,13 +200,7 @@ class DocSyncServiceImpl implements DocSyncService {
       if (noteServerUrl == null) {
         return;
       }
-      var docApi = DocApi(
-        baseUrl: noteServerUrl,
-        token: serviceManager.userService.token,
-        clientId: serviceManager.userService.clientId.toString(),
-        securityVersion:
-            serviceManager.cryptService.getCurrentPassword()?.version,
-      );
+      DocApi docApi = api(noteServerUrl);
       Response result;
       try {
         result = await docApi.downloadDoc(docId);
@@ -222,7 +216,12 @@ class DocSyncServiceImpl implements DocSyncService {
       // result 返回的是数据+文件zip压缩包{state,file}
       if (result.statusCode == 200) {
         var fileBytes = result.data;
-        fileBytes = serviceManager.cryptService.decode(fileBytes);
+        var versionStr = result.headers['securityVersion']?.first.toString();
+        int? version;
+        if (versionStr != null) {
+          version = int.parse(versionStr);
+        }
+        fileBytes = serviceManager.cryptService.decode(fileBytes, version);
         // 写入文件,并且通知upload
         try {
           // 更新文档，并且检测文档是否需要更新
@@ -243,13 +242,7 @@ class DocSyncServiceImpl implements DocSyncService {
     if (noteServerUrl == null) {
       return false;
     }
-    var docApi = DocApi(
-      baseUrl: noteServerUrl,
-      token: serviceManager.userService.token,
-      clientId: serviceManager.userService.clientId.toString(),
-      securityVersion:
-          serviceManager.cryptService.getCurrentPassword()?.version,
-    );
+    DocApi docApi = api(noteServerUrl);
     var lockResult = await docApi.queryDocStateAndLock(docId);
     var serverDocState = lockResult?.docState;
     var doc = await serviceManager.editService.readDoc(docId);
@@ -267,9 +260,20 @@ class DocSyncServiceImpl implements DocSyncService {
       docState = base64Encode(doc.encodeStateVectorV2());
     }
     var docContent = doc.encodeStateAsUpdateV2();
-    docContent = serviceManager.cryptService.encode(docContent);
+    docContent = serviceManager.cryptService.encodeByCurrentPwd(docContent);
     await docApi.uploadDoc(docId, docState, docContent);
     return true;
+  }
+
+  DocApi api(String noteServerUrl) {
+    var docApi = DocApi(
+      baseUrl: noteServerUrl,
+      token: serviceManager.userService.token,
+      clientId: serviceManager.userService.clientId.toString(),
+      securityVersion:
+          serviceManager.cryptService.getCurrentPassword()?.version,
+    );
+    return docApi;
   }
 
   bool needDownload(String docState, String? serverDocState) {
@@ -292,5 +296,41 @@ class DocSyncServiceImpl implements DocSyncService {
       }
     }
     return false;
+  }
+
+  @override
+  Future<void> reUploadDoc() async {
+    await reUploadAllDoc();
+    await reUploadOldPwdDoc();
+  }
+
+  Future<void> reUploadAllDoc() async {
+    var docList = await serviceManager.docService.queryDocAndNoteList();
+    for (var value in docList) {
+      var uuid = value.uuid;
+      if (uuid == null) {
+        continue;
+      }
+      await uploadDocFile(uuid);
+    }
+  }
+
+  Future<void> reUploadOldPwdDoc() async {
+    var noteServerUrl = serviceManager.userService.noteServerUrl;
+    if (noteServerUrl == null) {
+      return;
+    }
+    var docApi = api(noteServerUrl);
+    var versions = serviceManager.cryptService.getPasswordVersions();
+    var result = await docApi.queryOldPwdDocList(versions);
+    if (result == null) {
+      return;
+    }
+    for (var item in result) {
+      if (item.dataId == null) {
+        continue;
+      }
+      await uploadDocFile(item.dataId ?? "");
+    }
   }
 }

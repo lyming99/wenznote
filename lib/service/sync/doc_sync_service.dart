@@ -29,4 +29,5 @@ abstract class DocSyncService {
 
   Future<bool> uploadDocFile(String docId, {Duration? timeout});
 
+  Future<void> reUploadDoc();
 }

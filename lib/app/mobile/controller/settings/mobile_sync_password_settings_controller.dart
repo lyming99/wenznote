@@ -35,7 +35,7 @@ class MobileSyncPasswordSettingsController extends ServiceManagerController {
       serviceManager.cryptService.getCurrentPassword()?.sha256;
 
   void copyPwd() {
-    RichClipboard.setData(RichClipboardData( text: pwd??""));
+    RichClipboard.setData(RichClipboardData(text: pwd ?? ""));
     showToast("复制成功！");
   }
 
@@ -47,7 +47,13 @@ class MobileSyncPasswordSettingsController extends ServiceManagerController {
     return serviceManager.cryptService.generatePassword(password);
   }
 
-  Future<bool> changePwd(String pwd) async{
-    return serviceManager.cryptService.changeServerPassword(pwd);
+  Future<bool> changePwd(String pwd) async {
+    var isOk = await serviceManager.cryptService.changeServerPassword(pwd);
+    if (isOk) {
+      // 修改密码后，重传所有记录和笔记文件
+      serviceManager.recordSyncService.reUploadDbData();
+      serviceManager.docSyncService.reUploadDoc();
+    }
+    return isOk;
   }
 }

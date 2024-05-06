@@ -22,6 +22,8 @@ import 'package:wenznote/service/card/card_study_service.dart';
 import 'package:wenznote/service/service_manager.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../commons/mvc/controller.dart';
+
 class WinCardSetDetailPageController extends ServiceManagerController {
   late CardStudyService studyService;
   late CardService cardService;
@@ -70,9 +72,9 @@ class WinCardSetDetailPageController extends ServiceManagerController {
     cardService = serviceManager.cardService;
     studyService = serviceManager.cardStudyService;
     fetchData();
-    cardListener = cardService.documentIsar.cardPOs.watchLazy().listen((event) {
-      fetchData();
-    });
+    // cardListener = cardService.documentIsar.cardPOs.watchLazy().listen((event) {
+    //   fetchData();
+    // });
     searchContent.listen((e) {
       fetchData();
     });

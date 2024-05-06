@@ -178,7 +178,6 @@ class FileManager {
   Future<String> getSaveDir() async {
     var defaultRootDir = await _getRootDir();
     var configFile = "$defaultRootDir/config.json";
-    printLog(configFile);
     if (File(configFile).existsSync()) {
       var configContent = await File(configFile).readAsString();
       if (configContent.isNotEmpty) {

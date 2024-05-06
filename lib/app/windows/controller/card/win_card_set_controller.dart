@@ -30,14 +30,14 @@ class WinCardSetController extends ServiceManagerController {
     cardSetService = serviceManager.cardService;
     studyService = serviceManager.cardStudyService;
     fetchData();
-    cardSetSubscription =
-        cardSetService.documentIsar.cardSetPOs.watchLazy().listen((event) {
-      fetchData();
-    });
-    cardSubscription =
-        cardSetService.documentIsar.cardPOs.watchLazy().listen((event) {
-      fetchData();
-    });
+    // cardSetSubscription =
+    //     cardSetService.documentIsar.cardSetPOs.watchLazy().listen((event) {
+    //   fetchData();
+    // });
+    // cardSubscription =
+    //     cardSetService.documentIsar.cardPOs.watchLazy().listen((event) {
+    //   fetchData();
+    // });
     searchContent.listen((p0) {
       fetchData();
     });

@@ -116,30 +116,31 @@ class WinHomePage extends MvcView<WinHomeController> {
         },
         itemBuilder:
             (BuildContext context, bool checked, bool hover, bool pressed) {
-          return Obx(
-            () => Stack(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  child: MobileUserIcon(),
-                ),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Container(
-                    width: 10,
-                    height: 10,
-                    margin: EdgeInsets.only(right: 2),
-                    decoration: BoxDecoration(
-                      color: controller.isConnected
-                          ? Colors.greenAccent
-                          : Colors.red,
-                      borderRadius: BorderRadius.circular(10),
+          return Stack(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                child: MobileUserIcon(),
+              ),
+              if (controller.isLogin)
+                Obx(
+                  () => Align(
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      margin: EdgeInsets.only(right: 2),
+                      decoration: BoxDecoration(
+                        color: controller.isConnected
+                            ? Colors.greenAccent
+                            : Colors.red,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                   ),
                 ),
-              ],
-            ),
+            ],
           );
         },
       ),
