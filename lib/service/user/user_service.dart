@@ -64,6 +64,9 @@ class UserService with ChangeNotifier {
     if (noteServer == null) {
       return null;
     }
+    if(kDebugMode){
+      return "http://127.0.0.1:9898";
+    }
     return "http://${noteServer.host}:${noteServer.port}";
   }
 
