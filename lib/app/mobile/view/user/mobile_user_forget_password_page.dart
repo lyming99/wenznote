@@ -169,27 +169,6 @@ class MobileUserForgetPasswordPage
             "assets/images/app_logo.png",
           ),
         ),
-        Container(
-          alignment: Alignment.topLeft,
-          width: 60,
-          height: 60,
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 4,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.red,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              "预览版",
-              style: TextStyle(
-                fontSize: 10,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        )
       ],
     );
   }

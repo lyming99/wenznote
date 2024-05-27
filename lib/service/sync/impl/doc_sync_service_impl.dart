@@ -20,6 +20,7 @@ class DocSyncServiceImpl implements DocSyncService {
   Map<String, int> queryDeltaTimeRecord = {};
   Map<String, int> downloadDocFileTimeRecord = {};
   Timer? _downloadTimer;
+  bool _isFirstSync = false;
 
   final _downloadLock = <String, Object>{};
 
@@ -27,6 +28,7 @@ class DocSyncServiceImpl implements DocSyncService {
 
   @override
   void startDownloadTimer() {
+    _isFirstSync=true;
     stopDownloadTimer();
     _downloadTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
       _downloadDocTask();
@@ -52,6 +54,10 @@ class DocSyncServiceImpl implements DocSyncService {
         .map((e) => e.updateTime)
         .reduce((value, element) => max(value, element));
     await writeDocUpdateTime(updateTime);
+    if(_isFirstSync){
+      _isFirstSync=false;
+      serviceManager.docService.notifyListeners();
+    }
   }
 
   Future<int> readDocUpdateTime() async {

@@ -1,5 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:wenznote/app/windows/controller/home/win_home_controller.dart';
 import 'package:wenznote/app/windows/model/today/search_result_vo.dart';
@@ -196,49 +198,65 @@ class WinTodayPage extends MvcView<WinTodayController> {
         controller.tabBarController = tabController;
         return Material(
           color: Colors.transparent,
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: TabBar(
-              padding: EdgeInsets.zero,
-              controller: controller.tabBarController,
-              labelColor: theme.resources.textFillColorPrimary,
-              labelPadding: const EdgeInsets.symmetric(horizontal: 16,),
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              onTap: (index) {
-                switch (index) {
-                  case 0:
-                    controller.noteType.value = [
-                      NoteType.note,
-                      NoteType.doc,
-                      NoteType.dayNote,
-                    ];
-                    break;
-                  case 1:
-                    controller.noteType.value = [
-                      NoteType.note,
-                    ];
-                    break;
-                  case 2:
-                    controller.noteType.value = [
-                      NoteType.doc,
-                    ];
-                    break;
-                }
-              },
-              tabs: [
-                Tab(
-                  text: "全部",
-                ),
-                Tab(
-                  text: "便签",
-                ),
-                Tab(
-                  text: "笔记",
-                ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: TabBar(
+                    padding: EdgeInsets.zero,
+                    controller: controller.tabBarController,
+                    labelColor: theme.resources.textFillColorPrimary,
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 16,),
+                    isScrollable: true,
+                    tabAlignment: TabAlignment.start,
+                    onTap: (index) {
+                      switch (index) {
+                        case 0:
+                          controller.noteType.value = [
+                            NoteType.note,
+                            NoteType.doc,
+                            NoteType.dayNote,
+                          ];
+                          break;
+                        case 1:
+                          controller.noteType.value = [
+                            NoteType.note,
+                          ];
+                          break;
+                        case 2:
+                          controller.noteType.value = [
+                            NoteType.doc,
+                          ];
+                          break;
+                      }
+                    },
+                    tabs: [
+                      Tab(
+                        text: "全部",
+                      ),
+                      Tab(
+                        text: "便签",
+                      ),
+                      Tab(
+                        text: "笔记",
+                      ),
 
-              ],
-            ),
+                    ],
+                  ),
+                ),
+              ),
+              //刷新按钮
+              fluent.IconButton(
+                icon: const Icon(
+                  Icons.refresh,
+                  size: 16,
+                ),
+                onPressed: () {
+                  controller.startSearchTask();
+                },
+              ),
+            ],
           ),
         );
       }),

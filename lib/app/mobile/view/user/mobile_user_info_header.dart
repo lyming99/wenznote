@@ -82,20 +82,7 @@ class MobileUserHeaderWidget extends MvcView<MobileUserHeaderController> {
             SizedBox(
               width: 4,
             ),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 2),
-              child: Text(
-                "预览版",
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+
           ],
         ),
         SizedBox(

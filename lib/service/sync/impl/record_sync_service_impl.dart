@@ -282,24 +282,27 @@ class RecordSyncServiceImpl extends RecordSyncService {
     if (pullAll) {
       pullLock = pullAllLock;
     }
+
     return pullLock.synchronizedWithLog(() async {
       try {
         /**
          * 1.获取 client states 数据
          */
-        var dataList = await documentIsar.dbDeltas.where().findAll();
+        var allDataList = await documentIsar.dbDeltas.where().findAll();
+        var uploadList = allDataList;
         if (dataIdList != null) {
-          dataList
-              .removeWhere((element) => !dataIdList.contains(element.dataId));
+          uploadList = allDataList
+              .where((element) => !dataIdList.contains(element.dataId))
+              .toList();
         }
         var clientMap = HashMap<int, int>();
-        for (var value in dataList) {
-          var clientId = value.clientId;
+        for (var uploadItem in uploadList) {
+          var clientId = uploadItem.clientId;
           if (clientId == null) {
             continue;
           }
           var old = clientMap[clientId];
-          var newValue = value.updateTime ?? 0;
+          var newValue = uploadItem.updateTime ?? 0;
           if (old == null || newValue > old) {
             clientMap[clientId] = newValue;
           }
@@ -327,7 +330,7 @@ class RecordSyncServiceImpl extends RecordSyncService {
               clientStates: clientStates,
               dataIdList: dataIdList,
               dataType: dataType,
-              localDbList: dataList,
+              localAllList: allDataList,
             );
           } catch (e, stack) {
             if (kDebugMode) {
@@ -343,7 +346,7 @@ class RecordSyncServiceImpl extends RecordSyncService {
             await _pullDbData(
               token: token,
               pullAll: pullAll,
-              localDbList: dataList,
+              localAllList: allDataList,
               clientStates: clientStates,
               dataIdList: dataIdList,
               dataType: "card-${cardSet.uuid}",
@@ -357,9 +360,6 @@ class RecordSyncServiceImpl extends RecordSyncService {
             printLog("同步时下载卡片数据失败，$e");
           }
         }
-        SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-          serviceManager.docService.notifyListeners();
-        });
       } catch (e) {
         printLog("同步时下载记录数据失败，$e");
       }
@@ -369,7 +369,7 @@ class RecordSyncServiceImpl extends RecordSyncService {
   Future<void> _pullDbData({
     required String token,
     required bool pullAll,
-    required List<DbDelta> localDbList,
+    required List<DbDelta> localAllList,
     List<ClientDbStateVO>? clientStates,
     List<String>? dataIdList,
     String? dataType,
@@ -398,14 +398,14 @@ class RecordSyncServiceImpl extends RecordSyncService {
       var value = entry.value;
       // 6.从本地查询出dataId对应的数据
       var localList =
-          localDbList.where((element) => element.dataId == dataId).toList();
+          localAllList.where((element) => element.dataId == dataId).toList();
       var mergeList = <DbDelta>[];
       mergeList.addAll(localList);
       mergeList.addAll(value);
       // 7.将所有的dbDelta数据合并起来计算出对应的数据
       await dbDeltaToLocalData(dataId, mergeList);
       // 8.将下载的数据存到本地数据库
-      await saveDbDelta(localList, value);
+      await saveDbDelta(localAllList, value);
     }
     var hasDirItem = updateList.any((element) => element.dataType == "dir");
     if (hasDirItem) {
@@ -415,23 +415,22 @@ class RecordSyncServiceImpl extends RecordSyncService {
 
   /// 保持或者合并DbDelta数据
   Future<void> saveDbDelta(
-      List<DbDelta> localList, List<DbDelta> remoteList) async {
+      List<DbDelta> localAllList, List<DbDelta> remoteList) async {
     for (var delta in remoteList) {
-      var existItem = documentIsar.dbDeltas
-          .filter()
-          .dataIdEqualTo(delta.dataId)
-          .and()
-          .clientIdEqualTo(delta.clientId)
-          .findFirstSync();
-      if (existItem == null) {
+      var existItem = localAllList
+          .where((element) =>
+              element.dataId == delta.dataId &&
+              element.clientId == delta.clientId)
+          .toList();
+      if (existItem.isEmpty) {
         delta.id = Isar.autoIncrement;
         delta.hasUpload = true;
         await documentIsar.writeTxn(() async {
           await documentIsar.dbDeltas.put(delta);
         });
       } else {
-        if ((delta.updateTime ?? 0) > (existItem.updateTime ?? 0)) {
-          delta.id = existItem.id;
+        if ((delta.updateTime ?? 0) > (existItem.first.updateTime ?? 0)) {
+          delta.id = existItem.first.id;
           delta.hasUpload = true;
           await documentIsar.writeTxn(() async {
             await documentIsar.dbDeltas.put(delta);

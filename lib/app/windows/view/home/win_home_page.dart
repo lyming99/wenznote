@@ -532,7 +532,7 @@ class WinHomePage extends MvcView<WinHomeController> {
             showAboutDialog(
               context: context,
               applicationName: "温知笔记",
-              applicationVersion: "1.0.beta(预览版)",
+              applicationVersion: "1.0",
               applicationIcon: SizedBox(
                   width: 60,
                   height: 60,

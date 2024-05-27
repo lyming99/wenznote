@@ -45,43 +45,6 @@ class MobileUserPage extends MvcView<MobileUserController> {
   Widget buildMenu(BuildContext context) {
     return Column(
       children: [
-        // 会员
-        buildMenuGroup(
-          context,
-          ListTile.divideTiles(context: context, tiles: [
-            // fluent.FluentIcons.crown,
-            ListTile(
-              tileColor: MobileTheme.of(context).mobileNavBgColor,
-              leading: Icon(
-                fluent.FluentIcons.info,
-                size: 24,
-              ),
-              title: Text("预览版"),
-              trailing: Icon(Icons.arrow_forward_ios_outlined),
-              onTap: () {
-                // controller.openBakView(context);
-                // controller.openLifelongLearningPage();
-                showDialog(
-                    context: context,
-                    builder: (context) {
-                      return fluent.ContentDialog(
-                        constraints: BoxConstraints(maxWidth: 300,),
-                        content: Text("预览版，有些功能可能无法正常使用，不过可以加QQ群(568359924)反馈你想要用的功能~"),
-                        title: Text("预览版"),
-                        actions: [
-                          fluent.FilledButton(
-                            onPressed: () {
-                              context.pop();
-                            },
-                            child: Text("知道了"),
-                          )
-                        ],
-                      );
-                    });
-              },
-            ),
-          ]),
-        ),
         //关于
         buildMenuGroup(
           context,
@@ -139,7 +102,7 @@ class MobileUserPage extends MvcView<MobileUserController> {
                 showAboutDialog(
                   context: context,
                   applicationName: "温知笔记",
-                  applicationVersion: "1.0.beta(预览版)",
+                  applicationVersion: "1.0",
                   applicationIcon: SizedBox(
                       width: 60,
                       height: 60,

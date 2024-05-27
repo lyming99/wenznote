@@ -17,6 +17,28 @@ class WinCardSetPage extends MvcView<WinCardSetController> {
       child: Column(
         children: [
           buildSearch(context),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Icon(
+                    Icons.folder,
+                    color: Colors.grey,
+                  ),
+                ),
+                Expanded(child: fluent.Text("我的卡片")),
+                // 刷新按钮
+                fluent.IconButton(
+                  icon: Icon(Icons.refresh,size: 16,),
+                  onPressed: () {
+                    controller.refresh();
+                  },
+                ),
+              ],
+            ),
+          ),
           Expanded(child: buildContent(context)),
         ],
       ),

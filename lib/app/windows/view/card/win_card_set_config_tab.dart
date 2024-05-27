@@ -2,17 +2,17 @@ import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wenznote/app/windows/controller/card/win_card_set_config_tab_controller.dart';
+import 'package:wenznote/commons/mvc/view.dart';
 import 'package:wenznote/editor/theme/theme.dart';
 import 'package:wenznote/editor/widget/drop_menu.dart';
 import 'package:wenznote/editor/widget/toggle_item.dart';
 import 'package:window_manager/window_manager.dart';
 
-class WinCardSetConfigTab extends StatelessWidget {
-  final WinCardSetConfigTabController controller;
+class WinCardSetConfigTab extends MvcView<WinCardSetConfigTabController> {
 
   const WinCardSetConfigTab({
     super.key,
-    required this.controller,
+    required super.controller,
   });
 
   @override

@@ -187,6 +187,10 @@ class WinDocListController extends ServiceManagerController {
     docListService.moveToDir(dir, list.map((e) => e.doc ?? e.dir).toList());
   }
 
+  void refresh(){
+    searchDoc(docPageController.searchContent.value);
+  }
+
   Future<void> searchDoc(String text) async {
     searchTask?.cancel = true;
     searchResultList.clear();

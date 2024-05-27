@@ -259,6 +259,8 @@ class MobileStudyController extends ServiceManagerController {
       playCount = 3;
     } else if (playMode == PlayTtsMode.playAll.name) {
       playCount = 100000000;
+    } else if (playMode == PlayTtsMode.none.name) {
+      playCount = 0;
     } else {
       playCount = 1;
     }

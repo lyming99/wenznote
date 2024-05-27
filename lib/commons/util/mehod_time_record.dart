@@ -12,7 +12,8 @@ extension MethodTimeRecord on Object {
     printLog("[$logTitle] start.");
     var dateStart = DateTime.now();
     try {
-      return await synchronized(computation, timeout: timeout);
+      var result = await synchronized(computation, timeout: timeout);
+      return result;
     } finally {
       var dateEnd = DateTime.now();
       printLog(

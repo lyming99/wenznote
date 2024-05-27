@@ -37,6 +37,13 @@ class WinDocListView extends MvcView<WinDocListController> {
                   ),
                 ),
                 Expanded(child: buildPath(context)),
+                // 刷新按钮
+                fluent.IconButton(
+                  icon: Icon(Icons.refresh,size: 16,),
+                  onPressed: () {
+                    controller.refresh();
+                  },
+                ),
               ],
             ),
           ),

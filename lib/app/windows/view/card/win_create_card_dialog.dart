@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:fluent_ui/fluent_ui.dart' as fluent;
 import 'package:flutter/material.dart';
 import 'package:future_progress_dialog/future_progress_dialog.dart';
+import 'package:get/get.dart';
 import 'package:wenznote/editor/block/element/element.dart';
 import 'package:wenznote/editor/block/text/text.dart';
 import 'package:wenznote/editor/crdt/doc_utils.dart';
@@ -16,20 +17,7 @@ import 'package:uuid/uuid.dart';
 void showGenerateCardDialog(
     BuildContext context, String cardName, List<DocPO> docList) async {
   List<String> cats = ["标题1", "标题2", "标题3", "标题4", "标题5", "标题6"];
-  String? spliteTitle = "标题2";
-  var box = fluent.ComboBox<String>(
-    value: "标题2",
-    items: cats.map<fluent.ComboBoxItem<String>>((e) {
-      return fluent.ComboBoxItem<String>(
-        child: Text(e),
-        value: e,
-      );
-    }).toList(),
-    onChanged: (val) {
-      spliteTitle = val;
-    },
-    placeholder: const Text('Select a cat breed'),
-  );
+  var splitTitle = "标题2".obs;
   var cardNameController = TextEditingController(text: cardName);
   showDialog(
     context: context,
@@ -48,7 +36,22 @@ void showGenerateCardDialog(
               Row(
                 children: [
                   Text("分割类型: "),
-                  Expanded(child: box),
+                  Expanded(
+                      child: Obx(
+                    () => fluent.ComboBox<String>(
+                      placeholder: Text("请选择分割类型       "),
+                      value: splitTitle.value,
+                      items: cats.map<fluent.ComboBoxItem<String>>((e) {
+                        return fluent.ComboBoxItem<String>(
+                          child: Text(e),
+                          value: e,
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        splitTitle.value = val ?? "";
+                      },
+                    ),
+                  )),
                 ],
               ),
               SizedBox(
@@ -86,8 +89,11 @@ void showGenerateCardDialog(
                     builder: (context) => FutureProgressDialog(
                           message: const Text("正在生成中..."),
                           () async {
-                            await _generateCard(context, cardNameController.text,
-                                docList, spliteTitle);
+                            await _generateCard(
+                                context,
+                                cardNameController.text,
+                                docList,
+                                splitTitle.value);
                           }(),
                         ));
               },
@@ -159,7 +165,7 @@ Future<void> _generateCard(
     }
     await createCard(serviceManager.cardService, cardSet, saveList, current);
     if (saveList.isNotEmpty) {
-      await serviceManager.cardService.insertCards(cardSet.uuid,saveList);
+      await serviceManager.cardService.insertCards(cardSet.uuid, saveList);
       saveList.clear();
     }
   }
@@ -180,7 +186,7 @@ Future<void> createCard(CardService cardService, CardSetPO set,
     updateTime: DateTime.now().millisecondsSinceEpoch,
   ));
   if (saveList.length > 1000) {
-    await cardService.insertCards(set.uuid,saveList);
+    await cardService.insertCards(set.uuid, saveList);
     saveList.clear();
   }
 }

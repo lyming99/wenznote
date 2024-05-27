@@ -49,6 +49,10 @@ class WinCardSetController extends ServiceManagerController {
     cardSetSubscription?.cancel();
   }
 
+  void refresh() {
+    fetchData();
+  }
+
   Future<void> fetchData() async {
     var cardSets = await cardSetService.queryCardSetList();
     var showItems = <WinCardSetItemVO>[];
